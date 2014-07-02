@@ -16,11 +16,13 @@ require 'fileutils'
       [1, 2, 4, 8, 16].each do |r|
         mod_dirname = "mod/#{n}/#{m}/#{i}/#{r}"
         system("mkdir -p #{mod_dirname}") unless Dir.exists?(mod_dirname)
-        10.times do |x|
-          unless File.exists?("#{mod_dirname}/#{x}.data")
-            system "touch #{mod_dirname}/#{x}.data"
-            system "./random-ppp.rb -r #{r} -m #{dirname}/#{i}.data > #{mod_dirname}/#{x}.data"
-            system "/usr/bin/time -f \"%e\" -o #{mod_dirname}/#{x}.log timeout -s 9 10m ./cppp  #{mod_dirname}/#{x}.data > #{mod_dirname}/#{x}.out"
+        if i < 10
+          10.times do |x|
+            unless File.exists?("#{mod_dirname}/#{x}.data")
+              system "touch #{mod_dirname}/#{x}.data"
+              system "./random-ppp.rb -r #{r} -m #{dirname}/#{i}.data > #{mod_dirname}/#{x}.data"
+              system "/usr/bin/time -f \"%e\" -o #{mod_dirname}/#{x}.log timeout -s 9 10m ./cppp  #{mod_dirname}/#{x}.data > #{mod_dirname}/#{x}.out"
+            end
           end
         end
       end
