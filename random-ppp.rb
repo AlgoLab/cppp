@@ -23,9 +23,9 @@ class OptparseExample
       opts.separator "Specific options:"
 
 
-    # Mandatory argument.
+      # Mandatory argument.
       opts.on("-m", "--matrix MATRIX_FILENAME",
-              "Input matrix") do |matrix|
+        "Input matrix") do |matrix|
         options.matrix = matrix
       end
 
