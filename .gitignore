@@ -1,3 +1,7 @@
+cppp
+lib/msdir/
+
+
 # Object files
 *.o
 *.ko
@@ -39,3 +43,4 @@ tmp
 .yardoc
 _yardoc
 doc/
+.Rproj.user
