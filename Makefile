@@ -5,11 +5,12 @@ OBJ_DIR	=obj/
 BIN_DIR	=bin/
 
 CFLAGS	= -g -Wall -DDEBUG -O2 -march=native -Wno-deprecated
-LIBS 	= #
-CFLAGS_EXTRA =  -m64 -std=c1 -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes
-CFLAGS_DEBUG = -g # -lefence
-CFLAGS_LIBS = `pkg-config --cflags glib-2.0`
-LDLIBS = `pkg-config --libs glib-2.0`
+STD_LIBS = glib-2.0 igraph
+LIBS 	= lib/igraph/igraph
+CFLAGS_EXTRA =  -m64 -std=c1 -pedantic -Wall -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -g
+CFLAGS_DEBUG = # -lefence
+CFLAGS_LIBS = `pkg-config --cflags $(STD_LIBS)`
+LDLIBS = `pkg-config --libs $(STD_LIBS)`
 
 all: cppp
 
