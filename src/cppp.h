@@ -1,4 +1,7 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <assert.h>
+#include <string.h>
+#include <err.h>
 #include <igraph.h>
-
-#define BLACK 0
-#define RED   1
