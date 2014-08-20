@@ -53,12 +53,16 @@
 /**
    \struct pp_instance
    \brief the data structure to store a single instance
+
+   The \c matrix field can be \c NULL, if we are not interested in the matrix
+   any more.
 */
 typedef struct pp_instance {
     uint32_t num_species;
     uint32_t num_characters;
     igraph_t *red_black;
     igraph_t *conflict;
+    uint8_t  *matrix;
 } pp_instance;
 
 /**
@@ -85,45 +89,22 @@ realize_character(const pp_instance *src, const uint32_t character);
    Deallocates all memory used to store \c inst.
 */
 void
-destroy_instance(pp_instance *inst);
+destroy_instance(pp_instance *instp);
 
 /**
    \param inst: instance
    \return the red-black graph associated to the input instance
 */
 igraph_t *
-get_red_black_graph(const pp_instance *inst);
+get_red_black_graph(const pp_instance *instp);
 
 /**
    \param inst: instance
    \return the conflict graph associated to the input instance
 */
 igraph_t *
-get_conflict_graph(const pp_instance *inst);
+get_conflict_graph(const pp_instance *instp);
 
-/**
-   \struct matrix
-   \brief the data structure to store an instance matrix
-
-   It has an array of the values stored, that can only be accessed via some
-   defined methods \c matrix_get_value and \c matrix_set_value
-
-   To change the dimensions, we need to copy and reinitialize the entire matrix.
-*/
-typedef struct matrix {
-    uint32_t num_species;
-    uint32_t num_characters;
-    uint8_t* values;
-} matrix_s;
-
-/**
-   Compute a new matrix from an instance.
-
-   \param instance
-*/
-
-matrix_s *
-get_matrix(pp_instance *instance);
 
 /**
    Read an entry of an instance matrix
@@ -133,7 +114,7 @@ get_matrix(pp_instance *instance);
    \param character: goes from 0 to the number of characters - 1
 */
 uint8_t
-matrix_get_value(matrix_s *matrix, uint32_t species, uint32_t character);
+matrix_get_value(pp_instance *instp, uint32_t species, uint32_t character);
 
 /**
    Set the value of an entry of an instance matrix
@@ -141,13 +122,7 @@ matrix_get_value(matrix_s *matrix, uint32_t species, uint32_t character);
    \param matrix
    \param species: goes from 0 to the number of species - 1
    \param character: goes from 0 to the number of characters - 1
-   \param: the value to write
+   \param the value to write
 */
 void
-matrix_set_value(matrix_s *matrix, uint32_t species, uint32_t character, uint8_t value);
-
-/**
-   Frees the memory used by a matrix
-*/
-void
-destroy_matrix(matrix_s *matrix);
+matrix_set_value(pp_instance *instp, uint32_t species, uint32_t character, uint8_t value);

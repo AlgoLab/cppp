@@ -9,20 +9,31 @@ int main(int argc, char *argv[]) {
     igraph_i_set_attribute_table(&igraph_cattribute_table);
 
     assert(argc >= 2);
-    pp_instance_s temp;
-    read_instance_from_filename(&temp, argv[1]);
+    pp_instance temp = read_instance_from_filename(argv[1]);
 
 /*
   The maximum depth of a phylogeny is 2n, therefore we can have at most 2n
   red-black and conflict graphs.
 */
-    pp_instance_s instances[2*temp.num_species];
+    pp_instance instances[2*temp.num_species];
 
     uint32_t level=0;
     instances[0] = temp;
+    temp = instances[0];
 
     while(level > 0) {
         ;
     }
 
+    for(uint8_t i=0; i <= level; i++)
+        destroy_instance(instances+i);
+}
+
+void
+destroy_instance(pp_instance *instp) {
+    if (instp->conflict != NULL)
+        igraph_destroy(instp->conflict);
+    if (instp->red_black != NULL)
+        igraph_destroy(instp->red_black);
+    free(instp->matrix);
 }
