@@ -63,6 +63,8 @@ typedef struct pp_instance {
     igraph_t *red_black;
     igraph_t *conflict;
     uint8_t  *matrix;
+    uint32_t *species_label;
+    uint32_t *character_label;
 } pp_instance;
 
 /**
@@ -126,3 +128,11 @@ matrix_get_value(pp_instance *instp, uint32_t species, uint32_t character);
 */
 void
 matrix_set_value(pp_instance *instp, uint32_t species, uint32_t character, uint8_t value);
+
+/**
+   \brief deallocates all memory used to store an instance
+
+   \param pointer to the instance
+*/
+void
+destroy_instance(pp_instance *instp);

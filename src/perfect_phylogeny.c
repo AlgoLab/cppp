@@ -92,10 +92,12 @@ matrix2redblack(pp_instance *instp) {
 
     for(uint32_t s=0; s<instp->num_species; s++) {
         SETVAN(rb, "id", s, s);
+        instp->species_label[s] = s;
         SETVAN(rb, "color", s, SPECIES);
     }
     for(uint32_t c=0; c<instp->num_characters; c++) {
         SETVAN(rb, "id", c+instp->num_species, c);
+        instp->character_label[c] = c+instp->num_species;
         SETVAN(rb, "color", c+instp->num_species, BLACK);
     }
     for (uint32_t s=0; s<instp->num_species; s++)
@@ -129,11 +131,14 @@ matrix_set_value(pp_instance *inst, uint32_t species, uint32_t character, uint8_
     inst->matrix[character + inst->num_characters*species] = value;
 }
 
-static uint8_t *
-init_matrix(uint32_t num_species, uint32_t num_characters) {
-    uint8_t *m = calloc(num_species*num_characters, sizeof(uint8_t));
-    assert(m != NULL);
-    return m;
+static void
+init_instance(pp_instance *instp) {
+    instp->matrix = calloc(instp->num_species*instp->num_characters, sizeof(uint8_t));
+    assert(instp->matrix != NULL);
+    instp->species_label = calloc(instp->num_species, sizeof(uint32_t));
+    assert(instp->species_label != NULL);
+    instp->character_label = calloc(instp->num_characters, sizeof(uint32_t));
+    assert(instp->character_label != NULL);
 }
 
 
@@ -147,9 +152,9 @@ read_instance_from_filename(const char *filename) {
 
     assert(fscanf(file, "%"SCNu32" %"SCNu32, &num_species, &num_characters) != EOF);
     pp_instance inst = {.num_species = num_species,
-                        .num_characters = num_characters,
-                        .matrix = init_matrix(num_species, num_characters)
+                        .num_characters = num_characters
     };
+    init_instance(&inst);
 
     for(uint32_t s=0; s < num_species; s++)
         for(uint32_t c=0; c < num_characters; c++) {
@@ -228,11 +233,15 @@ get_conflict_graph(const pp_instance *inst) {
                 ck_assert_int_eq(matrix_get_value(&instance, i, j), data[i][j]); \
                 igraph_integer_t eid;                                   \
                 igraph_get_eid(instance.red_black, &eid, i, j+instance.num_species, 0, 0); \
-                if (data[i][j] == 1)									\
-                    ck_assert_int_ge(eid, 0);							\
-                else													\
+                if (data[i][j] == 1)                                    \
+                    ck_assert_int_ge(eid, 0);                           \
+                else                                                    \
                     ck_assert_int_lt(eid, 0);                           \
             }                                                           \
+        for (uint8_t i=0; i<instance.num_species; i++)                  \
+            ck_assert_int_eq(instance.species_label[i], i);             \
+        for (uint8_t i=0; i<instance.num_characters; i++)               \
+            ck_assert_int_eq(instance.character_label[i], i+instance.num_species); \
     }
 
 
@@ -240,17 +249,17 @@ START_TEST(test_read_instance_from_filename_1) {
     const uint8_t num_species = 4;
     const uint8_t num_characters = 4;
     const uint8_t data[4][4] = {
-        {0, 0, 1, 1},
-        {0, 1, 0, 1},
-        {1, 0, 1, 0},
-        {1, 1, 0, 0}
+    {0, 0, 1, 1},
+    {0, 1, 0, 1},
+    {1, 0, 1, 0},
+    {1, 1, 0, 0}
     };
     pp_instance instance = read_instance_from_filename("tests/input/read/1.txt");
     TEST_MATRIX_PP;
-}
+    }
     END_TEST
 
-        START_TEST(test_read_instance_from_filename_2) {
+    START_TEST(test_read_instance_from_filename_2) {
     const uint8_t num_species = 6;
     const uint8_t num_characters = 3;
     const uint8_t data[6][3] = {
@@ -260,14 +269,14 @@ START_TEST(test_read_instance_from_filename_1) {
     {1, 0, 0},
     {1, 0, 1},
     {1, 1, 0}
-};
+    };
     pp_instance instance = read_instance_from_filename("tests/input/read/2.txt");
     TEST_MATRIX_PP;
     //    igraph_write_graph_gml(instance.red_black, stdout, 0, 0);
-}
+    }
     END_TEST
 
-        static Suite * perfect_phylogeny_suite(void) {
+    static Suite * perfect_phylogeny_suite(void) {
     Suite *s;
     TCase *tc_core;
 
@@ -281,7 +290,7 @@ START_TEST(test_read_instance_from_filename_1) {
     suite_add_tcase(s, tc_core);
 
     return s;
-}
+    }
 
     int main(void) {
     int number_failed;
@@ -296,5 +305,16 @@ START_TEST(test_read_instance_from_filename_1) {
     number_failed = srunner_ntests_failed(sr);
     srunner_free(sr);
     return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
-}
+    }
 #endif
+
+    void
+    destroy_instance(pp_instance *instp) {
+    if (instp->conflict != NULL)
+        igraph_destroy(instp->conflict);
+    if (instp->red_black != NULL)
+        igraph_destroy(instp->red_black);
+    free(instp->matrix);
+    free(instp->species_label);
+    free(instp->character_label);
+    }

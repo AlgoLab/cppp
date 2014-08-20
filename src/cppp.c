@@ -27,13 +27,6 @@ int main(int argc, char *argv[]) {
 
     for(uint8_t i=0; i <= level; i++)
         destroy_instance(instances+i);
-}
 
-void
-destroy_instance(pp_instance *instp) {
-    if (instp->conflict != NULL)
-        igraph_destroy(instp->conflict);
-    if (instp->red_black != NULL)
-        igraph_destroy(instp->red_black);
-    free(instp->matrix);
+    return 0;
 }
