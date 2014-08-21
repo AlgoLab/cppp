@@ -87,7 +87,7 @@ read_instance_from_filename(const char *filename);
    allocated. It must be freed with \c destroy_instance after it has been used.
 */
 pp_instance
-realize_character(const pp_instance *src, const uint32_t character);
+realize_character(const pp_instance src, const uint32_t character);
 
 /**
    \param inst: instance

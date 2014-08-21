@@ -33,24 +33,44 @@
    \return dest: a deep copy of src, ie a new instance with same values as \c src
 */
 static pp_instance
-copy_instance(const pp_instance *src) {
+copy_instance(const pp_instance src) {
     igraph_t *grb = malloc(sizeof(igraph_t));
     assert(grb != NULL);
     igraph_t *gcf = malloc(sizeof(igraph_t));
     assert(gcf != NULL);
-    igraph_copy(grb, src->red_black);
-    igraph_copy(gcf, src->conflict);
+    igraph_copy(grb, src.red_black);
+    igraph_copy(gcf, src.conflict);
 
-    pp_instance dest = {.num_species = src->num_species,
-                        .num_characters = src->num_characters,
-                        .red_black = grb,
-                        .conflict = gcf
-    };
+    pp_instance dest = src;
+    dest.red_black = grb;
+    dest.conflict  = gcf;
+    dest.matrix    = NULL;
+    memcpy(dest.species_label, src.species_label, sizeof(*src.species_label));
+    memcpy(dest.character_label, src.character_label, sizeof(*src.character_label));
+    memcpy(dest.conflict_label, src.conflict_label, sizeof(*src.conflict_label));
     return dest;
 }
 
+#ifdef TEST_EVERYTHING
+static uint32_t instance_cmp(pp_instance *instp1, pp_instance *instp2) {
+    uint32_t result = 0;
+    result += (instp1->num_characters != instp2->num_characters) ? 0x0001 : 0;
+    result += (instp1->num_species != instp2->num_species)       ? 0x0002 : 0;
+    result += (memcmp(instp1->species_label, instp2->species_label, sizeof(*(instp1->species_label))) != 0) ? 0x0004 : 0;
+    result += (memcmp(instp1->character_label, instp2->character_label, sizeof(*(instp1->character_label))) != 0) ? 0x0008 : 0;
+    result += (memcmp(instp1->conflict_label, instp2->conflict_label, sizeof(*(instp1->conflict_label))) != 0) ? 0x0010 : 0;
+    return result;
+}
+START_TEST(copy_instance_1) {
+    pp_instance inst = read_instance_from_filename("tests/input/read/1.txt");
+    pp_instance inst2 = copy_instance(inst);
+    ck_assert_int_eq(instance_cmp(&inst, &inst2),0);
+}
+END_TEST
+#endif
+
 pp_instance
-realize_character(const pp_instance *src, const uint32_t character) {
+realize_character(const pp_instance src, const uint32_t character) {
     pp_instance dest = copy_instance(src);
 //TODO
     return dest;
@@ -318,6 +338,8 @@ static Suite * perfect_phylogeny_suite(void) {
 
     tcase_add_test(tc_core, test_read_instance_from_filename_1);
     tcase_add_test(tc_core, test_read_instance_from_filename_2);
+    tcase_add_test(tc_core, copy_instance_1);
+
     suite_add_tcase(s, tc_core);
 
     return s;
