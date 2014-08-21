@@ -44,3 +44,9 @@ tmp
 _yardoc
 doc/
 .Rproj.user
+
+# Dependencies
+*.d
+
+# Misc
+*.log
