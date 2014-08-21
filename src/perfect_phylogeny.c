@@ -236,40 +236,40 @@ get_conflict_graph(const pp_instance *inst) {
 }
 
 #ifdef TEST_EVERYTHING
-#define TEST_MATRIX_PP {                                                \
-        ck_assert_int_eq(instance.num_species, num_species);            \
-        ck_assert_int_eq(instance.num_characters, num_characters);      \
-        for (uint32_t i=0; i<instance.num_species; i++)                 \
-            for (uint32_t j=0; j<instance.num_characters; j++)    {     \
-                ck_assert_int_eq(matrix_get_value(&instance, i, j), data[i][j]); \
-                igraph_integer_t eid;                                   \
-                igraph_get_eid(instance.red_black, &eid, i, j+instance.num_species, 0, 0); \
-                if (data[i][j] == 1)                                    \
-                    ck_assert_int_ge(eid, 0);                           \
-                else                                                    \
-                    ck_assert_int_lt(eid, 0);                           \
-            }                                                           \
-        for (uint32_t i=0; i<instance.num_species; i++)                 \
-            ck_assert_int_eq(instance.species_label[i], i);             \
-        for (uint32_t i=0; i<instance.num_characters; i++)              \
-            ck_assert_int_eq(instance.character_label[i], i+instance.num_species); \
-        if (conflict != NULL) {											\
-			for (uint32_t c1=0; c1<instance.num_characters; c1++)		\
-				for (uint32_t c2=0; c2<instance.num_characters; c2++) {	\
-					igraph_integer_t eid;								\
-					igraph_get_eid(instance.conflict, &eid, instance.conflict_label[c1], instance.conflict_label[c2], 0, 0); \
-					if (conflict[c1][c2] == 1)							\
-						ck_assert_msg(eid >= 0, "Characters %d %d\n", c1, c2); \
-					else												\
-						ck_assert_msg(eid < 0, "Characters %d %d\n", c1, c2); \
-				}														\
-        }																\
+static void test_matrix_pp(pp_instance inst, const uint8_t num_species, const uint8_t num_characters,
+    const uint8_t data[inst.num_species][inst.num_characters],
+    const uint8_t conflict[inst.num_characters][inst.num_characters]) {
+    ck_assert_int_eq(inst.num_species, num_species);
+    ck_assert_int_eq(inst.num_characters, num_characters);
+    for (uint32_t i=0; i<inst.num_species; i++)
+        for (uint32_t j=0; j<inst.num_characters; j++)    {
+            ck_assert_int_eq(matrix_get_value(&inst, i, j), data[i][j]);
+            igraph_integer_t eid;
+            igraph_get_eid(inst.red_black, &eid, i, j+inst.num_species, 0, 0);
+            if (data[i][j] == 1)
+                ck_assert_int_ge(eid, 0);
+            else
+                ck_assert_int_lt(eid, 0);
+        }
+    for (uint32_t i=0; i<inst.num_species; i++)
+        ck_assert_int_eq(inst.species_label[i], i);
+    for (uint32_t i=0; i<inst.num_characters; i++)
+        ck_assert_int_eq(inst.character_label[i], i+inst.num_species);
+    if (conflict != NULL) {
+        for (uint32_t c1=0; c1<inst.num_characters; c1++)
+            for (uint32_t c2=0; c2<inst.num_characters; c2++) {
+                igraph_integer_t eid;
+                igraph_get_eid(inst.conflict, &eid, inst.conflict_label[c1], inst.conflict_label[c2], 0, 0);
+                if (conflict[c1][c2] == 1)
+                    ck_assert_msg(eid >= 0, "Characters %d %d\n", c1, c2);
+                else
+                    ck_assert_msg(eid < 0, "Characters %d %d\n", c1, c2);
+            }
     }
+}
 
 
 START_TEST(test_read_instance_from_filename_1) {
-    const uint8_t num_species = 4;
-    const uint8_t num_characters = 4;
     const uint8_t data[4][4] = {
         {0, 0, 1, 1},
         {0, 1, 0, 1},
@@ -282,14 +282,12 @@ START_TEST(test_read_instance_from_filename_1) {
         {1, 0, 0, 1},
         {0, 1, 1, 0}
     };
-    pp_instance instance = read_instance_from_filename("tests/input/read/1.txt");
-    TEST_MATRIX_PP;
+    pp_instance inst = read_instance_from_filename("tests/input/read/1.txt");
+    test_matrix_pp(inst, 4, 4, data, conflict);
 }
 END_TEST
 
 START_TEST(test_read_instance_from_filename_2) {
-    const uint8_t num_species = 6;
-    const uint8_t num_characters = 3;
     const uint8_t data[6][3] = {
         {0, 0, 1},
         {0, 1, 0},
@@ -303,9 +301,9 @@ START_TEST(test_read_instance_from_filename_2) {
         {1, 0, 1},
         {1, 1, 0}
     };
-    pp_instance instance = read_instance_from_filename("tests/input/read/2.txt");
-    TEST_MATRIX_PP;
-    //    igraph_write_graph_gml(instance.red_black, stdout, 0, 0);
+    pp_instance inst = read_instance_from_filename("tests/input/read/2.txt");
+    test_matrix_pp(inst, 6, 3, data, conflict);
+    //    igraph_write_graph_gml(inst.red_black, stdout, 0, 0);
 }
 END_TEST
 
