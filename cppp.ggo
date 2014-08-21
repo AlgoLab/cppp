@@ -1,0 +1,14 @@
+package "cppp"
+version "0.1.0"
+description "cppp - Compute a Constrained Perfect Phylogeny, if it exists"
+args "--unamed-opts"
+
+# Options
+option  "output"	o "Output file"	string	typestr="filename"
+option  "log"		l "Log file"	string 	typestr="filename"	optional
+option  "strategy"	s "Strategy"	int 				optional
+details="\n
+The id code of the strategy used in selecting the next character to be realized,
+according to the following table:\n
+0: same order as the input\n
+---------------------------\n"
