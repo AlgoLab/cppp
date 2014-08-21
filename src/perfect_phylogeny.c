@@ -98,6 +98,7 @@ matrix2redblack(pp_instance *instp) {
     for(uint32_t c=0; c<instp->num_characters; c++) {
         SETVAN(rb, "id", c+instp->num_species, c);
         instp->character_label[c] = c+instp->num_species;
+        instp->conflict_label[c] = c;
         SETVAN(rb, "color", c+instp->num_species, BLACK);
     }
     for (uint32_t s=0; s<instp->num_species; s++)
@@ -114,6 +115,14 @@ matrix2conflict(pp_instance *instp) {
     assert(g != NULL);
     igraph_empty(g, instp->num_characters, IGRAPH_UNDIRECTED);
     // TODO
+    for(uint32_t c1=0; c1<instp->num_characters; c1++)
+        for(uint32_t c2=c1+1; c2<instp->num_characters; c2++) {
+            uint8_t states[2][2] = { {0, 0}, {0, 0} };
+            for(uint32_t s=0; s<instp->num_species; s++)
+                states[matrix_get_value(instp, s, c1)][matrix_get_value(instp, s, c2)] = 1;
+            if(states[0][0] + states[0][1] + states[1][0] + states[1][1] == 4)
+                igraph_add_edge(g, instp->conflict_label[c1], instp->conflict_label[c2]);
+        }
     return g;
 }
 
@@ -139,6 +148,8 @@ init_instance(pp_instance *instp) {
     assert(instp->species_label != NULL);
     instp->character_label = calloc(instp->num_characters, sizeof(uint32_t));
     assert(instp->character_label != NULL);
+    instp->conflict_label = calloc(instp->num_characters, sizeof(uint32_t));
+    assert(instp->conflict_label != NULL);
 }
 
 
@@ -228,8 +239,8 @@ get_conflict_graph(const pp_instance *inst) {
 #define TEST_MATRIX_PP {                                                \
         ck_assert_int_eq(instance.num_species, num_species);            \
         ck_assert_int_eq(instance.num_characters, num_characters);      \
-        for (uint8_t i=0; i<instance.num_species; i++)                  \
-            for (uint8_t j=0; j<instance.num_characters; j++)    {      \
+        for (uint32_t i=0; i<instance.num_species; i++)                 \
+            for (uint32_t j=0; j<instance.num_characters; j++)    {     \
                 ck_assert_int_eq(matrix_get_value(&instance, i, j), data[i][j]); \
                 igraph_integer_t eid;                                   \
                 igraph_get_eid(instance.red_black, &eid, i, j+instance.num_species, 0, 0); \
@@ -238,10 +249,21 @@ get_conflict_graph(const pp_instance *inst) {
                 else                                                    \
                     ck_assert_int_lt(eid, 0);                           \
             }                                                           \
-        for (uint8_t i=0; i<instance.num_species; i++)                  \
+        for (uint32_t i=0; i<instance.num_species; i++)                 \
             ck_assert_int_eq(instance.species_label[i], i);             \
-        for (uint8_t i=0; i<instance.num_characters; i++)               \
+        for (uint32_t i=0; i<instance.num_characters; i++)              \
             ck_assert_int_eq(instance.character_label[i], i+instance.num_species); \
+        if (conflict != NULL) {											\
+			for (uint32_t c1=0; c1<instance.num_characters; c1++)		\
+				for (uint32_t c2=0; c2<instance.num_characters; c2++) {	\
+					igraph_integer_t eid;								\
+					igraph_get_eid(instance.conflict, &eid, instance.conflict_label[c1], instance.conflict_label[c2], 0, 0); \
+					if (conflict[c1][c2] == 1)							\
+						ck_assert_msg(eid >= 0, "Characters %d %d\n", c1, c2); \
+					else												\
+						ck_assert_msg(eid < 0, "Characters %d %d\n", c1, c2); \
+				}														\
+        }																\
     }
 
 
@@ -249,34 +271,45 @@ START_TEST(test_read_instance_from_filename_1) {
     const uint8_t num_species = 4;
     const uint8_t num_characters = 4;
     const uint8_t data[4][4] = {
-    {0, 0, 1, 1},
-    {0, 1, 0, 1},
-    {1, 0, 1, 0},
-    {1, 1, 0, 0}
+        {0, 0, 1, 1},
+        {0, 1, 0, 1},
+        {1, 0, 1, 0},
+        {1, 1, 0, 0}
+    };
+    const uint8_t conflict[4][4] = {
+        {0, 1, 1, 0},
+        {1, 0, 0, 1},
+        {1, 0, 0, 1},
+        {0, 1, 1, 0}
     };
     pp_instance instance = read_instance_from_filename("tests/input/read/1.txt");
     TEST_MATRIX_PP;
-    }
-    END_TEST
+}
+END_TEST
 
-    START_TEST(test_read_instance_from_filename_2) {
+START_TEST(test_read_instance_from_filename_2) {
     const uint8_t num_species = 6;
     const uint8_t num_characters = 3;
     const uint8_t data[6][3] = {
-    {0, 0, 1},
-    {0, 1, 0},
-    {0, 1, 1},
-    {1, 0, 0},
-    {1, 0, 1},
-    {1, 1, 0}
+        {0, 0, 1},
+        {0, 1, 0},
+        {0, 1, 1},
+        {1, 0, 0},
+        {1, 0, 1},
+        {1, 1, 0}
+    };
+    const uint8_t conflict[3][3] = {
+        {0, 1, 1},
+        {1, 0, 1},
+        {1, 1, 0}
     };
     pp_instance instance = read_instance_from_filename("tests/input/read/2.txt");
     TEST_MATRIX_PP;
     //    igraph_write_graph_gml(instance.red_black, stdout, 0, 0);
-    }
-    END_TEST
+}
+END_TEST
 
-    static Suite * perfect_phylogeny_suite(void) {
+static Suite * perfect_phylogeny_suite(void) {
     Suite *s;
     TCase *tc_core;
 
@@ -290,9 +323,9 @@ START_TEST(test_read_instance_from_filename_1) {
     suite_add_tcase(s, tc_core);
 
     return s;
-    }
+}
 
-    int main(void) {
+int main(void) {
     int number_failed;
     Suite *s;
     SRunner *sr;
@@ -305,11 +338,11 @@ START_TEST(test_read_instance_from_filename_1) {
     number_failed = srunner_ntests_failed(sr);
     srunner_free(sr);
     return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
-    }
+}
 #endif
 
-    void
-    destroy_instance(pp_instance *instp) {
+void
+destroy_instance(pp_instance *instp) {
     if (instp->conflict != NULL)
         igraph_destroy(instp->conflict);
     if (instp->red_black != NULL)
@@ -317,4 +350,5 @@ START_TEST(test_read_instance_from_filename_1) {
     free(instp->matrix);
     free(instp->species_label);
     free(instp->character_label);
-    }
+    free(instp->conflict_label);
+}

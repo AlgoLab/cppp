@@ -56,6 +56,9 @@
 
    The \c matrix field can be \c NULL, if we are not interested in the matrix
    any more.
+
+   The fields \c species_label and \c character_label allow to quickly identify
+   the vertex of a red-black (or conflict) graph with a certain label
 */
 typedef struct pp_instance {
     uint32_t num_species;
@@ -65,6 +68,7 @@ typedef struct pp_instance {
     uint8_t  *matrix;
     uint32_t *species_label;
     uint32_t *character_label;
+    uint32_t *conflict_label;
 } pp_instance;
 
 /**
