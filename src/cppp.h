@@ -5,3 +5,4 @@
 #include <string.h>
 #include <err.h>
 #include <igraph.h>
+#include <glib.h>

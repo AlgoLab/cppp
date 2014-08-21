@@ -70,7 +70,7 @@ clean:
 	rm -rf ${TEST_DIR}/*.o ${OBJ_DIR} ${BIN_DIR} $(SRC_DIR)/*.d $(LIB_DIR)/getopt
 
 check: $(T_OBJECTS) bin
-
+	tests/internal/perfect_phylogeny.o
 
 doc: $(P) docs/latex/refman.pdf
 	doxygen && cd docs/latex/ && latexmk -recorder -use-make -pdf refman
@@ -83,5 +83,5 @@ ifneq "$(MAKECMDGOALS)" "clean"
 endif
 
 $(LIB_DIR)/getopt/cmdline.c $(LIB_DIR)/getopt/cmdline.h: cppp.ggo
-	@mkdir $(LIB_DIR)/getopt
+	@mkdir -p $(LIB_DIR)/getopt
 	gengetopt -i $< --output-dir=$(LIB_DIR)/getopt

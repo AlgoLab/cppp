@@ -22,12 +22,16 @@
 #include "getopt/cmdline.h"
 #include "cppp.h"
 #include "perfect_phylogeny.h"
+#include "logging.h"
+
 
 
 int main(int argc, char **argv) {
-    struct gengetopt_args_info args_info;
+    static struct gengetopt_args_info args_info;
     assert(cmdline_parser (argc, argv, &args_info) == 0);
     assert(args_info.inputs_num >= 1);
+    start_logging(args_info.quiet_given, args_info.log_given, args_info.log_arg);
+
     igraph_i_set_attribute_table(&igraph_cattribute_table);
     pp_instance temp = read_instance_from_filename(args_info.inputs[0]);
 
@@ -48,6 +52,7 @@ int main(int argc, char **argv) {
     for(uint8_t i=0; i <= level; i++)
         destroy_instance(instances+i);
 
+    end_logging();
     cmdline_parser_free(&args_info);
     return 0;
 }
