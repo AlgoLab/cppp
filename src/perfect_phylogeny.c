@@ -61,18 +61,88 @@ static uint32_t instance_cmp(pp_instance *instp1, pp_instance *instp2) {
     result += (memcmp(instp1->conflict_label, instp2->conflict_label, sizeof(*(instp1->conflict_label))) != 0) ? 0x0010 : 0;
     return result;
 }
-START_TEST(copy_instance_1) {
+START_TEST(copy_instance) {
     pp_instance inst = read_instance_from_filename("tests/input/read/1.txt");
     pp_instance inst2 = copy_instance(inst);
+    ck_assert_int_eq(instance_cmp(&inst, &inst2),0);
+    inst = read_instance_from_filename("tests/input/read/1.txt");
+    inst2 = copy_instance(inst);
     ck_assert_int_eq(instance_cmp(&inst, &inst2),0);
 }
 END_TEST
 #endif
 
+/**
+   To realize a character, first we have to find the id \c c of the vertex of
+   the red-black graph encoding the input character.
+   Then we find the connected component \c A of the
+   red-black graph to which \c c belongs, and the set \c B of vertices adjacent
+   to \c c.
+
+   If \c is labeled black,
+   we remove all edges from \c c to \c B and we add the edges from \c c to
+   \c A. Finally, we label \c c as red.
+
+   If \c c is already red, we check that A=B. In that case we remove all edges
+   incident on \c c and we remove the vertex \c c (since it is free). On the
+   other hand, if A is not equal to B, we return that the realization is
+   impossible, setting \c error=1.
+*/
 pp_instance
-realize_character(const pp_instance src, const uint32_t character) {
+realize_character(const pp_instance src, const uint32_t character, const operation *op) {
+    assert(op != NULL);
     pp_instance dest = copy_instance(src);
-//TODO
+    igraph_real_t c = dest.character_label[character];
+
+    igraph_vector_t *conn_comp;
+    igraph_vector_init(conn_comp, dest.num_species+dest.num_characters);
+    assert(igraph_subcomponent(dest->red_black, conn_comp, c, IGRAPH_ALL) == 0);
+    igraph_vector_sort(conn_comp);
+    igraph_vector_t *adjacent;
+    igraph_vector_init(adjacent, dest.num_species);
+    igraph_neighborhood(dest->red_black, adjacent, c, 1, IGRAPH_ALL);
+    igraph_vector_sort(adjacent);
+    igraph_vector_t *not_adjacent;
+    igraph_vector_init(not_adjacent, 0);
+    igraph_vector_difference_sorted(conn_comp, adjacent, not_adjacent);
+
+    int color = VAN(dest->red_black, "color", c);
+    assert(color != SPECIES);
+    if (color == BLACK) {
+        igraph_vector_t *new_red;
+        igraph_vector_init(new_red, 0);
+        for (size_t i=0, size_t l=igraph_vector_size(not_adjacent); i<l; i++) {
+            VECTOR(new_red)[2*i] = c;
+            VECTOR(new_red)[2*i+1] = VECTOR(not_adjacent)[i];
+        }
+        igraph_add_edges(dest.red_black, new_red, 0);
+        igraph_vector_destroy(new_red);
+
+        igraph_vector_t *to_delete;
+        igraph_vector_init(to_delete, 0);
+        for (size_t i=0, size_t l=igraph_vector_size(adjacent); i<l; i++) {
+            VECTOR(to_delete)[2*i] = c;
+            VECTOR(to_delete)[2*i+1] = VECTOR(adjacent)[i];
+        }
+        igraph_add_edges(dest.red_black, to_delete);
+        igraph_vector_destroy(to_delete);
+
+        igraph_vector_destroy(not_adjacent);
+        igraph_vector_destroy(adjacent);
+        igraph_vector_destroy(conn_comp);
+
+        op->type = 1;
+        SETVAN(rb, "color", c, RED);
+    }
+    if (color == RED)
+        if (igraph_vector_size(adjacent) == igraph_vector_size(conn_comp)) {
+            op->type = 0;
+        } else {
+            igraph_delete_vertices(dest.red_black, c);
+            dest.num_species--;
+            op->type = 2;
+            op->removed_characters_list = g_slist_append(op->removed_characters_list, GINT_TO_POINTER(character));
+        }
     return dest;
 }
 
@@ -182,8 +252,11 @@ read_instance_from_filename(const char *filename) {
     uint32_t num_species, num_characters;
 
     assert(fscanf(file, "%"SCNu32" %"SCNu32, &num_species, &num_characters) != EOF);
-    pp_instance inst = {.num_species = num_species,
-                        .num_characters = num_characters
+    pp_instance inst = {
+        .num_species = num_species,
+        .num_characters = num_characters
+        .num_species_orig = num_species,
+        .num_characters_orig = num_characters
     };
     init_instance(&inst);
 
@@ -206,42 +279,93 @@ read_instance_from_filename(const char *filename) {
 
 #endif
 
-/*********************************************************
- simplify the red-black graph whenever possible.
+/*
+  \brief Simplify the red-black graph whenever possible.
 
-The graph at the end of the function has the same solution as at function
-invocation
-*********************************************************/
-/* static int */
-/* red_black_graph_cleanup(igraph_t *rb, uint32_t num_species, uint32_t num_characters) { */
-/*     // remove isolated species and characters */
-/*     igraph_vector_t clusters, sizes, isolated; */
-/*     igraph_vector_init(&clusters, 0); */
-/*     igraph_vector_init(&sizes, 0); */
-/*     igraph_vector_init(&isolated, 0); */
-/*     /\* igraph_clusters(rb, clusters, sizes, 0, 0); *\/ */
+  \param instance to be simplified
+  \return simplified instance
 
-/*     /\* for (uint32_t i=0; i<igraph_vector_size(clusters); i++) *\/ */
-/*     /\*     if (igraph_vector_e(sizes, i) == 1) *\/ */
-/*     /\*         /\\* *\/ */
-/*     /\*           when the cluster contains only one vertex, the cluster id is also *\/ */
-/*     /\*           the vertex id *\/ */
-/*     /\*         *\\/ *\/ */
-/*     /\*         igraph_vector_push_back(isolated, igraph_vector_e(clusters, i)); *\/ */
-/*     /\* igraph_delete_vertices(rb, isolated); *\/ */
+  The goal is to obtain a new instance that has the same solutions as the
+  original instance. More precisely:
 
-/*     /\* igraph_vector_delete(clusters); *\/ */
-/*     /\* igraph_vector_delete(sizes); *\/ */
-/*     /\* igraph_vector_delete(isolated); *\/ */
+  * we remove all isolated vertices of the red-black graph
+  * we remove duplicated characters
+  * we remove duplicated species
 
-/*     igraph_vector_destroy(&clusters); */
-/*     igraph_vector_destroy(&sizes); */
-/*     igraph_vector_destroy(&isolated); */
-/* // TODO: remove duplicated species */
+  Notice that at each function, at most one of those operations is performed,
+  therefore it is necessary to include this function in a \c while loop to
+  completely simplify the instance
+*/
 
-/*     // TODO: remove duplicated characters */
-/*     return 0; */
-/* } */
+pp_instance
+red_black_graph_cleanup(const pp_instance src, const operation *op) {
+    // remove isolated species and characters
+    assert(op != NULL);
+    int err;
+    pp_instance dest = copy_instance(src);
+    long int n=igraph_vcount(dest.red_black);
+    igraph_vector_t clusters, sizes, isolated;
+    err = igraph_vector_init(&clusters, 0);
+    assert(err != 0);
+    err = igraph_vector_init(&sizes, 1);
+    assert(err != 0);
+    err = igraph_vector_init(&isolated, 0);
+    assert(err != 0);
+
+    // Looking for null species
+    for (uint32_t i=0; i < dest.num_species_orig; i++) {
+        uint32_t id = dest.species_label[i];
+        igraph_vector_t v;
+        err = igraph_vector_init_seq(&v, id, id);
+        err = igraph_degree(src.red_black, &sizes, v, 0, IGRAPH_LOOPS);
+        assert(err != 0);
+        if (VECTOR(sizes)[0] == 1) {
+            op->removed_species_list = g_slist_append(op->removed_species_list, GINT_TO_POINTER(i));
+            op->type = 3;
+        }
+    }
+
+    // Looking for null characters
+    for (uint32_t i=0; i < dest.num_characters_orig; i++) {
+        uint32_t id = dest.characters_label[i];
+        igraph_vector_t v;
+        err = igraph_vector_init_seq(&v, id, id);
+        err = igraph_degree(src.red_black, &sizes, v, 0, IGRAPH_LOOPS);
+        assert(err != 0);
+        if (VECTOR(sizes)[0] == 1) {
+            op->removed_characters_list = g_slist_append(op->removed_characters_list, GINT_TO_POINTER(i));
+            op->type = 3;
+        }
+    }
+
+/* TODO (if necessary) */
+/* we remove duplicated characters */
+/* we remove duplicated species */
+    return dest;
+}
+/*
+  when the cluster contains only one vertex, the cluster id is also
+  the vertex id
+*/
+igraph_vector_push_back(isolated, igraph_vector_e(clusters, i));
+igraph_delete_vertices(rb, isolated);
+
+igraph_vector_delete(clusters);
+igraph_vector_delete(sizes);
+igraph_vector_delete(isolated);
+
+
+
+
+igraph_vector_destroy(&clusters);
+igraph_vector_destroy(&sizes);
+igraph_vector_destroy(&isolated);
+
+// remove universal BLACK characters (it only needs to be executed at the
+// topmost level)
+// TODO
+return 0;
+}
 
 igraph_t *
 get_red_black_graph(const pp_instance *inst) {
@@ -261,6 +385,8 @@ static void test_matrix_pp(pp_instance inst, const uint8_t num_species, const ui
     const uint8_t conflict[inst.num_characters][inst.num_characters]) {
     ck_assert_int_eq(inst.num_species, num_species);
     ck_assert_int_eq(inst.num_characters, num_characters);
+    ck_assert_int_eq(inst.num_species_orig, num_species);
+    ck_assert_int_eq(inst.num_characters_orig, num_characters);
     for (uint32_t i=0; i<inst.num_species; i++)
         for (uint32_t j=0; j<inst.num_characters; j++)    {
             ck_assert_int_eq(matrix_get_value(&inst, i, j), data[i][j]);
@@ -371,4 +497,14 @@ destroy_instance(pp_instance *instp) {
     free(instp->species_label);
     free(instp->character_label);
     free(instp->conflict_label);
+}
+
+void
+destroy_state(state_s *statep) {
+    destroy_instance(statep->instance);
+    free(statep->instance);
+    g_slist_free(statep->operation->removed_species_list);
+    g_slist_free(statep->operation->removed_characters_list);
+    free(statep->operation);
+    free(statep->tried_char);
 }

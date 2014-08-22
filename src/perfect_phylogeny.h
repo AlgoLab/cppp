@@ -59,10 +59,13 @@
 
    The fields \c species_label and \c character_label allow to quickly identify
    the vertex of a red-black (or conflict) graph with a certain label
+
 */
 typedef struct pp_instance {
     uint32_t num_species;
     uint32_t num_characters;
+    uint32_t num_species_orig;
+    uint32_t num_characters_orig;
     igraph_t *red_black;
     igraph_t *conflict;
     uint8_t  *matrix;
@@ -70,6 +73,36 @@ typedef struct pp_instance {
     uint32_t *character_label;
     uint32_t *conflict_label;
 } pp_instance;
+
+/**
+   \struct checked_instance
+
+   The version of \c pp_instance with an additional field \c error which
+   contains 0 iff the instance has been correctly computed
+*/
+typedef struct checked_instance {
+    pp_instance *instance;
+    uint8_t error;
+} checked_instance;
+
+
+/**
+   \struct operation
+
+   It describes an operation that has been, or can be, applied to an instance.
+
+   The \c type can take the following values:
+
+   * \c 0 => no operation
+   * \c 1 => realized a positive character
+   * \c 2 => realized a negative character, a character has been freed
+   * \c 3 => null characters/species have been removed
+   */
+typedef struct operation {
+    uint8_t type;
+    GSList *removed_species_list;
+    GSList *removed_characters_list;
+} operation;
 
 /**
    \param filename: the corresponding file contains an input matrix
@@ -81,13 +114,15 @@ read_instance_from_filename(const char *filename);
 /**
    \param src: instance
    \param character: the character \b name to be realized
+   \param op: a pointer to an operation. It must have been already initialized
+
    \return the instance after the realization of \c character
 
    The memory necessary to store the newly created instance is automatically
    allocated. It must be freed with \c destroy_instance after it has been used.
 */
 pp_instance
-realize_character(const pp_instance src, const uint32_t character);
+realize_character(const pp_instance src, const uint32_t character, const operation *op);
 
 /**
    \param inst: instance
@@ -140,3 +175,29 @@ matrix_set_value(pp_instance *instp, uint32_t species, uint32_t character, uint8
 */
 void
 destroy_instance(pp_instance *instp);
+
+/**
+   \struct state_s
+
+   It stores everything that is necessary to construct the final phylogeny and
+   to determine the next step of the strategy.
+
+   It consists of \c operation, \c instance, \c realized_char and \c
+   tried_chars which are respectively the operation to apply to the current
+   instance (\c instance), the character to realize and the list of characters
+   that we have previously tried to realize (without success)
+*/
+typedef struct state_s {
+    operation *operation;
+    pp_instance *instance;
+    uint32_t realized_char;
+    GSList *tried_chars;
+} state_s;
+
+/**
+   \brief deallocates all memory used to store a state
+
+   \param pointer to the state
+*/
+void
+destroy_state(state_s *statep);

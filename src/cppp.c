@@ -24,8 +24,6 @@
 #include "perfect_phylogeny.h"
 #include "logging.h"
 
-
-
 int main(int argc, char **argv) {
     static struct gengetopt_args_info args_info;
     assert(cmdline_parser (argc, argv, &args_info) == 0);
@@ -35,22 +33,23 @@ int main(int argc, char **argv) {
     igraph_i_set_attribute_table(&igraph_cattribute_table);
     pp_instance temp = read_instance_from_filename(args_info.inputs[0]);
 
-/*
-  The maximum depth of a phylogeny is 2n, therefore we can have at most 2n
-  red-black and conflict graphs.
+/**
+   Notice that each character is realized at most twice (once positive and once
+   negative) and that each species can be declared null at most once.
+
+   Therefore each partial solution con contain at most 2n+m statuses.
 */
-    pp_instance instances[2*temp.num_species];
+    state_s states[2*temp.num_species+temp.num_characters];
 
     uint32_t level=0;
-    instances[0] = temp;
-    temp = instances[0];
+    states[level]->instance = temp;
 
-    while(level > 0) {
+    while(level >= 0) {
         ;
     }
 
-    for(uint8_t i=0; i <= level; i++)
-        destroy_instance(instances+i);
+    for(uint8_t i=0; i <= 2*temp.num_species+temp.num_characters; i++)
+        destroy_state(states+i);
 
     end_logging();
     cmdline_parser_free(&args_info);
