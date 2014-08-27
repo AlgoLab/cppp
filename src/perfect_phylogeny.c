@@ -28,27 +28,26 @@
 #include <check.h>
 #include <stdlib.h>
 #endif
-/**
-   \param src
-   \return dest: a deep copy of src, ie a new instance with same values as \c src
-*/
-static pp_instance
-copy_instance(const pp_instance src) {
-    igraph_t *grb = malloc(sizeof(igraph_t));
-    assert(grb != NULL);
-    igraph_t *gcf = malloc(sizeof(igraph_t));
-    assert(gcf != NULL);
-    igraph_copy(grb, src.red_black);
-    igraph_copy(gcf, src.conflict);
 
-    pp_instance dest = src;
-    dest.red_black = grb;
-    dest.conflict  = gcf;
-    dest.matrix    = NULL;
-    memcpy(dest.species_label, src.species_label, sizeof(*src.species_label));
-    memcpy(dest.character_label, src.character_label, sizeof(*src.character_label));
-    memcpy(dest.conflict_label, src.conflict_label, sizeof(*src.conflict_label));
-    return dest;
+void
+copy_instance(pp_instance *dst, const pp_instance *src) {
+    if (dst->red_black == NULL) dst->red_black = g_malloc0(sizeof(igraph_t));
+    if (dst->conflict == NULL)  dst->conflict  = g_malloc0(sizeof(igraph_t));
+
+    dst->num_species = src->num_species;
+    dst->num_characters = src->num_characters;
+    dst->num_species_orig = src->num_species_orig;
+    dst->num_characters_orig = src->num_characters_orig;
+
+    igraph_copy(dst->red_black, src->red_black);
+    igraph_copy(dst->conflict, src->conflict);
+    dst->matrix = src->matrix;
+    dst->species_label = g_malloc(src->num_species_orig * sizeof(uint32_t));
+    memcpy(dst->species_label, src->species_label, src->num_species_orig * sizeof(uint32_t));
+    dst->character_label = g_malloc(src->num_characters_orig * sizeof(uint32_t));
+    memcpy(dst->character_label, src->character_label, src->num_characters_orig * sizeof(uint32_t));
+    dst->conflict_label = g_malloc(src->num_characters_orig * sizeof(uint32_t));
+    memcpy(dst->conflict_label, src->conflict_label, src->num_characters_orig * sizeof(uint32_t));
 }
 
 #ifdef TEST_EVERYTHING
@@ -56,17 +55,25 @@ static uint32_t instance_cmp(pp_instance *instp1, pp_instance *instp2) {
     uint32_t result = 0;
     result += (instp1->num_characters != instp2->num_characters) ? 0x0001 : 0;
     result += (instp1->num_species != instp2->num_species)       ? 0x0002 : 0;
-    result += (memcmp(instp1->species_label, instp2->species_label, sizeof(*(instp1->species_label))) != 0) ? 0x0004 : 0;
-    result += (memcmp(instp1->character_label, instp2->character_label, sizeof(*(instp1->character_label))) != 0) ? 0x0008 : 0;
-    result += (memcmp(instp1->conflict_label, instp2->conflict_label, sizeof(*(instp1->conflict_label))) != 0) ? 0x0010 : 0;
+    result += instp1->species_label == NULL || instp2->species_label == NULL ||
+        (memcmp(instp1->species_label, instp2->species_label, sizeof(*(instp1->species_label))) != 0) ? 0x0004 : 0;
+    result += instp1->character_label == NULL || instp2->character_label == NULL ||
+        (memcmp(instp1->character_label, instp2->character_label, sizeof(*(instp1->character_label))) != 0) ? 0x0008 : 0;
+    result += instp1->conflict_label == NULL || instp2->conflict_label == NULL ||
+        (memcmp(instp1->conflict_label, instp2->conflict_label, sizeof(*(instp1->conflict_label))) != 0) ? 0x0010 : 0;
     return result;
 }
-START_TEST(copy_instance) {
+START_TEST(copy_instance_1) {
     pp_instance inst = read_instance_from_filename("tests/input/read/1.txt");
-    pp_instance inst2 = copy_instance(inst);
+    pp_instance inst2 = { 0 };
+    copy_instance(&inst2, &inst);
     ck_assert_int_eq(instance_cmp(&inst, &inst2),0);
-    inst = read_instance_from_filename("tests/input/read/1.txt");
-    inst2 = copy_instance(inst);
+}
+END_TEST
+START_TEST(copy_instance_2) {
+    pp_instance inst = read_instance_from_filename("tests/input/read/2.txt");
+    pp_instance inst2 = { 0 };
+    copy_instance(&inst2, &inst);
     ck_assert_int_eq(instance_cmp(&inst, &inst2),0);
 }
 END_TEST
