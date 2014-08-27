@@ -37,7 +37,7 @@ $(P): $(OBJECTS)
 all: $(P) doc check
 	echo $(OBJECTS)
 
-${OBJ_DIR}/%.o: $(SRC_DIR)/%.c $(LIB_DIR)/getopt/cmdline.h
+${OBJ_DIR}/%.o: $(SRC_DIR)/%.c $(LIBS)
 	@echo '* Compiling $<'
 	@mkdir -p $(dir $@)
 	$(CC_FULL) -MM -MF $(patsubst %.c,%.d,$<)  -MT $@ $<
