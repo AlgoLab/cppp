@@ -173,11 +173,10 @@ realize_character(const pp_instance src, const uint32_t character, operation *op
 /* } */
 
 /**
-   \param matrix: instance matrix
-   \param n: number of species
-   \param m: number of characters
+   \param instance
 
-   \return the red-black graph corresponding to the input matrix
+   Updates an instance by computing the red-black and the conflict graphs
+   associated to a given matrix.
 
    In a red-black graph, the first \c instp->num_species ids correspond to species,
    while the ids larger or equal to instp->num_species correspond to characters.
