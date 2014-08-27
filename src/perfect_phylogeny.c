@@ -181,36 +181,37 @@ realize_character(const pp_instance src, const uint32_t character, const operati
    or \c RED (at the beginning, there can only be \c BLACK edges).
 
 */
-static igraph_t *
-matrix2redblack(pp_instance *instp) {
-    igraph_t *rb = malloc(sizeof(igraph_t));
-    assert(rb != NULL);
-    igraph_empty_attrs(rb, instp->num_species+instp->num_characters, IGRAPH_UNDIRECTED, 0);
+static void
+matrix2graphs(pp_instance *instp) {
+    assert(instp->matrix != NULL);
+
+    instp->species_label = g_malloc(instp->num_species * sizeof(uint32_t));
+    instp->character_label = g_malloc(instp->num_characters * sizeof(uint32_t));
+    instp->conflict_label = g_malloc(instp->num_species * sizeof(uint32_t));
+
+/* We start with the red-black graph */
+    instp->red_black = g_malloc(sizeof(igraph_t));
+    igraph_empty_attrs(instp->red_black, instp->num_species+instp->num_characters, IGRAPH_UNDIRECTED, 0);
 
     for(uint32_t s=0; s<instp->num_species; s++) {
-        SETVAN(rb, "id", s, s);
+        SETVAN(instp->red_black, "id", s, s);
         instp->species_label[s] = s;
-        SETVAN(rb, "color", s, SPECIES);
+        SETVAN(instp->red_black, "color", s, SPECIES);
     }
     for(uint32_t c=0; c<instp->num_characters; c++) {
-        SETVAN(rb, "id", c+instp->num_species, c);
+        SETVAN(instp->red_black, "id", c+instp->num_species, c);
         instp->character_label[c] = c+instp->num_species;
         instp->conflict_label[c] = c;
-        SETVAN(rb, "color", c+instp->num_species, BLACK);
+        SETVAN(instp->red_black, "color", c+instp->num_species, BLACK);
     }
     for (uint32_t s=0; s<instp->num_species; s++)
         for (uint32_t c=0; c<instp->num_characters; c++)
             if (matrix_get_value(instp, s, c) == 1)
-                igraph_add_edge(rb, s, c+instp->num_species);
-    return rb;
-}
+                igraph_add_edge(instp->red_black, s, c+instp->num_species);
 
-
-static igraph_t *
-matrix2conflict(pp_instance *instp) {
-    igraph_t *g = malloc(sizeof(igraph_t));
-    assert(g != NULL);
-    igraph_empty(g, instp->num_characters, IGRAPH_UNDIRECTED);
+    /* Now we compute the conflict graph */
+    instp->conflict = g_malloc(sizeof(igraph_t));
+    igraph_empty(instp->conflict, instp->num_characters, IGRAPH_UNDIRECTED);
     // TODO
     for(uint32_t c1=0; c1<instp->num_characters; c1++)
         for(uint32_t c2=c1+1; c2<instp->num_characters; c2++) {
@@ -218,9 +219,8 @@ matrix2conflict(pp_instance *instp) {
             for(uint32_t s=0; s<instp->num_species; s++)
                 states[matrix_get_value(instp, s, c1)][matrix_get_value(instp, s, c2)] = 1;
             if(states[0][0] + states[0][1] + states[1][0] + states[1][1] == 4)
-                igraph_add_edge(g, instp->conflict_label[c1], instp->conflict_label[c2]);
+                igraph_add_edge(instp->conflict, instp->conflict_label[c1], instp->conflict_label[c2]);
         }
-    return g;
 }
 
 /**
@@ -237,19 +237,6 @@ matrix_set_value(pp_instance *inst, uint32_t species, uint32_t character, uint8_
     inst->matrix[character + inst->num_characters*species] = value;
 }
 
-static void
-init_instance(pp_instance *instp) {
-    instp->matrix = calloc(instp->num_species*instp->num_characters, sizeof(uint8_t));
-    assert(instp->matrix != NULL);
-    instp->species_label = calloc(instp->num_species, sizeof(uint32_t));
-    assert(instp->species_label != NULL);
-    instp->character_label = calloc(instp->num_characters, sizeof(uint32_t));
-    assert(instp->character_label != NULL);
-    instp->conflict_label = calloc(instp->num_characters, sizeof(uint32_t));
-    assert(instp->conflict_label != NULL);
-}
-
-
 pp_instance
 read_instance_from_filename(const char *filename) {
     FILE* file;
@@ -259,14 +246,12 @@ read_instance_from_filename(const char *filename) {
     uint32_t num_species, num_characters;
 
     assert(fscanf(file, "%"SCNu32" %"SCNu32, &num_species, &num_characters) != EOF);
-    pp_instance inst = {
-        .num_species = num_species,
-        .num_characters = num_characters
-        .num_species_orig = num_species,
-        .num_characters_orig = num_characters
-    };
-    init_instance(&inst);
-
+    pp_instance inst = { 0 };
+    inst.num_species = num_species;
+    inst.num_characters = num_characters;
+    inst.num_species_orig = num_species;
+    inst.num_characters_orig = num_characters;
+    inst.matrix = g_malloc(num_species * num_characters * sizeof(uint8_t));
     for(uint32_t s=0; s < num_species; s++)
         for(uint32_t c=0; c < num_characters; c++) {
             uint8_t x;
@@ -274,8 +259,11 @@ read_instance_from_filename(const char *filename) {
             matrix_set_value(&inst, s, c, x);
         }
 
-    inst.red_black = matrix2redblack(&inst);
-    inst.conflict = matrix2conflict(&inst);
+    matrix2graphs(&inst);
+    char* str = NULL;
+    str_instance(&inst, str);
+    g_debug("%s", str);
+    free(str);
 
     fclose(file);
     return inst;

@@ -41,9 +41,9 @@ int main(int argc, char **argv) {
 */
     state_s states[2*temp.num_species+temp.num_characters];
 
-    uint32_t level=0;
-    states[level]->instance = temp;
-
+    uint32_t level = 0;
+    init_state(states+0);
+    copy_instance(states[0].instance, &temp);
     while(level >= 0) {
         ;
     }
