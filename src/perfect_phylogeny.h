@@ -112,19 +112,6 @@ void str_instance(const pp_instance* instp, char* str);
 void
 copy_instance(pp_instance *dst, const pp_instance *src);
 
-
-/**
-   \struct checked_instance
-
-   The version of \c pp_instance with an additional field \c error which
-   contains 0 iff the instance has been correctly computed
-*/
-typedef struct checked_instance {
-pp_instance *instance;
-uint8_t error;
-} checked_instance;
-
-
 /**
    \struct operation
 
