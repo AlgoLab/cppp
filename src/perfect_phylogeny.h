@@ -35,8 +35,9 @@
    @brief This file contains all public functions that can be useful for dealing with
    perfect phylogenies
 */
-
-
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -45,6 +46,7 @@
 #include <err.h>
 #include <igraph.h>
 #include <inttypes.h>
+#include <glib.h>
 
 #define SPECIES 0
 #define BLACK 1
@@ -58,21 +60,58 @@
    any more.
 
    The fields \c species_label and \c character_label allow to quickly identify
-   the vertex of a red-black (or conflict) graph with a certain label
+   the vertex of a red-black (or conflict) graph with a certain label, since
+   they map each original species/character to the id of the corresponding
+   vertex of the red-black graph. If the species/character is not in the current
+   set, than those arrays have value \c UINT32_MAX or \c -1.
+
+   Similarly, \c conflict_label maps each original character to the id of the
+   corresponding vertex of the conflict graph.
+   If the character is not in the current set, than the array has value \c UINT32_MAX or \c -1.
 
 */
 typedef struct pp_instance {
-    uint32_t num_species;
-    uint32_t num_characters;
-    uint32_t num_species_orig;
-    uint32_t num_characters_orig;
-    igraph_t *red_black;
-    igraph_t *conflict;
-    uint8_t  *matrix;
-    uint32_t *species_label;
-    uint32_t *character_label;
-    uint32_t *conflict_label;
+uint32_t num_species;
+uint32_t num_characters;
+uint32_t num_species_orig;
+uint32_t num_characters_orig;
+igraph_t *red_black;
+igraph_t *conflict;
+uint8_t  *matrix;
+uint32_t *species_label;
+uint32_t *character_label;
+uint32_t *conflict_label;
 } pp_instance;
+
+/**
+   \brief managing instances: \c new_instance \c init_instance \c
+   destroy_instance \c free_instance
+
+   \c destroy_instance does not free the instance, while \c free_instance does
+*/
+pp_instance *
+new_instance(void);
+
+/* void */
+/* init_instance(pp_instance * instp, uint32_t num_species, uint32_t num_characters); */
+
+void
+destroy_instance(pp_instance *instp);
+
+void
+free_instance(pp_instance *instp);
+
+void str_instance(const pp_instance* instp, char* str);
+/**
+   \brief copy an instance
+
+   \param src, dst: pointers to the instances
+
+   The instance must have already been allocated.
+*/
+void
+copy_instance(pp_instance *dst, const pp_instance *src);
+
 
 /**
    \struct checked_instance
@@ -81,8 +120,8 @@ typedef struct pp_instance {
    contains 0 iff the instance has been correctly computed
 */
 typedef struct checked_instance {
-    pp_instance *instance;
-    uint8_t error;
+pp_instance *instance;
+uint8_t error;
 } checked_instance;
 
 
@@ -99,10 +138,26 @@ typedef struct checked_instance {
    * \c 3 => null characters/species have been removed
    */
 typedef struct operation {
-    uint8_t type;
-    GSList *removed_species_list;
-    GSList *removed_characters_list;
+uint8_t type;
+GSList *removed_species_list;
+GSList *removed_characters_list;
 } operation;
+
+/**
+   \brief managing operations: \c new_operation \c init_operation \c
+   destroy_operation
+*/
+operation *
+new_operation(void);
+
+void
+init_operation(operation *op);
+
+void
+destroy_operation(operation *op);
+
+void
+free_operation(operation *op);
 
 /**
    \param filename: the corresponding file contains an input matrix
@@ -122,15 +177,8 @@ read_instance_from_filename(const char *filename);
    allocated. It must be freed with \c destroy_instance after it has been used.
 */
 pp_instance
-realize_character(const pp_instance src, const uint32_t character, const operation *op);
+realize_character(const pp_instance src, const uint32_t character, operation *op);
 
-/**
-   \param inst: instance
-
-   Deallocates all memory used to store \c inst.
-*/
-void
-destroy_instance(pp_instance *instp);
 
 /**
    \param inst: instance
@@ -169,14 +217,6 @@ void
 matrix_set_value(pp_instance *instp, uint32_t species, uint32_t character, uint8_t value);
 
 /**
-   \brief deallocates all memory used to store an instance
-
-   \param pointer to the instance
-*/
-void
-destroy_instance(pp_instance *instp);
-
-/**
    \struct state_s
 
    It stores everything that is necessary to construct the final phylogeny and
@@ -195,9 +235,45 @@ typedef struct state_s {
 } state_s;
 
 /**
-   \brief deallocates all memory used to store a state
-
-   \param pointer to the state
+   \brief managing states: \c new_state \c init_state \c
+   destroy_state
 */
+
+state_s *
+new_state(void);
+
 void
-destroy_state(state_s *statep);
+init_state(state_s * stp);
+
+void
+destroy_state(state_s *stp);
+
+void
+free_state(state_s *stp);
+
+/**
+   \brief simplify the instance, if possible
+
+   \param instance to be simplified
+   \return simplified instance
+
+   The goal is to obtain a new instance that has the same solutions as the
+   original instance. More precisely:
+
+   * we remove all isolated vertices of the red-black graph
+   * we remove duplicated characters
+   * we remove duplicated species
+
+   Notice that at each function, at most one of those operations is performed,
+   therefore it is necessary to include this function in a \c while loop to
+   completely simplify the instance
+*/
+pp_instance
+instance_cleanup(const pp_instance src, operation *op);
+
+/* From 21st century C */
+#define Sasprintf(write_to,  ...) {                                     \
+                                   char *tmp_string_for_extend = write_to; \
+                                   asprintf(&(write_to), __VA_ARGS__);  \
+                                   free(tmp_string_for_extend);         \
+                                   }

@@ -417,19 +417,235 @@ START_TEST(test_read_instance_from_filename_2) {
     //    igraph_write_graph_gml(inst.red_black, stdout, 0, 0);
 }
 END_TEST
+#endif
 
+/**
+   \brief managing instances: \c new_instance \c init_instance \c
+   destroy_instance \c free_instance
+
+   \c destroy_instance does not free the instance, while \c free_instance does
+*/
+pp_instance *
+new_instance(void) {
+    pp_instance *instp = g_malloc0(sizeof(pp_instance));
+    return instp;
+}
+
+#ifdef TEST_EVERYTHING
+static void null_instance_test(pp_instance *instp) {
+    ck_assert_msg(instp != NULL, "op has been freed\n");
+    ck_assert_int_eq(instp->num_species, 0);
+    ck_assert_int_eq(instp->num_characters, 0);
+    ck_assert_int_eq(instp->num_species_orig, 0);
+    ck_assert_int_eq(instp->num_characters_orig, 0);
+    ck_assert_msg(instp->conflict == NULL, "instp->red_black has not been freed\n");
+    ck_assert_msg(instp->red_black == NULL, "instp->red_black has not been freed\n");
+    ck_assert_msg(instp->matrix == NULL, "instp->red_black has not been freed\n");
+    ck_assert_msg(instp->species_label == NULL, "instp->red_black has not been freed\n");
+    ck_assert_msg(instp->character_label == NULL, "instp->red_black has not been freed\n");
+    ck_assert_msg(instp->conflict_label == NULL, "instp->red_black has not been freed\n");
+}
+
+START_TEST(new_instance_1) {
+    pp_instance * instp = new_instance();
+    null_instance_test(instp);
+}
+END_TEST
+#endif
+
+/* void */
+/* init_instance(pp_instance * instp) { */
+/*     assert(instp != NULL); */
+/*     instp->conflict = g_malloc(sizeof(igraph_t)); */
+/*     igraph_empty(instp->conflict, instp->num_characters, IGRAPH_UNDIRECTED); */
+/*     instp->red_black = = g_malloc(sizeof(igraph_t)); */
+/*     igraph_empty_attrs(instp->red_black, instp->num_species + instp->num_characters, IGRAPH_UNDIRECTED); */
+/*     instp->matrix =  NULL; */
+/*     instp->species_label = g_malloc(instp->num_species * sizeof(uint32_t)); */
+/*     instp->character_label = g_malloc(instp->num_characters * sizeof(uint32_t)); */
+/*     instp->conflict_label = g_malloc(instp->num_species * sizeof(uint32_t)); */
+/* } */
+
+
+/* #ifdef TEST_EVERYTHING */
+/* /\* START_TEST(init_instance_1) { *\/ */
+/* /\*     pp_instance inst = { 0 }; *\/ */
+/* /\*     null_instance_test(&inst); *\/ */
+/* /\* } *\/ */
+/* /\* END_TEST *\/ */
+/* #endif */
+
+void str_instance(const pp_instance* instp, char* str) {
+    assert(0 <= asprintf(&str,
+            "Instance: {\n"
+            "  num_species: %d\n"
+            "  num_characters: %d\n"
+            "  num_species_orig: %d\n"
+            "  num_characters_orig: %d\n"
+            "  red_black: %p\n"
+            "  conflict: %p\n"
+            "  matrix: %p\n"
+            "  species_label: %p\n"
+            "  character_label: %p\n"
+            "  conflict_label: %p\n"
+            "}",
+            instp->num_species,
+            instp->num_characters,
+            instp->num_species_orig,
+            instp->num_characters_orig,
+            (void *) instp->red_black,
+            (void *) instp->conflict,
+            (void *) instp->matrix,
+            (void *) instp->species_label,
+            (void *) instp->character_label,
+            (void *) instp->conflict_label));
+}
+
+void
+destroy_instance(pp_instance *instp) {
+    if (instp->conflict != NULL)
+        igraph_destroy(instp->conflict);
+    if (instp->red_black != NULL)
+        igraph_destroy(instp->red_black);
+    free(instp->matrix);
+    free(instp->species_label);
+    free(instp->character_label);
+    free(instp->conflict_label);
+}
+
+#ifdef TEST_EVERYTHING
+START_TEST(destroy_instance_1) {
+    pp_instance *instp = new_instance();
+    destroy_instance(instp);
+    null_instance_test(instp);
+}
+END_TEST
+#endif
+
+
+void
+free_instance(pp_instance *instp) {
+    destroy_instance(instp);
+    free(instp);
+}
+
+/**
+   \brief managing operations: \c new_operation \c init_operation \c
+   destroy_operation
+*/
+operation *
+new_operation(void) {
+    operation *op = g_malloc0(sizeof(operation));
+    init_operation(op);
+    return op;
+}
+
+#ifdef TEST_EVERYTHING
+START_TEST(new_operation_1) {
+    operation *op = new_operation();
+    ck_assert_msg(op != NULL, "op has been freed\n");
+    ck_assert_msg(op->removed_species_list == NULL, "removed_species_list has not been freed\n");
+    ck_assert_msg(op->removed_characters_list == NULL, "removed_characters_list has not been freed\n");
+    ck_assert_int_eq(op->removed_characters_list, 0);
+}
+END_TEST
+#endif
+
+
+
+void
+init_operation(operation *op) {
+    assert(op != NULL);
+    operation temp = {
+        .type = 0,
+        .removed_species_list = NULL,
+        .removed_characters_list = NULL
+    };
+    *op = temp;
+}
+
+
+void
+destroy_operation(operation *op) {
+    if (op->removed_species_list != NULL)
+        g_slist_free(op->removed_species_list);
+    if (op->removed_characters_list != NULL)
+        g_slist_free(op->removed_characters_list);
+    op->removed_characters_list = 0;
+}
+
+
+#ifdef TEST_EVERYTHING
+START_TEST(destroy_operation_1) {
+    operation *op = new_operation();
+    destroy_operation(op);
+    ck_assert_msg(op != NULL, "op has been freed\n");
+    ck_assert_msg(op->removed_species_list == NULL, "removed_species_list has not been freed\n");
+    ck_assert_msg(op->removed_characters_list == NULL, "removed_characters_list has not been freed\n");
+    ck_assert_int_eq(op->removed_characters_list, 0);
+}
+END_TEST
+#endif
+
+void
+free_operation(operation *op) {
+    destroy_operation(op);
+    free(op);
+}
+
+state_s *
+new_state(void) {
+    state_s *stp = g_malloc0(sizeof(state_s));
+    init_state(stp);
+    return stp;
+}
+
+
+void
+init_state(state_s *stp) {
+    assert(stp != NULL);
+    state_s temp = {
+        .operation = new_operation(),
+        .instance = new_instance(),
+        .realized_char = 0,
+        .tried_chars = NULL,
+    };
+    *stp = temp;
+}
+
+void
+destroy_state(state_s *stp) {
+    free_instance(stp->instance);
+    free_operation(stp->operation);
+    if (stp->tried_chars != NULL)
+        g_slist_free(stp->tried_chars);
+}
+
+void
+free_state(state_s *stp) {
+    destroy_state(stp);
+    free(stp);
+}
+
+#ifdef TEST_EVERYTHING
 static Suite * perfect_phylogeny_suite(void) {
     Suite *s;
     TCase *tc_core;
 
     s = suite_create("perfect_phylogeny.c");
 
-    /* Core test case */
+/* Core test case */
     tc_core = tcase_create("Core");
 
+    /* tcase_add_test(tc_core, init_instance_1); */
     tcase_add_test(tc_core, test_read_instance_from_filename_1);
     tcase_add_test(tc_core, test_read_instance_from_filename_2);
+    tcase_add_test(tc_core, new_instance_1);
+    tcase_add_test(tc_core, destroy_instance_1);
     tcase_add_test(tc_core, copy_instance_1);
+    tcase_add_test(tc_core, copy_instance_2);
+    tcase_add_test(tc_core, new_operation_1);
+    tcase_add_test(tc_core, destroy_operation_1);
 
     suite_add_tcase(s, tc_core);
 
@@ -451,25 +667,3 @@ int main(void) {
     return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 #endif
-
-void
-destroy_instance(pp_instance *instp) {
-    if (instp->conflict != NULL)
-        igraph_destroy(instp->conflict);
-    if (instp->red_black != NULL)
-        igraph_destroy(instp->red_black);
-    free(instp->matrix);
-    free(instp->species_label);
-    free(instp->character_label);
-    free(instp->conflict_label);
-}
-
-void
-destroy_state(state_s *statep) {
-    destroy_instance(statep->instance);
-    free(statep->instance);
-    g_slist_free(statep->operation->removed_species_list);
-    g_slist_free(statep->operation->removed_characters_list);
-    free(statep->operation);
-    free(statep->tried_char);
-}
