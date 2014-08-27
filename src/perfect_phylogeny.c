@@ -96,61 +96,68 @@ END_TEST
    impossible, setting \c error=1.
 */
 pp_instance
-realize_character(const pp_instance src, const uint32_t character, const operation *op) {
+realize_character(const pp_instance src, const uint32_t character, operation *op) {
     assert(op != NULL);
-    pp_instance dest = copy_instance(src);
-    igraph_real_t c = dest.character_label[character];
+    pp_instance dst;
+    copy_instance(&dst, &src);
+    igraph_real_t c = dst.character_label[character];
 
-    igraph_vector_t *conn_comp;
-    igraph_vector_init(conn_comp, dest.num_species+dest.num_characters);
-    assert(igraph_subcomponent(dest->red_black, conn_comp, c, IGRAPH_ALL) == 0);
-    igraph_vector_sort(conn_comp);
-    igraph_vector_t *adjacent;
-    igraph_vector_init(adjacent, dest.num_species);
-    igraph_neighborhood(dest->red_black, adjacent, c, 1, IGRAPH_ALL);
-    igraph_vector_sort(adjacent);
-    igraph_vector_t *not_adjacent;
-    igraph_vector_init(not_adjacent, 0);
-    igraph_vector_difference_sorted(conn_comp, adjacent, not_adjacent);
+    igraph_vector_t conn_comp;
+    igraph_vector_init(&conn_comp, dst.num_species+dst.num_characters);
+    assert(igraph_subcomponent(dst.red_black, &conn_comp, c, IGRAPH_ALL) == 0);
+    igraph_vector_sort(&conn_comp);
+    igraph_vector_ptr_t res;
+    igraph_vector_ptr_init(&res, 1);
+    igraph_neighborhood(dst.red_black, &res, igraph_vss_1(c), 1, IGRAPH_ALL);
+    igraph_vector_t adjacent;
+    igraph_vector_copy(&adjacent, VECTOR(res)[0]);
+    igraph_vector_sort(&adjacent);
+    igraph_vector_t not_adjacent;
+    igraph_vector_init(&not_adjacent, 0);
+    igraph_vector_difference_sorted(&conn_comp, &adjacent, &not_adjacent);
 
-    int color = VAN(dest->red_black, "color", c);
+    int color = VAN(dst.red_black, "color", c);
     assert(color != SPECIES);
     if (color == BLACK) {
-        igraph_vector_t *new_red;
-        igraph_vector_init(new_red, 0);
-        for (size_t i=0, size_t l=igraph_vector_size(not_adjacent); i<l; i++) {
+        igraph_vector_t new_red;
+        size_t l=igraph_vector_size(&not_adjacent);
+        igraph_vector_init(&new_red, 2*l);
+        for (size_t i=0; i<l; i++) {
             VECTOR(new_red)[2*i] = c;
             VECTOR(new_red)[2*i+1] = VECTOR(not_adjacent)[i];
         }
-        igraph_add_edges(dest.red_black, new_red, 0);
-        igraph_vector_destroy(new_red);
+        igraph_add_edges(dst.red_black, &new_red, 0);
+        igraph_vector_destroy(&new_red);
 
-        igraph_vector_t *to_delete;
-        igraph_vector_init(to_delete, 0);
-        for (size_t i=0, size_t l=igraph_vector_size(adjacent); i<l; i++) {
+        igraph_vector_t to_delete;
+        l=igraph_vector_size(&adjacent);
+        igraph_vector_init(&to_delete, 2*l);
+        igraph_es_t edges_to_delete;
+        for (size_t i=0; i<l; i++) {
             VECTOR(to_delete)[2*i] = c;
             VECTOR(to_delete)[2*i+1] = VECTOR(adjacent)[i];
+            igraph_es_pairs(&edges_to_delete, &to_delete, IGRAPH_UNDIRECTED);
+            igraph_delete_edges(dst.red_black, edges_to_delete);
         }
-        igraph_add_edges(dest.red_black, to_delete);
-        igraph_vector_destroy(to_delete);
-
-        igraph_vector_destroy(not_adjacent);
-        igraph_vector_destroy(adjacent);
-        igraph_vector_destroy(conn_comp);
+        igraph_vector_destroy(&to_delete);
+        igraph_vector_destroy(&not_adjacent);
+        igraph_vector_destroy(&adjacent);
+        igraph_vector_destroy(&conn_comp);
+        igraph_es_destroy(&edges_to_delete);
 
         op->type = 1;
-        SETVAN(rb, "color", c, RED);
+        SETVAN(dst.red_black, "color", c, RED);
     }
     if (color == RED)
-        if (igraph_vector_size(adjacent) == igraph_vector_size(conn_comp)) {
+        if (igraph_vector_size(&adjacent) == igraph_vector_size(&conn_comp)) {
             op->type = 0;
         } else {
-            igraph_delete_vertices(dest.red_black, c);
-            dest.num_species--;
+            igraph_delete_vertices(dst.red_black, igraph_vss_1(c));
+            dst.num_species--;
             op->type = 2;
             op->removed_characters_list = g_slist_append(op->removed_characters_list, GINT_TO_POINTER(character));
         }
-    return dest;
+    return dst;
 }
 
 /* static int */
