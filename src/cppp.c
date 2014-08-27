@@ -26,9 +26,9 @@
 
 int main(int argc, char **argv) {
     static struct gengetopt_args_info args_info;
-    assert(cmdline_parser (argc, argv, &args_info) == 0);
+    assert(cmdline_parser(argc, argv, &args_info) == 0);
     assert(args_info.inputs_num >= 1);
-    start_logging(args_info.quiet_given, args_info.log_given, args_info.log_arg);
+    start_logging(args_info);
 
     igraph_i_set_attribute_table(&igraph_cattribute_table);
     pp_instance temp = read_instance_from_filename(args_info.inputs[0]);

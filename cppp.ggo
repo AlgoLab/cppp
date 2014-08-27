@@ -5,9 +5,10 @@ args "--unamed-opts"
 
 # Options
 option  "output"	o "Output file"			string	typestr="filename"
-option  "quiet" 	q "Output only the result" 	flag 	off
-option  "log"		l "Log file (default=stderr)"	string 	typestr="filename"	optional
 option  "strategy"	s "Strategy"			int 				optional
+option 	"quiet" 	q "Output only the result" 	flag				off
+option 	"verbose" 	v "Logs some information" 	flag 				off
+option 	"debug" 	d "Detailed log for debugging" 	flag 				off
 details="\n
 The id code of the strategy used in selecting the next character to be realized,
 according to the following table:\n
