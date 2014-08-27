@@ -281,30 +281,17 @@ read_instance_from_filename(const char *filename) {
 #endif
 
 /*
-  \brief Simplify the red-black graph whenever possible.
+  \brief Simplify the instance whenever possible.
 
-  \param instance to be simplified
-  \return simplified instance
-
-  The goal is to obtain a new instance that has the same solutions as the
-  original instance. More precisely:
-
-  * we remove all isolated vertices of the red-black graph
-  * we remove duplicated characters
-  * we remove duplicated species
-
-  Notice that at each function, at most one of those operations is performed,
-  therefore it is necessary to include this function in a \c while loop to
-  completely simplify the instance
 */
 
 pp_instance
-red_black_graph_cleanup(const pp_instance src, const operation *op) {
+instance_cleanup(const pp_instance src, operation *op) {
     // remove isolated species and characters
     assert(op != NULL);
     int err;
-    pp_instance dest = copy_instance(src);
-    long int n=igraph_vcount(dest.red_black);
+    pp_instance dst;
+    copy_instance(&dst, &src);
     igraph_vector_t clusters, sizes, isolated;
     err = igraph_vector_init(&clusters, 0);
     assert(err != 0);
@@ -314,11 +301,11 @@ red_black_graph_cleanup(const pp_instance src, const operation *op) {
     assert(err != 0);
 
     // Looking for null species
-    for (uint32_t i=0; i < dest.num_species_orig; i++) {
-        uint32_t id = dest.species_label[i];
+    for (uint32_t i=0; i < dst.num_species_orig; i++) {
+        uint32_t id = dst.species_label[i];
         igraph_vector_t v;
         err = igraph_vector_init_seq(&v, id, id);
-        err = igraph_degree(src.red_black, &sizes, v, 0, IGRAPH_LOOPS);
+        err = igraph_degree(src.red_black, &sizes, igraph_vss_vector(&v), 0, IGRAPH_LOOPS);
         assert(err != 0);
         if (VECTOR(sizes)[0] == 1) {
             op->removed_species_list = g_slist_append(op->removed_species_list, GINT_TO_POINTER(i));
@@ -327,11 +314,11 @@ red_black_graph_cleanup(const pp_instance src, const operation *op) {
     }
 
     // Looking for null characters
-    for (uint32_t i=0; i < dest.num_characters_orig; i++) {
-        uint32_t id = dest.characters_label[i];
+    for (uint32_t i=0; i < dst.num_characters_orig; i++) {
+        uint32_t id = dst.character_label[i];
         igraph_vector_t v;
         err = igraph_vector_init_seq(&v, id, id);
-        err = igraph_degree(src.red_black, &sizes, v, 0, IGRAPH_LOOPS);
+        err = igraph_degree(src.red_black, &sizes, igraph_vss_vector(&v), 0, IGRAPH_LOOPS);
         assert(err != 0);
         if (VECTOR(sizes)[0] == 1) {
             op->removed_characters_list = g_slist_append(op->removed_characters_list, GINT_TO_POINTER(i));
@@ -342,30 +329,7 @@ red_black_graph_cleanup(const pp_instance src, const operation *op) {
 /* TODO (if necessary) */
 /* we remove duplicated characters */
 /* we remove duplicated species */
-    return dest;
-}
-/*
-  when the cluster contains only one vertex, the cluster id is also
-  the vertex id
-*/
-igraph_vector_push_back(isolated, igraph_vector_e(clusters, i));
-igraph_delete_vertices(rb, isolated);
-
-igraph_vector_delete(clusters);
-igraph_vector_delete(sizes);
-igraph_vector_delete(isolated);
-
-
-
-
-igraph_vector_destroy(&clusters);
-igraph_vector_destroy(&sizes);
-igraph_vector_destroy(&isolated);
-
-// remove universal BLACK characters (it only needs to be executed at the
-// topmost level)
-// TODO
-return 0;
+    return dst;
 }
 
 igraph_t *
