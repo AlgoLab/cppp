@@ -12,7 +12,7 @@ SRCS := $(wildcard $(SRC_DIR)/*.c)
 SOURCES := $(SRCS:$(SRC_DIR)/%=%)
 
 CFLAGS_STD = -g -Wall -DDEBUG -O0 -march=native -Wno-deprecated -Wno-parentheses -Wno-format
-STD_LIBS = glib-2.0 igraph
+STD_LIBS = glib-2.0 igraph jansson
 DEBUG_LIBS = check #efence
 
 LIBS 	= $(LIB_DIR)/getopt/cmdline.o

@@ -47,6 +47,7 @@
 #include <igraph.h>
 #include <inttypes.h>
 #include <glib.h>
+#include <jansson.h>
 
 #define SPECIES 0
 #define BLACK 1
@@ -124,6 +125,7 @@ void str_instance(const pp_instance* instp, char* str);
 void
 copy_instance(pp_instance *dst, const pp_instance *src);
 
+
 /**
    \struct operation
    \brief an operation that has been, or can be, applied to an instance.
@@ -134,11 +136,17 @@ copy_instance(pp_instance *dst, const pp_instance *src);
    * \c 1 => realized a positive character
    * \c 2 => realized a negative character, a character has been freed
    * \c 3 => null characters/species have been removed
-   */
+
+   \c removed_species_list and \c removed_characters_list are lists of original
+   species and characters, while \c removed_red_black_list and \c
+   removed_conflict_list are lists of vertices of the red-black and conflict graphs.
+*/
 typedef struct operation {
     uint8_t type;
     GSList *removed_species_list;
     GSList *removed_characters_list;
+    GSList *removed_red_black_list;
+    GSList *removed_conflict_list;
 } operation;
 
 /**
@@ -253,6 +261,14 @@ void
 free_state(state_s *stp);
 
 /**
+   \brief check if a state is internally consistent
+
+   \return 0 if all check have been passed, otherwise an error code larger than 0.
+*/
+uint32_t check_state(const state_s* stp);
+
+
+/**
    \brief simplify the instance, if possible
 
    \param instance to be simplified
@@ -272,9 +288,16 @@ free_state(state_s *stp);
 pp_instance
 instance_cleanup(const pp_instance src, operation *op);
 
-/* From 21st century C */
-#define Sasprintf(write_to,  ...) {             \
-        char *tmp_string_for_extend = write_to; \
-        asprintf(&(write_to), __VA_ARGS__);     \
-        free(tmp_string_for_extend);            \
-    }
+/**
+   \brief read a state (instance, operation) from a
+   file
+*/
+state_s*
+read_state_from_file(char* filename);
+
+/**
+   \brief write a state (instance, operation) to a
+   file
+*/
+void
+write_state_to_file(char* filename, state_s* stp);

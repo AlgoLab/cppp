@@ -56,7 +56,12 @@ copy_instance(pp_instance *dst, const pp_instance *src) {
 
 #ifdef TEST_EVERYTHING
 static int g_slist_cmp(GSList* l1, GSList* l2) {
-    while (uint32_t x1 = g_slist_next(l1) && uint32_t x1 = g_slist_next(l2)) {
+    if (l1 == NULL && l2 == NULL) return 0;
+    if (l1 == NULL) return 1;
+    if (l2 == NULL) return -1;
+    gpointer x1 = g_slist_next(l1);
+    gpointer x2 = g_slist_next(l2);
+    for (;x1 != NULL && x2 != NULL; x1 = g_slist_next(l1), x2 = g_slist_next(l2)) {
         if (x1 < x2) return 1;
         if (x2 < x1) return -1;
     }
@@ -65,20 +70,18 @@ static int g_slist_cmp(GSList* l1, GSList* l2) {
 }
 static uint32_t instance_cmp(pp_instance *instp1, pp_instance *instp2) {
     uint32_t result = 0;
-    result += (instp1->num_characters != instp2->num_characters) ? 0x0001 : 0;
-    result += (instp1->num_species != instp2->num_species)       ? 0x0002 : 0;
-    result += instp1->species_label == NULL || instp2->species_label == NULL ||
-        (memcmp(instp1->species_label, instp2->species_label, sizeof(*(instp1->species_label))) != 0) ? 0x0004 : 0;
-    result += instp1->character_label == NULL || instp2->character_label == NULL ||
-        (memcmp(instp1->character_label, instp2->character_label, sizeof(*(instp1->character_label))) != 0) ? 0x0008 : 0;
-    result += instp1->conflict_label == NULL || instp2->conflict_label == NULL ||
-        (memcmp(instp1->conflict_label, instp2->conflict_label, sizeof(*(instp1->conflict_label))) != 0) ? 0x0010 : 0;
-    result += instp1->root_state == NULL || instp2->root_state == NULL ||
-        (memcmp(instp1->root_state, instp2->root_state, sizeof(*(instp1->root_state))) != 0) ? 0x0011 : 0;
-    result += instp1->species == NULL || instp2->species == NULL ||
-        (g_slist_cmp(instp1->species, instp2->species) != 0) ? 0x0010 : 0;
-    result += instp1->characters == NULL || instp2->characters == NULL ||
-        (g_slist_cmp(instp1->characters, instp2->characters) != 0) ? 0x0010 : 0;
+    if (instp1->num_characters != instp2->num_characters) result += 1;
+    if (instp1->num_species != instp2->num_species) result += 2;
+    if (instp1->species_label == NULL || instp2->species_label == NULL ||
+        memcmp(instp1->species_label, instp2->species_label, sizeof(*(instp1->species_label)))) result += 4;
+    if (instp1->character_label == NULL || instp2->character_label == NULL ||
+        memcmp(instp1->character_label, instp2->character_label, sizeof(*(instp1->character_label)))) result += 8;
+    if (instp1->conflict_label == NULL || instp2->conflict_label == NULL ||
+        memcmp(instp1->conflict_label, instp2->conflict_label, sizeof(*(instp1->conflict_label)))) result += 16;
+    if (instp1->root_state == NULL || instp2->root_state == NULL ||
+        memcmp(instp1->root_state, instp2->root_state, sizeof(*(instp1->root_state)))) result += 32;
+    if (g_slist_cmp(instp1->species, instp2->species)) result += 64;
+    if (g_slist_cmp(instp1->characters, instp2->characters)) result += 128;
     return result;
 }
 START_TEST(copy_instance_1) {
@@ -100,13 +103,11 @@ END_TEST
 /**
    To realize a character, first we have to find the id \c c of the vertex of
    the red-black graph encoding the input character.
-   Then we find the connected component \c A of the
-   red-black graph to which \c c belongs, and the set \c B of vertices adjacent
-   to \c c.
+   Then we find the connected component \c A of the red-black graph to which \c
+   c belongs, and the set \c B of vertices adjacent to \c c.
 
-   If \c is labeled black,
-   we remove all edges from \c c to \c B and we add the edges from \c c to
-   \c A. Finally, we label \c c as red.
+   If \c is labeled black, we remove all edges from \c c to \c B and we add the
+   edges from \c c to \c A. Finally, we label \c c as red.
 
    If \c c is already red, we check that A=B. In that case we remove all edges
    incident on \c c and we remove the vertex \c c (since it is free). On the
@@ -165,15 +166,17 @@ realize_character(const pp_instance src, const uint32_t character, operation *op
 
         op->type = 1;
         SETVAN(dst.red_black, "color", c, RED);
+        dst.root_state[character] = 1;
     }
     if (color == RED)
-        if (igraph_vector_size(&adjacent) == igraph_vector_size(&conn_comp)) {
+        if (igraph_vector_size(&adjacent) != igraph_vector_size(&conn_comp)) {
             op->type = 0;
         } else {
             igraph_delete_vertices(dst.red_black, igraph_vss_1(c));
             dst.num_species--;
             op->type = 2;
             op->removed_characters_list = g_slist_append(op->removed_characters_list, GINT_TO_POINTER(character));
+            dst.root_state[character] = -1;
         }
     return dst;
 }
@@ -436,6 +439,28 @@ START_TEST(test_read_instance_from_filename_2) {
     //    igraph_write_graph_gml(inst.red_black, stdout, 0, 0);
 }
 END_TEST
+
+START_TEST(test_read_instance_from_filename_3) {
+    const uint8_t data[5][5] = {
+        {0, 0, 0, 1, 0},
+        {0, 1, 0, 0, 0},
+        {1, 0, 1, 0, 0},
+        {1, 1, 0, 0, 0},
+        {0, 0, 0, 0, 0}
+    };
+    const uint8_t conflict[5][5] = {
+        {0, 1, 0, 0, 0},
+        {1, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0}
+    };
+    pp_instance inst = read_instance_from_filename("tests/input/read/3.txt");
+    test_matrix_pp(inst, 5, 5, data, conflict);
+    //igraph_write_graph_gml(inst.red_black, stdout, 0, 0);
+}
+END_TEST
+
 #endif
 
 /**
@@ -465,7 +490,7 @@ static void null_instance_test(pp_instance *instp) {
     ck_assert_msg(instp->conflict_label == NULL, "instp->red_black has not been freed\n");
     ck_assert_msg(instp->root_state == NULL, "instp->root_state has not been freed\n");
     ck_assert_msg(instp->species == NULL, "instp->species has not been freed\n");
-    ck_assert_msg(instp->character == NULL, "instp->characters has not been freed\n");
+    ck_assert_msg(instp->characters == NULL, "instp->characters has not been freed\n");
 }
 
 START_TEST(new_instance_1) {
@@ -541,8 +566,8 @@ destroy_instance(pp_instance *instp) {
     free(instp->character_label);
     free(instp->conflict_label);
     free(instp->root_state);
-    g_slist_free(species);
-    g_slist_free(characters);
+    g_slist_free(instp->species);
+    g_slist_free(instp->characters);
 }
 
 #ifdef TEST_EVERYTHING
@@ -561,6 +586,8 @@ free_instance(pp_instance *instp) {
     free(instp);
 }
 
+
+
 /**
    \brief managing operations: \c new_operation \c init_operation \c
    destroy_operation
@@ -578,6 +605,8 @@ START_TEST(new_operation_1) {
     ck_assert_msg(op != NULL, "op has been freed\n");
     ck_assert_msg(op->removed_species_list == NULL, "removed_species_list has not been freed\n");
     ck_assert_msg(op->removed_characters_list == NULL, "removed_characters_list has not been freed\n");
+    ck_assert_msg(op->removed_red_black_list == NULL, "removed_red_black_list has not been freed\n");
+    ck_assert_msg(op->removed_conflict_list == NULL, "removed_conflict_list has not been freed\n");
     ck_assert_int_eq(op->removed_characters_list, 0);
 }
 END_TEST
@@ -591,7 +620,9 @@ init_operation(operation *op) {
     operation temp = {
         .type = 0,
         .removed_species_list = NULL,
-        .removed_characters_list = NULL
+        .removed_characters_list = NULL,
+        .removed_red_black_list = NULL,
+        .removed_conflict_list = NULL
     };
     *op = temp;
 }
@@ -603,6 +634,10 @@ destroy_operation(operation *op) {
         g_slist_free(op->removed_species_list);
     if (op->removed_characters_list != NULL)
         g_slist_free(op->removed_characters_list);
+    if (op->removed_red_black_list != NULL)
+        g_slist_free(op->removed_red_black_list);
+    if (op->removed_conflict_list != NULL)
+        g_slist_free(op->removed_conflict_list);
     op->removed_characters_list = 0;
 }
 
@@ -614,6 +649,8 @@ START_TEST(destroy_operation_1) {
     ck_assert_msg(op != NULL, "op has been freed\n");
     ck_assert_msg(op->removed_species_list == NULL, "removed_species_list has not been freed\n");
     ck_assert_msg(op->removed_characters_list == NULL, "removed_characters_list has not been freed\n");
+    ck_assert_msg(op->removed_red_black_list == NULL, "removed_red_black_list has not been freed\n");
+    ck_assert_msg(op->removed_conflict_list == NULL, "removed_conflict_list has not been freed\n");
     ck_assert_int_eq(op->removed_characters_list, 0);
 }
 END_TEST
@@ -639,7 +676,7 @@ init_state(state_s *stp) {
         .operation = new_operation(),
         .instance = new_instance(),
         .realized_char = 0,
-        .tried_chars = NULL,
+        .tried_characters = NULL,
     };
     *stp = temp;
 }
@@ -648,8 +685,8 @@ void
 destroy_state(state_s *stp) {
     free_instance(stp->instance);
     free_operation(stp->operation);
-    if (stp->tried_chars != NULL)
-        g_slist_free(stp->tried_chars);
+    if (stp->tried_characters != NULL)
+        g_slist_free(stp->tried_characters);
 }
 
 void
@@ -657,6 +694,123 @@ free_state(state_s *stp) {
     destroy_state(stp);
     free(stp);
 }
+
+uint32_t check_state(const state_s* stp) {
+    uint32_t err = 0;
+    pp_instance* instp = stp->instance;
+    if (instp->num_species != g_slist_length(instp->species)) {
+        err += 1;
+        g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", instp->num_species, g_slist_length(instp->species));
+    }
+    if (instp->num_characters != g_slist_length(instp->characters)) {
+        err += 2;
+        g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", instp->num_characters, g_slist_length(instp->characters));
+    }
+    if (instp->num_species != sizeof(instp->species_label)/sizeof(instp->species_label[0])) {
+        err += 1;
+        g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %lu)", instp->num_species , sizeof(instp->species_label)/sizeof(instp->species_label[0]));
+    }
+    if (instp->num_species != sizeof(instp->root_state)/sizeof(instp->root_state[0])) {
+        err += 1;
+        g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %lu)", instp->num_species , sizeof(instp->root_state)/sizeof(instp->root_state[0]));
+    }
+    if (instp->num_characters != sizeof(instp->character_label)/sizeof(instp->character_label[0])) {
+        err += 1;
+        g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %lu)", instp->num_characters, sizeof(instp->character_label)/sizeof(instp->character_label[0]));
+    }
+    if (instp->num_characters != sizeof(instp->conflict_label)/sizeof(instp->conflict_label[0])) {
+        err += 1;
+        g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %lu)", instp->num_characters, sizeof(instp->conflict_label)/sizeof(instp->conflict_label[0]));
+    }
+
+
+    return err;
+}
+
+static GSList* json_array2gslist(json_t* array) {
+    GSList* list = NULL;
+    size_t index;
+    json_t *value;
+    json_array_foreach(array, index, value)
+        list = g_slist_prepend(list, GINT_TO_POINTER(json_integer_value(value)));
+    return g_slist_reverse(list);
+}
+
+
+state_s*
+read_state_from_file(char* filename) {
+    state_s* stp = new_state();
+    operation* op = new_operation();
+    pp_instance* instp = new_instance();
+    stp->instance = instp;
+    stp->operation = op;
+
+    json_t* data = json_load_file(filename, JSON_DISABLE_EOF_CHECK , NULL);
+    assert(data != NULL && "Could not parse JSON file\n");
+
+    json_t* obj = json_object_get(data, "realized_char");
+    assert(obj != NULL && "Missing realized_char\n");
+    assert(json_is_integer(obj) && "realized_char must be an integer\n");
+    stp->realized_char = json_integer_value(obj);
+
+    obj = json_object_get(data, "tried_characters");
+    assert(obj != NULL && "Missing tried_characters\n");
+    assert(json_is_array(obj) && "tried_characters must be an array\n");
+    stp->tried_characters = json_array2gslist(obj);
+
+    return stp;
+}
+
+static json_t* gslist2json_array(GSList* list) {
+    json_t* array = json_array();
+    for(;list != NULL; list = g_slist_next(list))
+        json_array_append(array, json_integer(GPOINTER_TO_INT(list->data)));
+    return array;
+}
+
+void
+write_state_to_file(char* filename, state_s* stp) {
+    json_t* data = json_object();
+    assert(!json_object_set(data, "realized_char", json_integer(stp->realized_char)));
+    assert(!json_object_set(data, "tried_characters", gslist2json_array(stp->tried_characters)));
+
+    assert(!json_dump_file(data, filename, JSON_INDENT(4) | JSON_SORT_KEYS) &&
+        "Cannot write JSON file\n");
+}
+#ifdef TEST_EVERYTHING
+START_TEST(write_json_1) {
+    state_s *stp = new_state();
+    stp->realized_char = 1;
+    write_state_to_file("tests/api/1.json", stp);
+
+    state_s *stp2 = read_state_from_file("tests/api/1.json");
+    ck_assert_int_eq(stp->realized_char, stp2->realized_char);
+}
+END_TEST
+#endif
+
+#ifdef TEST_EVERYTHING
+START_TEST(write_json_2) {
+    state_s *stp = new_state();
+    stp->realized_char = 1;
+    stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(91));
+    stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(92));
+    stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(93));
+    stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(95));
+    stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(96));
+    stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(97));
+    stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(98));
+    write_state_to_file("tests/api/2.json", stp);
+
+    state_s *stp2 = read_state_from_file("tests/api/2.json");
+    ck_assert_int_eq(stp->realized_char, stp2->realized_char);
+    for (size_t i=0; i<7; i++)
+        ck_assert_int_eq(GPOINTER_TO_INT(g_slist_nth_data(stp->tried_characters, i)),
+            GPOINTER_TO_INT(g_slist_nth_data(stp2->tried_characters, i)));
+}
+END_TEST
+#endif
+
 
 #ifdef TEST_EVERYTHING
 static Suite * perfect_phylogeny_suite(void) {
@@ -677,6 +831,10 @@ static Suite * perfect_phylogeny_suite(void) {
     tcase_add_test(tc_core, copy_instance_2);
     tcase_add_test(tc_core, new_operation_1);
     tcase_add_test(tc_core, destroy_operation_1);
+
+    tcase_add_test(tc_core, test_read_instance_from_filename_3);
+    tcase_add_test(tc_core, write_json_1);
+    tcase_add_test(tc_core, write_json_2);
 
     suite_add_tcase(s, tc_core);
 
