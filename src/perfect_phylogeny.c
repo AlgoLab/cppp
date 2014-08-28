@@ -48,9 +48,21 @@ copy_instance(pp_instance *dst, const pp_instance *src) {
     memcpy(dst->character_label, src->character_label, src->num_characters_orig * sizeof(uint32_t));
     dst->conflict_label = g_malloc(src->num_characters_orig * sizeof(uint32_t));
     memcpy(dst->conflict_label, src->conflict_label, src->num_characters_orig * sizeof(uint32_t));
+    dst->root_state = g_malloc(src->num_characters_orig * sizeof(uint8_t));
+    memcpy(dst->root_state, src->root_state, src->num_characters_orig * sizeof(uint8_t));
+    dst->species = g_slist_copy(src->species);
+    dst->characters = g_slist_copy(src->characters);
 }
 
 #ifdef TEST_EVERYTHING
+static int g_slist_cmp(GSList* l1, GSList* l2) {
+    while (uint32_t x1 = g_slist_next(l1) && uint32_t x1 = g_slist_next(l2)) {
+        if (x1 < x2) return 1;
+        if (x2 < x1) return -1;
+    }
+    if (x1 == NULL && x2 == NULL) return 0;
+    return (x1 == NULL) ? 1 : -1;
+}
 static uint32_t instance_cmp(pp_instance *instp1, pp_instance *instp2) {
     uint32_t result = 0;
     result += (instp1->num_characters != instp2->num_characters) ? 0x0001 : 0;
@@ -61,6 +73,12 @@ static uint32_t instance_cmp(pp_instance *instp1, pp_instance *instp2) {
         (memcmp(instp1->character_label, instp2->character_label, sizeof(*(instp1->character_label))) != 0) ? 0x0008 : 0;
     result += instp1->conflict_label == NULL || instp2->conflict_label == NULL ||
         (memcmp(instp1->conflict_label, instp2->conflict_label, sizeof(*(instp1->conflict_label))) != 0) ? 0x0010 : 0;
+    result += instp1->root_state == NULL || instp2->root_state == NULL ||
+        (memcmp(instp1->root_state, instp2->root_state, sizeof(*(instp1->root_state))) != 0) ? 0x0011 : 0;
+    result += instp1->species == NULL || instp2->species == NULL ||
+        (g_slist_cmp(instp1->species, instp2->species) != 0) ? 0x0010 : 0;
+    result += instp1->characters == NULL || instp2->characters == NULL ||
+        (g_slist_cmp(instp1->characters, instp2->characters) != 0) ? 0x0010 : 0;
     return result;
 }
 START_TEST(copy_instance_1) {
@@ -258,6 +276,7 @@ read_instance_from_filename(const char *filename) {
     inst.num_species_orig = num_species;
     inst.num_characters_orig = num_characters;
     inst.matrix = g_malloc(num_species * num_characters * sizeof(uint8_t));
+    inst.root_state = g_malloc0(num_species * sizeof(uint8_t));
     for(uint32_t s=0; s < num_species; s++)
         for(uint32_t c=0; c < num_characters; c++) {
             uint8_t x;
@@ -444,6 +463,9 @@ static void null_instance_test(pp_instance *instp) {
     ck_assert_msg(instp->species_label == NULL, "instp->red_black has not been freed\n");
     ck_assert_msg(instp->character_label == NULL, "instp->red_black has not been freed\n");
     ck_assert_msg(instp->conflict_label == NULL, "instp->red_black has not been freed\n");
+    ck_assert_msg(instp->root_state == NULL, "instp->root_state has not been freed\n");
+    ck_assert_msg(instp->species == NULL, "instp->species has not been freed\n");
+    ck_assert_msg(instp->character == NULL, "instp->characters has not been freed\n");
 }
 
 START_TEST(new_instance_1) {
@@ -488,6 +510,9 @@ void str_instance(const pp_instance* instp, char* str) {
             "  species_label: %p\n"
             "  character_label: %p\n"
             "  conflict_label: %p\n"
+            "  root_state: %p\n"
+            "  species: %p\n"
+            "  characters: %p\n"
             "}",
             instp->num_species,
             instp->num_characters,
@@ -498,7 +523,11 @@ void str_instance(const pp_instance* instp, char* str) {
             (void *) instp->matrix,
             (void *) instp->species_label,
             (void *) instp->character_label,
-            (void *) instp->conflict_label));
+            (void *) instp->conflict_label,
+            (void *) instp->root_state,
+            (void *) instp->species,
+            (void *) instp->characters
+            ));
 }
 
 void
@@ -511,6 +540,9 @@ destroy_instance(pp_instance *instp) {
     free(instp->species_label);
     free(instp->character_label);
     free(instp->conflict_label);
+    free(instp->root_state);
+    g_slist_free(species);
+    g_slist_free(characters);
 }
 
 #ifdef TEST_EVERYTHING
@@ -593,13 +625,12 @@ free_operation(operation *op) {
     free(op);
 }
 
-state_s *
+state_s*
 new_state(void) {
     state_s *stp = g_malloc0(sizeof(state_s));
     init_state(stp);
     return stp;
 }
-
 
 void
 init_state(state_s *stp) {

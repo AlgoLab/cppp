@@ -67,20 +67,32 @@
 
    Similarly, \c conflict_label maps each original character to the id of the
    corresponding vertex of the conflict graph.
-   If the character is not in the current set, than the array has value \c UINT32_MAX or \c -1.
+   If the character is not in the current set, than the array has value \c
+   UINT32_MAX or \c -1.
+
+   The \c root_state gives the states of the root for each original species. The
+   species that are not in the current instance have value \c UINT32_MAX or \c
+   -1.
+
+   \c species and \c characters are the list of current species and characters
+   respectively.
+
 
 */
 typedef struct pp_instance {
-uint32_t num_species;
-uint32_t num_characters;
-uint32_t num_species_orig;
-uint32_t num_characters_orig;
-igraph_t *red_black;
-igraph_t *conflict;
-uint8_t  *matrix;
-uint32_t *species_label;
-uint32_t *character_label;
-uint32_t *conflict_label;
+    uint32_t num_species;
+    uint32_t num_characters;
+    uint32_t num_species_orig;
+    uint32_t num_characters_orig;
+    igraph_t *red_black;
+    igraph_t *conflict;
+    uint8_t  *matrix;
+    uint32_t *species_label;
+    uint32_t *character_label;
+    uint32_t *conflict_label;
+    uint8_t  *root_state;
+    GSList   *species;
+    GSList   *characters;
 } pp_instance;
 
 /**
@@ -114,8 +126,7 @@ copy_instance(pp_instance *dst, const pp_instance *src);
 
 /**
    \struct operation
-
-   It describes an operation that has been, or can be, applied to an instance.
+   \brief an operation that has been, or can be, applied to an instance.
 
    The \c type can take the following values:
 
@@ -125,9 +136,9 @@ copy_instance(pp_instance *dst, const pp_instance *src);
    * \c 3 => null characters/species have been removed
    */
 typedef struct operation {
-uint8_t type;
-GSList *removed_species_list;
-GSList *removed_characters_list;
+    uint8_t type;
+    GSList *removed_species_list;
+    GSList *removed_characters_list;
 } operation;
 
 /**
@@ -205,6 +216,9 @@ matrix_set_value(pp_instance *instp, uint32_t species, uint32_t character, uint8
 
 /**
    \struct state_s
+   \brief an instance and the
+   possible completions that have
+   been already tried
 
    It stores everything that is necessary to construct the final phylogeny and
    to determine the next step of the strategy.
@@ -218,7 +232,7 @@ typedef struct state_s {
     operation *operation;
     pp_instance *instance;
     uint32_t realized_char;
-    GSList *tried_chars;
+    GSList *tried_characters;
 } state_s;
 
 /**
@@ -259,8 +273,8 @@ pp_instance
 instance_cleanup(const pp_instance src, operation *op);
 
 /* From 21st century C */
-#define Sasprintf(write_to,  ...) {                                     \
-                                   char *tmp_string_for_extend = write_to; \
-                                   asprintf(&(write_to), __VA_ARGS__);  \
-                                   free(tmp_string_for_extend);         \
-                                   }
+#define Sasprintf(write_to,  ...) {             \
+        char *tmp_string_for_extend = write_to; \
+        asprintf(&(write_to), __VA_ARGS__);     \
+        free(tmp_string_for_extend);            \
+    }
