@@ -735,6 +735,46 @@ static GSList* json_array2gslist(json_t* array) {
     return g_slist_reverse(list);
 }
 
+static uint32_t* json_array2array(json_t* array) {
+    size_t index;
+    json_t *value;
+    uint32_t* new = GC_MALLOC(json_array_size(array) * sizeof(uint32_t));
+    assert(new != NULL);
+    json_array_foreach(array, index, value) {
+        new[index] = json_integer_value(value);
+    }
+    return new;
+}
+
+static uint32_t json_get_integer(const json_t* root, const char* field) {
+    json_t* obj = json_object_get(root, field);
+    assert(obj != NULL && "Missing JSON field\n");
+    assert(json_is_integer(obj) && "value must be an integer\n");
+    return json_integer_value(obj);
+}
+
+static char* json_get_string(json_t* root, char* field) {
+    json_t* obj = json_object_get(root, field);
+    assert(obj != NULL && "Missing JSON field\n");
+    assert(json_is_string(obj) && "value must be an integer\n");
+    char* dst = GC_MALLOC(sizeof(char) * 300); // json_string_length
+    dst = strdup(json_string_value(obj));
+    return dst;
+}
+
+static uint32_t* json_get_array(json_t* root, char* field) {
+    json_t* obj = json_object_get(root, field);
+    assert(obj != NULL && "Missing JSON field\n");
+    assert(json_is_array(obj) && "field must be an array\n");
+    return json_array2array(obj);
+}
+
+static GSList* json_get_list(json_t* root, char* field) {
+    json_t* obj = json_object_get(root, field);
+    assert(obj != NULL && "Missing JSON field\n");
+    assert(json_is_array(obj) && "field must be an array\n");
+    return json_array2gslist(obj);
+}
 
 state_s*
 read_state_from_file(char* filename) {
@@ -748,16 +788,46 @@ read_state_from_file(char* filename) {
     json_t* data = json_load_file(filename, JSON_DISABLE_EOF_CHECK , NULL);
     assert(data != NULL && "Could not parse JSON file\n");
 
-    json_t* obj = json_object_get(data, "realized_char");
-    assert(obj != NULL && "Missing realized_char\n");
-    assert(json_is_integer(obj) && "realized_char must be an integer\n");
-    stp->realized_char = json_integer_value(obj);
+    stp->realized_char = json_get_integer(data, "realized_char");
+    stp->tried_characters = json_get_list(data, "tried_characters");
 
-    obj = json_object_get(data, "tried_characters");
-    assert(obj != NULL && "Missing tried_characters\n");
-    assert(json_is_array(obj) && "tried_characters must be an array\n");
-    stp->tried_characters = json_array2gslist(obj);
+    json_t* instpj = json_object_get(data, "instance");
+    if (instpj != NULL) {
+        stp->instance->num_species = json_get_integer(instpj, "num_species");
+        stp->instance->num_characters = json_get_integer(instpj, "num_characters");
+        stp->instance->num_species_orig = json_get_integer(instpj, "num_species_orig");
+        stp->instance->num_characters_orig = json_get_integer(instpj, "num_characters_orig");
+        stp->instance->species_label = json_get_array(instpj, "species_label");
+        stp->instance->character_label = json_get_array(instpj, "character_label");
+        stp->instance->conflict_label = json_get_array(instpj, "conflict_label");
+        stp->instance->root_state = json_get_array(instpj, "root_state");
+        stp->instance->species = json_get_list(instpj, "species");
+        stp->instance->characters = json_get_list(instpj, "characters");
 
+        // Graphs
+        FILE* fp;
+        stp->instance->red_black = GC_MALLOC(sizeof(igraph_t));
+        fp = fopen(json_get_string(instpj, "red_black_file"), "r");
+        assert(fp != NULL && "Cannot open file\n");
+        igraph_read_graph_graphml(stp->instance->red_black, fp, 0);
+        fclose(fp);
+
+        stp->instance->conflict = GC_MALLOC(sizeof(igraph_t));
+        fp = fopen(json_get_string(instpj, "conflict_file"), "r");
+        assert(fp != NULL && "Cannot open file\n");
+        igraph_read_graph_graphml(stp->instance->conflict, fp, 0);
+        fclose(fp);
+    }
+
+    /* operation */
+    json_t* opj = json_object_get(data, "operation");
+    if (opj != NULL) {
+        stp->operation->type = json_get_integer(opj, "type");
+        stp->operation->removed_species_list = json_get_list(opj, "removed_species_list");
+        stp->operation->removed_characters_list = json_get_list(opj, "removed_characters_list");
+        stp->operation->removed_red_black_list = json_get_list(opj, "removed_red_black_list");
+        stp->operation->removed_conflict_list = json_get_list(opj, "removed_conflict_list");
+    }
     return stp;
 }
 
@@ -768,15 +838,77 @@ static json_t* gslist2json_array(GSList* list) {
     return array;
 }
 
+static json_t* array2json_array(uint32_t* p, size_t size) {
+    json_t* array = json_array();
+    for(size_t i=0; i<size; i++)
+        json_array_append(array, json_integer(p[i]));
+    return array;
+}
+
+/**
+   Since we use JSON as exchange format, we first have to build the JSON object
+   representing the state.
+
+   Since the igraph library provides the  \c igraph_write_graph_graphml
+   and \c igraph_read_graph_graphml functions that read/write a graphml file (an
+   XML that is quite readable), instead of encoding the graphs in JSON, we
+   include only the filenames and we export the graphs in GraphML
+*/
 void
 write_state_to_file(char* filename, state_s* stp) {
     json_set_alloc_funcs(GC_malloc, GC_free);
     json_t* data = json_object();
     assert(!json_object_set(data, "realized_char", json_integer(stp->realized_char)));
     assert(!json_object_set(data, "tried_characters", gslist2json_array(stp->tried_characters)));
+    json_t* instp = json_object();
+    json_t* op = json_object();
+    assert(!json_object_set(data, "instance", instp));
 
-    assert(!json_dump_file(data, filename, JSON_INDENT(4) | JSON_SORT_KEYS) &&
-        "Cannot write JSON file\n");
+    /* pp_instance */
+    assert(!json_object_set(instp, "num_species", json_integer(stp->instance->num_species)));
+    assert(!json_object_set(instp, "num_characters", json_integer(stp->instance->num_characters)));
+    assert(!json_object_set(instp, "num_species_orig", json_integer(stp->instance->num_species_orig)));
+    assert(!json_object_set(instp, "num_characters_orig", json_integer(stp->instance->num_characters_orig)));
+
+    char* g_filename = NULL;
+    FILE* fp = NULL;
+    if (stp->instance->red_black != NULL) {
+        asprintf(&g_filename, "%s-redblack.graphml", filename);
+        fp = fopen(g_filename, "w");
+        assert(fp != NULL);
+        assert(!igraph_write_graph_graphml(stp->instance->red_black, fp));
+        fclose(fp);
+        assert(!json_object_set(instp, "red_black_file", json_string(g_filename)));
+    }
+
+    if (stp->instance->conflict != NULL) {
+        asprintf(&g_filename, "%s-conflict.graphml", filename);
+        fp = fopen(g_filename, "w");
+        assert(!igraph_write_graph_graphml(stp->instance->conflict, fp));
+        fclose(fp);
+        assert(!json_object_set(instp, "conflict_file", json_string(g_filename)));
+    }
+    free(g_filename);
+
+    assert(!json_object_set(instp, "matrix", array2json_array(stp->instance->matrix, stp->instance->num_species * stp->instance->num_characters)));
+    assert(!json_object_set(instp, "species_label", array2json_array(stp->instance->species_label, stp->instance->num_species)));
+    assert(!json_object_set(instp, "character_label", array2json_array(stp->instance->character_label, stp->instance->num_characters)));
+    assert(!json_object_set(instp, "conflict_label", array2json_array(stp->instance->conflict_label, stp->instance->num_characters)));
+    assert(!json_object_set(instp, "root_state", array2json_array(stp->instance->root_state, stp->instance->num_species)));
+    assert(!json_object_set(instp, "species", gslist2json_array(stp->instance->species)));
+    assert(!json_object_set(instp, "characters", gslist2json_array(stp->instance->characters)));
+
+    /* operation */
+    if (stp->operation != NULL) {
+        assert(!json_object_set(op, "type", json_integer(stp->operation->type)));
+        assert(!json_object_set(op, "removed_species_list", gslist2json_array(stp->operation->removed_species_list)));
+        assert(!json_object_set(op, "removed_characters_list", gslist2json_array(stp->operation->removed_characters_list)));
+        assert(!json_object_set(op, "removed_red_black_list", gslist2json_array(stp->operation->removed_red_black_list)));
+        assert(!json_object_set(op, "removed_conflict_list", gslist2json_array(stp->operation->removed_conflict_list)));
+        assert(!json_object_set(data, "operation", op));
+    }
+
+    assert(!json_dump_file(data, filename, JSON_INDENT(4) | JSON_SORT_KEYS) && "Cannot write JSON file\n");
 }
 #ifdef TEST_EVERYTHING
 START_TEST(write_json_1) {
@@ -789,6 +921,23 @@ START_TEST(write_json_1) {
 }
 END_TEST
 #endif
+
+void first_state(state_s* stp, pp_instance *instp) {
+    if(stp->instance != instp) {
+        stp->instance = new_instance();
+        copy_instance(stp->instance, instp);
+    }
+    stp->operation = new_operation();
+    stp->realized_char = 0;
+    stp->tried_characters = NULL;
+
+    stp->operation->type = 0;
+    stp->operation->removed_species_list = NULL;
+    stp->operation->removed_characters_list = NULL;
+    stp->operation->removed_red_black_list = NULL;
+    stp->operation->removed_conflict_list = NULL;
+}
+
 
 #ifdef TEST_EVERYTHING
 START_TEST(write_json_2) {
@@ -808,6 +957,19 @@ START_TEST(write_json_2) {
     for (size_t i=0; i<7; i++)
         ck_assert_int_eq(GPOINTER_TO_INT(g_slist_nth_data(stp->tried_characters, i)),
             GPOINTER_TO_INT(g_slist_nth_data(stp2->tried_characters, i)));
+}
+END_TEST
+#endif
+
+#ifdef TEST_EVERYTHING
+START_TEST(write_json_3) {
+    state_s *stp = new_state();
+    stp->instance = new_instance();
+    *stp->instance = read_instance_from_filename("tests/input/read/3.txt");
+    write_state_to_file("tests/api/3.json", stp);
+
+    state_s *stp2 = read_state_from_file("tests/api/3.json");
+    ck_assert_int_eq(stp->realized_char, stp2->realized_char);
 }
 END_TEST
 #endif
@@ -834,8 +996,9 @@ static Suite * perfect_phylogeny_suite(void) {
     tcase_add_test(tc_core, destroy_operation_1);
 
     tcase_add_test(tc_core, test_read_instance_from_filename_3);
-    tcase_add_test(tc_core, write_json_1);
-    tcase_add_test(tc_core, write_json_2);
+    /* tcase_add_test(tc_core, write_json_1); */
+    /* tcase_add_test(tc_core, write_json_2); */
+    tcase_add_test(tc_core, write_json_3);
 
     suite_add_tcase(s, tc_core);
 

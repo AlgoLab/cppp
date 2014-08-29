@@ -37,6 +37,9 @@
 */
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#include <libgen.h>     /*  for dirname(3) */
+#undef basename         /*  (snide comment about libgen.h removed) */
+#include <string.h>     /*  for basename(3) (GNU version) and strcmp(3) */
 #endif
 #include <stdlib.h>
 #include <stdio.h>
@@ -267,6 +270,14 @@ free_state(state_s *stp);
    \return 0 if all check have been passed, otherwise an error code larger than 0.
 */
 uint32_t check_state(const state_s* stp);
+
+/**
+   \brief creates the initial state corresponding to an instance
+
+   It assumes that the input state \c stp has already been allocated.
+   The function updates the state so that it is consistent with the input instance.
+*/
+void first_state(state_s* stp, pp_instance *instp);
 
 
 /**
