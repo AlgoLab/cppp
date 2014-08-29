@@ -51,7 +51,6 @@ int main(int argc, char **argv) {
     for(uint8_t i=0; i <= 2*temp.num_species+temp.num_characters; i++)
         destroy_state(states+i);
 
-    end_logging();
     cmdline_parser_free(&args_info);
     return 0;
 }
