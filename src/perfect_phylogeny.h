@@ -48,6 +48,7 @@
 #include <inttypes.h>
 #include <glib.h>
 #include <jansson.h>
+#include <gc.h>
 
 #define SPECIES 0
 #define BLACK 1

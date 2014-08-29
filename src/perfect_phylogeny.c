@@ -739,6 +739,7 @@ static GSList* json_array2gslist(json_t* array) {
 
 state_s*
 read_state_from_file(char* filename) {
+    json_set_alloc_funcs(GC_malloc, GC_free);
     state_s* stp = new_state();
     operation* op = new_operation();
     pp_instance* instp = new_instance();
@@ -770,6 +771,7 @@ static json_t* gslist2json_array(GSList* list) {
 
 void
 write_state_to_file(char* filename, state_s* stp) {
+    json_set_alloc_funcs(GC_malloc, GC_free);
     json_t* data = json_object();
     assert(!json_object_set(data, "realized_char", json_integer(stp->realized_char)));
     assert(!json_object_set(data, "tried_characters", gslist2json_array(stp->tried_characters)));
