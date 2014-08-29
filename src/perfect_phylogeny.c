@@ -31,8 +31,8 @@
 
 void
 copy_instance(pp_instance *dst, const pp_instance *src) {
-    if (dst->red_black == NULL) dst->red_black = g_malloc0(sizeof(igraph_t));
-    if (dst->conflict == NULL)  dst->conflict  = g_malloc0(sizeof(igraph_t));
+    if (dst->red_black == NULL) dst->red_black = GC_MALLOC(sizeof(igraph_t));
+    if (dst->conflict == NULL)  dst->conflict  = GC_MALLOC(sizeof(igraph_t));
 
     dst->num_species = src->num_species;
     dst->num_characters = src->num_characters;
@@ -42,13 +42,13 @@ copy_instance(pp_instance *dst, const pp_instance *src) {
     igraph_copy(dst->red_black, src->red_black);
     igraph_copy(dst->conflict, src->conflict);
     dst->matrix = src->matrix;
-    dst->species_label = g_malloc(src->num_species_orig * sizeof(uint32_t));
+    dst->species_label = GC_MALLOC(src->num_species_orig * sizeof(uint32_t));
     memcpy(dst->species_label, src->species_label, src->num_species_orig * sizeof(uint32_t));
-    dst->character_label = g_malloc(src->num_characters_orig * sizeof(uint32_t));
+    dst->character_label = GC_MALLOC(src->num_characters_orig * sizeof(uint32_t));
     memcpy(dst->character_label, src->character_label, src->num_characters_orig * sizeof(uint32_t));
-    dst->conflict_label = g_malloc(src->num_characters_orig * sizeof(uint32_t));
+    dst->conflict_label = GC_MALLOC(src->num_characters_orig * sizeof(uint32_t));
     memcpy(dst->conflict_label, src->conflict_label, src->num_characters_orig * sizeof(uint32_t));
-    dst->root_state = g_malloc(src->num_characters_orig * sizeof(uint32_t));
+    dst->root_state = GC_MALLOC(src->num_characters_orig * sizeof(uint32_t));
     memcpy(dst->root_state, src->root_state, src->num_characters_orig * sizeof(uint32_t));
     dst->species = g_slist_copy(src->species);
     dst->characters = g_slist_copy(src->characters);
@@ -212,12 +212,12 @@ static void
 matrix2graphs(pp_instance *instp) {
     assert(instp->matrix != NULL);
 
-    instp->species_label = g_malloc(instp->num_species * sizeof(uint32_t));
-    instp->character_label = g_malloc(instp->num_characters * sizeof(uint32_t));
-    instp->conflict_label = g_malloc(instp->num_species * sizeof(uint32_t));
+    instp->species_label = GC_MALLOC(instp->num_species * sizeof(uint32_t));
+    instp->character_label = GC_MALLOC(instp->num_characters * sizeof(uint32_t));
+    instp->conflict_label = GC_MALLOC(instp->num_species * sizeof(uint32_t));
 
 /* We start with the red-black graph */
-    instp->red_black = g_malloc(sizeof(igraph_t));
+    instp->red_black = GC_MALLOC(sizeof(igraph_t));
     igraph_empty_attrs(instp->red_black, instp->num_species+instp->num_characters, IGRAPH_UNDIRECTED, 0);
 
     for(uint32_t s=0; s<instp->num_species; s++) {
@@ -237,7 +237,7 @@ matrix2graphs(pp_instance *instp) {
                 igraph_add_edge(instp->red_black, s, c+instp->num_species);
 
     /* Now we compute the conflict graph */
-    instp->conflict = g_malloc(sizeof(igraph_t));
+    instp->conflict = GC_MALLOC(sizeof(igraph_t));
     igraph_empty(instp->conflict, instp->num_characters, IGRAPH_UNDIRECTED);
     // TODO
     for(uint32_t c1=0; c1<instp->num_characters; c1++)
@@ -278,8 +278,8 @@ read_instance_from_filename(const char *filename) {
     inst.num_characters = num_characters;
     inst.num_species_orig = num_species;
     inst.num_characters_orig = num_characters;
-    inst.matrix = g_malloc(num_species * num_characters * sizeof(uint32_t));
-    inst.root_state = g_malloc0(num_species * sizeof(uint32_t));
+    inst.matrix = GC_MALLOC(num_species * num_characters * sizeof(uint32_t));
+    inst.root_state = GC_MALLOC(num_species * sizeof(uint32_t));
     for(uint32_t s=0; s < num_species; s++)
         for(uint32_t c=0; c < num_characters; c++) {
             uint32_t x;
@@ -472,7 +472,7 @@ END_TEST
 */
 pp_instance *
 new_instance(void) {
-    pp_instance *instp = g_malloc0(sizeof(pp_instance));
+    pp_instance *instp = GC_MALLOC(sizeof(pp_instance));
     return instp;
 }
 
@@ -504,14 +504,14 @@ END_TEST
 /* void */
 /* init_instance(pp_instance * instp) { */
 /*     assert(instp != NULL); */
-/*     instp->conflict = g_malloc(sizeof(igraph_t)); */
+/*     instp->conflict = GC_MALLOC(sizeof(igraph_t)); */
 /*     igraph_empty(instp->conflict, instp->num_characters, IGRAPH_UNDIRECTED); */
-/*     instp->red_black = = g_malloc(sizeof(igraph_t)); */
+/*     instp->red_black = = GC_MALLOC(sizeof(igraph_t)); */
 /*     igraph_empty_attrs(instp->red_black, instp->num_species + instp->num_characters, IGRAPH_UNDIRECTED); */
 /*     instp->matrix =  NULL; */
-/*     instp->species_label = g_malloc(instp->num_species * sizeof(uint32_t)); */
-/*     instp->character_label = g_malloc(instp->num_characters * sizeof(uint32_t)); */
-/*     instp->conflict_label = g_malloc(instp->num_species * sizeof(uint32_t)); */
+/*     instp->species_label = GC_MALLOC(instp->num_species * sizeof(uint32_t)); */
+/*     instp->character_label = GC_MALLOC(instp->num_characters * sizeof(uint32_t)); */
+/*     instp->conflict_label = GC_MALLOC(instp->num_species * sizeof(uint32_t)); */
 /* } */
 
 
@@ -558,33 +558,33 @@ void str_instance(const pp_instance* instp, char* str) {
 
 void
 destroy_instance(pp_instance *instp) {
-    if (instp->conflict != NULL)
-        igraph_destroy(instp->conflict);
-    if (instp->red_black != NULL)
-        igraph_destroy(instp->red_black);
-    free(instp->matrix);
-    free(instp->species_label);
-    free(instp->character_label);
-    free(instp->conflict_label);
-    free(instp->root_state);
-    g_slist_free(instp->species);
-    g_slist_free(instp->characters);
+    /* if (instp->conflict != NULL) */
+    /*     igraph_destroy(instp->conflict); */
+    /* if (instp->red_black != NULL) */
+    /*     igraph_destroy(instp->red_black); */
+    /* free(instp->matrix); */
+    /* free(instp->species_label); */
+    /* free(instp->character_label); */
+    /* free(instp->conflict_label); */
+    /* free(instp->root_state); */
+    /* g_slist_free(instp->species); */
+    /* g_slist_free(instp->characters); */
 }
 
 #ifdef TEST_EVERYTHING
-START_TEST(destroy_instance_1) {
-    pp_instance *instp = new_instance();
-    destroy_instance(instp);
-    null_instance_test(instp);
-}
-END_TEST
+/* START_TEST(destroy_instance_1) { */
+/*     pp_instance *instp = new_instance(); */
+/*     destroy_instance(instp); */
+/*     null_instance_test(instp); */
+/* } */
+/* END_TEST */
 #endif
 
 
 void
 free_instance(pp_instance *instp) {
-    destroy_instance(instp);
-    free(instp);
+    /* destroy_instance(instp); */
+    /* free(instp); */
 }
 
 
@@ -595,7 +595,7 @@ free_instance(pp_instance *instp) {
 */
 operation *
 new_operation(void) {
-    operation *op = g_malloc0(sizeof(operation));
+    operation *op = GC_MALLOC(sizeof(operation));
     init_operation(op);
     return op;
 }
@@ -631,41 +631,41 @@ init_operation(operation *op) {
 
 void
 destroy_operation(operation *op) {
-    if (op->removed_species_list != NULL)
-        g_slist_free(op->removed_species_list);
-    if (op->removed_characters_list != NULL)
-        g_slist_free(op->removed_characters_list);
-    if (op->removed_red_black_list != NULL)
-        g_slist_free(op->removed_red_black_list);
-    if (op->removed_conflict_list != NULL)
-        g_slist_free(op->removed_conflict_list);
-    op->removed_characters_list = 0;
+    /* if (op->removed_species_list != NULL) */
+    /*     g_slist_free(op->removed_species_list); */
+    /* if (op->removed_characters_list != NULL) */
+    /*     g_slist_free(op->removed_characters_list); */
+    /* if (op->removed_red_black_list != NULL) */
+    /*     g_slist_free(op->removed_red_black_list); */
+    /* if (op->removed_conflict_list != NULL) */
+    /*     g_slist_free(op->removed_conflict_list); */
+    /* op->removed_characters_list = 0; */
 }
 
 
 #ifdef TEST_EVERYTHING
-START_TEST(destroy_operation_1) {
-    operation *op = new_operation();
-    destroy_operation(op);
-    ck_assert_msg(op != NULL, "op has been freed\n");
-    ck_assert_msg(op->removed_species_list == NULL, "removed_species_list has not been freed\n");
-    ck_assert_msg(op->removed_characters_list == NULL, "removed_characters_list has not been freed\n");
-    ck_assert_msg(op->removed_red_black_list == NULL, "removed_red_black_list has not been freed\n");
-    ck_assert_msg(op->removed_conflict_list == NULL, "removed_conflict_list has not been freed\n");
-    ck_assert_int_eq(op->removed_characters_list, 0);
-}
-END_TEST
+/* START_TEST(destroy_operation_1) { */
+/*     operation *op = new_operation(); */
+/*     destroy_operation(op); */
+/*     ck_assert_msg(op != NULL, "op has been freed\n"); */
+/*     ck_assert_msg(op->removed_species_list == NULL, "removed_species_list has not been freed\n"); */
+/*     ck_assert_msg(op->removed_characters_list == NULL, "removed_characters_list has not been freed\n"); */
+/*     ck_assert_msg(op->removed_red_black_list == NULL, "removed_red_black_list has not been freed\n"); */
+/*     ck_assert_msg(op->removed_conflict_list == NULL, "removed_conflict_list has not been freed\n"); */
+/*     ck_assert_int_eq(op->removed_characters_list, 0); */
+/* } */
+/* END_TEST */
 #endif
 
 void
 free_operation(operation *op) {
-    destroy_operation(op);
-    free(op);
+    /* destroy_operation(op); */
+    /* free(op); */
 }
 
 state_s*
 new_state(void) {
-    state_s *stp = g_malloc0(sizeof(state_s));
+    state_s *stp = GC_MALLOC(sizeof(state_s));
     init_state(stp);
     return stp;
 }
@@ -684,16 +684,16 @@ init_state(state_s *stp) {
 
 void
 destroy_state(state_s *stp) {
-    free_instance(stp->instance);
-    free_operation(stp->operation);
-    if (stp->tried_characters != NULL)
-        g_slist_free(stp->tried_characters);
+    /* free_instance(stp->instance); */
+    /* free_operation(stp->operation); */
+    /* if (stp->tried_characters != NULL) */
+    /*     g_slist_free(stp->tried_characters); */
 }
 
 void
 free_state(state_s *stp) {
-    destroy_state(stp);
-    free(stp);
+    /* destroy_state(stp); */
+    /* free(stp); */
 }
 
 uint32_t check_state(const state_s* stp) {
@@ -911,15 +911,15 @@ write_state_to_file(char* filename, state_s* stp) {
     assert(!json_dump_file(data, filename, JSON_INDENT(4) | JSON_SORT_KEYS) && "Cannot write JSON file\n");
 }
 #ifdef TEST_EVERYTHING
-START_TEST(write_json_1) {
-    state_s *stp = new_state();
-    stp->realized_char = 1;
-    write_state_to_file("tests/api/1.json", stp);
+/* START_TEST(write_json_1) { */
+/*     state_s *stp = new_state(); */
+/*     stp->realized_char = 1; */
+/*     write_state_to_file("tests/api/1.json", stp); */
 
-    state_s *stp2 = read_state_from_file("tests/api/1.json");
-    ck_assert_int_eq(stp->realized_char, stp2->realized_char);
-}
-END_TEST
+/*     state_s *stp2 = read_state_from_file("tests/api/1.json"); */
+/*     ck_assert_int_eq(stp->realized_char, stp2->realized_char); */
+/* } */
+/* END_TEST */
 #endif
 
 void first_state(state_s* stp, pp_instance *instp) {
@@ -940,25 +940,25 @@ void first_state(state_s* stp, pp_instance *instp) {
 
 
 #ifdef TEST_EVERYTHING
-START_TEST(write_json_2) {
-    state_s *stp = new_state();
-    stp->realized_char = 1;
-    stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(91));
-    stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(92));
-    stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(93));
-    stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(95));
-    stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(96));
-    stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(97));
-    stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(98));
-    write_state_to_file("tests/api/2.json", stp);
+/* START_TEST(write_json_2) { */
+/*     state_s *stp = new_state(); */
+/*     stp->realized_char = 1; */
+/*     stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(91)); */
+/*     stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(92)); */
+/*     stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(93)); */
+/*     stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(95)); */
+/*     stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(96)); */
+/*     stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(97)); */
+/*     stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(98)); */
+/*     write_state_to_file("tests/api/2.json", stp); */
 
-    state_s *stp2 = read_state_from_file("tests/api/2.json");
-    ck_assert_int_eq(stp->realized_char, stp2->realized_char);
-    for (size_t i=0; i<7; i++)
-        ck_assert_int_eq(GPOINTER_TO_INT(g_slist_nth_data(stp->tried_characters, i)),
-            GPOINTER_TO_INT(g_slist_nth_data(stp2->tried_characters, i)));
-}
-END_TEST
+/*     state_s *stp2 = read_state_from_file("tests/api/2.json"); */
+/*     ck_assert_int_eq(stp->realized_char, stp2->realized_char); */
+/*     for (size_t i=0; i<7; i++) */
+/*         ck_assert_int_eq(GPOINTER_TO_INT(g_slist_nth_data(stp->tried_characters, i)), */
+/*             GPOINTER_TO_INT(g_slist_nth_data(stp2->tried_characters, i))); */
+/* } */
+/* END_TEST */
 #endif
 
 #ifdef TEST_EVERYTHING
@@ -989,11 +989,11 @@ static Suite * perfect_phylogeny_suite(void) {
     tcase_add_test(tc_core, test_read_instance_from_filename_1);
     tcase_add_test(tc_core, test_read_instance_from_filename_2);
     tcase_add_test(tc_core, new_instance_1);
-    tcase_add_test(tc_core, destroy_instance_1);
+    /* tcase_add_test(tc_core, destroy_instance_1); */
     tcase_add_test(tc_core, copy_instance_1);
     tcase_add_test(tc_core, copy_instance_2);
     tcase_add_test(tc_core, new_operation_1);
-    tcase_add_test(tc_core, destroy_operation_1);
+    /* tcase_add_test(tc_core, destroy_operation_1); */
 
     tcase_add_test(tc_core, test_read_instance_from_filename_3);
     /* tcase_add_test(tc_core, write_json_1); */
