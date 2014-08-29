@@ -708,23 +708,21 @@ uint32_t check_state(const state_s* stp) {
         g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", instp->num_characters, g_slist_length(instp->characters));
     }
     if (instp->num_species != sizeof(instp->species_label)/sizeof(instp->species_label[0])) {
-        err += 1;
+        err += 4;
         g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %lu)", instp->num_species , sizeof(instp->species_label)/sizeof(instp->species_label[0]));
     }
     if (instp->num_species != sizeof(instp->root_state)/sizeof(instp->root_state[0])) {
-        err += 1;
+        err += 8;
         g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %lu)", instp->num_species , sizeof(instp->root_state)/sizeof(instp->root_state[0]));
     }
     if (instp->num_characters != sizeof(instp->character_label)/sizeof(instp->character_label[0])) {
-        err += 1;
+        err += 16;
         g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %lu)", instp->num_characters, sizeof(instp->character_label)/sizeof(instp->character_label[0]));
     }
     if (instp->num_characters != sizeof(instp->conflict_label)/sizeof(instp->conflict_label[0])) {
-        err += 1;
+        err += 32;
         g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %lu)", instp->num_characters, sizeof(instp->conflict_label)/sizeof(instp->conflict_label[0]));
     }
-
-
     return err;
 }
 
