@@ -48,8 +48,8 @@ copy_instance(pp_instance *dst, const pp_instance *src) {
     memcpy(dst->character_label, src->character_label, src->num_characters_orig * sizeof(uint32_t));
     dst->conflict_label = g_malloc(src->num_characters_orig * sizeof(uint32_t));
     memcpy(dst->conflict_label, src->conflict_label, src->num_characters_orig * sizeof(uint32_t));
-    dst->root_state = g_malloc(src->num_characters_orig * sizeof(uint8_t));
-    memcpy(dst->root_state, src->root_state, src->num_characters_orig * sizeof(uint8_t));
+    dst->root_state = g_malloc(src->num_characters_orig * sizeof(uint32_t));
+    memcpy(dst->root_state, src->root_state, src->num_characters_orig * sizeof(uint32_t));
     dst->species = g_slist_copy(src->species);
     dst->characters = g_slist_copy(src->characters);
 }
@@ -242,7 +242,7 @@ matrix2graphs(pp_instance *instp) {
     // TODO
     for(uint32_t c1=0; c1<instp->num_characters; c1++)
         for(uint32_t c2=c1+1; c2<instp->num_characters; c2++) {
-            uint8_t states[2][2] = { {0, 0}, {0, 0} };
+            uint32_t states[2][2] = { {0, 0}, {0, 0} };
             for(uint32_t s=0; s<instp->num_species; s++)
                 states[matrix_get_value(instp, s, c1)][matrix_get_value(instp, s, c2)] = 1;
             if(states[0][0] + states[0][1] + states[1][0] + states[1][1] == 4)
@@ -254,13 +254,13 @@ matrix2graphs(pp_instance *instp) {
    \brief some functions to abstract the access to the instance matrix
 */
 
-uint8_t
+uint32_t
 matrix_get_value(pp_instance *inst, uint32_t species, uint32_t character) {
     return inst->matrix[character + inst->num_characters*species];
 }
 
 void
-matrix_set_value(pp_instance *inst, uint32_t species, uint32_t character, uint8_t value) {
+matrix_set_value(pp_instance *inst, uint32_t species, uint32_t character, uint32_t value) {
     inst->matrix[character + inst->num_characters*species] = value;
 }
 
@@ -278,12 +278,12 @@ read_instance_from_filename(const char *filename) {
     inst.num_characters = num_characters;
     inst.num_species_orig = num_species;
     inst.num_characters_orig = num_characters;
-    inst.matrix = g_malloc(num_species * num_characters * sizeof(uint8_t));
-    inst.root_state = g_malloc0(num_species * sizeof(uint8_t));
+    inst.matrix = g_malloc(num_species * num_characters * sizeof(uint32_t));
+    inst.root_state = g_malloc0(num_species * sizeof(uint32_t));
     for(uint32_t s=0; s < num_species; s++)
         for(uint32_t c=0; c < num_characters; c++) {
-            uint8_t x;
-            assert(fscanf(file, "%"SCNu8, &x) != EOF);
+            uint32_t x;
+            assert(fscanf(file, "%"SCNu32, &x) != EOF);
             matrix_set_value(&inst, s, c, x);
         }
 
@@ -292,6 +292,7 @@ read_instance_from_filename(const char *filename) {
     str_instance(&inst, str);
     g_debug("%s", str);
     free(str);
+
 
     fclose(file);
     return inst;
@@ -367,9 +368,9 @@ get_conflict_graph(const pp_instance *inst) {
 }
 
 #ifdef TEST_EVERYTHING
-static void test_matrix_pp(pp_instance inst, const uint8_t num_species, const uint8_t num_characters,
-    const uint8_t data[inst.num_species][inst.num_characters],
-    const uint8_t conflict[inst.num_characters][inst.num_characters]) {
+static void test_matrix_pp(pp_instance inst, const uint32_t num_species, const uint32_t num_characters,
+    const uint32_t data[inst.num_species][inst.num_characters],
+    const uint32_t conflict[inst.num_characters][inst.num_characters]) {
     ck_assert_int_eq(inst.num_species, num_species);
     ck_assert_int_eq(inst.num_characters, num_characters);
     ck_assert_int_eq(inst.num_species_orig, num_species);
@@ -403,13 +404,13 @@ static void test_matrix_pp(pp_instance inst, const uint8_t num_species, const ui
 
 
 START_TEST(test_read_instance_from_filename_1) {
-    const uint8_t data[4][4] = {
+    const uint32_t data[4][4] = {
         {0, 0, 1, 1},
         {0, 1, 0, 1},
         {1, 0, 1, 0},
         {1, 1, 0, 0}
     };
-    const uint8_t conflict[4][4] = {
+    const uint32_t conflict[4][4] = {
         {0, 1, 1, 0},
         {1, 0, 0, 1},
         {1, 0, 0, 1},
@@ -421,7 +422,7 @@ START_TEST(test_read_instance_from_filename_1) {
 END_TEST
 
 START_TEST(test_read_instance_from_filename_2) {
-    const uint8_t data[6][3] = {
+    const uint32_t data[6][3] = {
         {0, 0, 1},
         {0, 1, 0},
         {0, 1, 1},
@@ -429,7 +430,7 @@ START_TEST(test_read_instance_from_filename_2) {
         {1, 0, 1},
         {1, 1, 0}
     };
-    const uint8_t conflict[3][3] = {
+    const uint32_t conflict[3][3] = {
         {0, 1, 1},
         {1, 0, 1},
         {1, 1, 0}
@@ -441,14 +442,14 @@ START_TEST(test_read_instance_from_filename_2) {
 END_TEST
 
 START_TEST(test_read_instance_from_filename_3) {
-    const uint8_t data[5][5] = {
+    const uint32_t data[5][5] = {
         {0, 0, 0, 1, 0},
         {0, 1, 0, 0, 0},
         {1, 0, 1, 0, 0},
         {1, 1, 0, 0, 0},
         {0, 0, 0, 0, 0}
     };
-    const uint8_t conflict[5][5] = {
+    const uint32_t conflict[5][5] = {
         {0, 1, 0, 0, 0},
         {1, 0, 0, 0, 0},
         {0, 0, 0, 0, 0},

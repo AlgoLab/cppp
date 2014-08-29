@@ -88,11 +88,11 @@ typedef struct pp_instance {
     uint32_t num_characters_orig;
     igraph_t *red_black;
     igraph_t *conflict;
-    uint8_t  *matrix;
+    uint32_t *matrix;
     uint32_t *species_label;
     uint32_t *character_label;
     uint32_t *conflict_label;
-    uint8_t  *root_state;
+    uint32_t *root_state;
     GSList   *species;
     GSList   *characters;
 } pp_instance;
@@ -143,7 +143,7 @@ copy_instance(pp_instance *dst, const pp_instance *src);
    removed_conflict_list are lists of vertices of the red-black and conflict graphs.
 */
 typedef struct operation {
-    uint8_t type;
+    uint32_t type;
     GSList *removed_species_list;
     GSList *removed_characters_list;
     GSList *removed_red_black_list;
@@ -209,7 +209,7 @@ get_conflict_graph(const pp_instance *instp);
    \param species: goes from 0 to the number of species - 1
    \param character: goes from 0 to the number of characters - 1
 */
-uint8_t
+uint32_t
 matrix_get_value(pp_instance *instp, uint32_t species, uint32_t character);
 
 /**
@@ -221,7 +221,7 @@ matrix_get_value(pp_instance *instp, uint32_t species, uint32_t character);
    \param the value to write
 */
 void
-matrix_set_value(pp_instance *instp, uint32_t species, uint32_t character, uint8_t value);
+matrix_set_value(pp_instance *instp, uint32_t species, uint32_t character, uint32_t value);
 
 /**
    \struct state_s
@@ -286,6 +286,7 @@ uint32_t check_state(const state_s* stp);
    therefore it is necessary to include this function in a \c while loop to
    completely simplify the instance
 */
+
 pp_instance
 instance_cleanup(const pp_instance src, operation *op);
 
