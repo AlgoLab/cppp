@@ -81,23 +81,21 @@
 
    \c species and \c characters are the list of current species and characters
    respectively.
-
-
 */
 typedef struct pp_instance {
-    uint32_t num_species;
-    uint32_t num_characters;
-    uint32_t num_species_orig;
-    uint32_t num_characters_orig;
-    igraph_t *red_black;
-    igraph_t *conflict;
-    uint32_t *matrix;
-    uint32_t *species_label;
-    uint32_t *character_label;
-    uint32_t *conflict_label;
-    uint32_t *root_state;
-    GSList   *species;
-    GSList   *characters;
+		uint32_t num_species;
+		uint32_t num_characters;
+		uint32_t num_species_orig;
+		uint32_t num_characters_orig;
+		igraph_t *red_black;
+		igraph_t *conflict;
+		uint32_t *matrix;
+		uint32_t *species_label;
+		uint32_t *character_label;
+		uint32_t *conflict_label;
+		uint32_t *root_state;
+		GSList   *species;
+		GSList   *characters;
 } pp_instance;
 
 /**
@@ -146,11 +144,11 @@ copy_instance(pp_instance *dst, const pp_instance *src);
    removed_conflict_list are lists of vertices of the red-black and conflict graphs.
 */
 typedef struct operation {
-    uint32_t type;
-    GSList *removed_species_list;
-    GSList *removed_characters_list;
-    GSList *removed_red_black_list;
-    GSList *removed_conflict_list;
+		uint32_t type;
+		GSList *removed_species_list;
+		GSList *removed_characters_list;
+		GSList *removed_red_black_list;
+		GSList *removed_conflict_list;
 } operation;
 
 /**
@@ -169,6 +167,8 @@ destroy_operation(operation *op);
 void
 free_operation(operation *op);
 
+void
+copy_operation(operation* dst, const operation* src);
 /**
    \param filename: the corresponding file contains an input matrix
    \return pp: the corresponding instance
@@ -241,10 +241,10 @@ matrix_set_value(pp_instance *instp, uint32_t species, uint32_t character, uint3
    that we have previously tried to realize (without success)
 */
 typedef struct state_s {
-    operation *operation;
-    pp_instance *instance;
-    uint32_t realized_char;
-    GSList *tried_characters;
+		operation *operation;
+		pp_instance *instance;
+		uint32_t realized_char;
+		GSList *tried_characters;
 } state_s;
 
 /**
@@ -297,9 +297,14 @@ void first_state(state_s* stp, pp_instance *instp);
    therefore it is necessary to include this function in a \c while loop to
    completely simplify the instance
 */
-
 pp_instance
 instance_cleanup(const pp_instance src, operation *op);
+
+/**
+   \brief copy a state
+*/
+void copy_state(state_s* dst, const state_s* src);
+
 
 /**
    \brief read a state (instance, operation) from a
