@@ -63,6 +63,7 @@ void copy_state(state_s* dst, const state_s* src) {
         copy_instance(dst->instance, src->instance);
         dst->realized_char = src->realized_char;
         dst->tried_characters = g_slist_copy(src->tried_characters);
+        dst->character_queue = g_slist_copy(src->character_queue);
 }
 
 void copy_operation(operation* dst, const operation* src) {
@@ -194,7 +195,7 @@ realize_character(const pp_instance src, const uint32_t character, operation *op
         }
         if (color == RED)
                 if (igraph_vector_size(&adjacent) != igraph_vector_size(&conn_comp)) {
-                        op->type = 0;
+                        op->type = -1;
                 } else {
                         igraph_delete_vertices(dst.red_black, igraph_vss_1(c));
                         dst.num_species--;
@@ -702,6 +703,7 @@ init_state(state_s *stp) {
                 .instance = new_instance(),
                 .realized_char = 0,
                 .tried_characters = NULL,
+                .character_queue = NULL,
         };
         *stp = temp;
 }
@@ -793,12 +795,16 @@ static uint32_t* json_get_array(json_t* root, char* field) {
         return json_array2array(obj);
 }
 
-static GSList* json_get_list(json_t* root, char* field) {
+static GSList* json_get_list(json_t* root, char* field, bool optional) {
         json_t* obj = json_object_get(root, field);
-        assert(obj != NULL && "Missing JSON field\n");
-        assert(json_is_array(obj) && "field must be an array\n");
-        return json_array2gslist(obj);
+        if (!optional) {
+                assert(obj != NULL && "Missing JSON field\n");
+                assert(json_is_array(obj) && "field must be an array\n");
+                return json_array2gslist(obj);
+        } else
+                return NULL;
 }
+
 
 state_s*
 read_state_from_file(char* filename) {
@@ -813,7 +819,8 @@ read_state_from_file(char* filename) {
         assert(data != NULL && "Could not parse JSON file\n");
 
         stp->realized_char = json_get_integer(data, "realized_char");
-        stp->tried_characters = json_get_list(data, "tried_characters");
+        stp->tried_characters = json_get_list(data, "tried_characters", true);
+        stp->character_queue = json_get_list(data, "character_queue", true);
 
         json_t* instpj = json_object_get(data, "instance");
         if (instpj != NULL) {
@@ -825,8 +832,8 @@ read_state_from_file(char* filename) {
                 stp->instance->character_label = json_get_array(instpj, "character_label");
                 stp->instance->conflict_label = json_get_array(instpj, "conflict_label");
                 stp->instance->root_state = json_get_array(instpj, "root_state");
-                stp->instance->species = json_get_list(instpj, "species");
-                stp->instance->characters = json_get_list(instpj, "characters");
+                stp->instance->species = json_get_list(instpj, "species", false);
+                stp->instance->characters = json_get_list(instpj, "characters", false);
 
                 // Graphs
                 FILE* fp;
@@ -847,10 +854,10 @@ read_state_from_file(char* filename) {
         json_t* opj = json_object_get(data, "operation");
         if (opj != NULL) {
                 stp->operation->type = json_get_integer(opj, "type");
-                stp->operation->removed_species_list = json_get_list(opj, "removed_species_list");
-                stp->operation->removed_characters_list = json_get_list(opj, "removed_characters_list");
-                stp->operation->removed_red_black_list = json_get_list(opj, "removed_red_black_list");
-                stp->operation->removed_conflict_list = json_get_list(opj, "removed_conflict_list");
+                stp->operation->removed_species_list = json_get_list(opj, "removed_species_list", false);
+                stp->operation->removed_characters_list = json_get_list(opj, "removed_characters_list", false);
+                stp->operation->removed_red_black_list = json_get_list(opj, "removed_red_black_list", false);
+                stp->operation->removed_conflict_list = json_get_list(opj, "removed_conflict_list", false);
         }
         return stp;
 }
@@ -884,6 +891,8 @@ write_state_to_file(char* filename, state_s* stp) {
         json_t* data = json_object();
         assert(!json_object_set(data, "realized_char", json_integer(stp->realized_char)));
         assert(!json_object_set(data, "tried_characters", gslist2json_array(stp->tried_characters)));
+        assert(!json_object_set(data, "character_queue", gslist2json_array(stp->character_queue)));
+
         json_t* instp = json_object();
         json_t* op = json_object();
         assert(!json_object_set(data, "instance", instp));
@@ -955,6 +964,7 @@ void first_state(state_s* stp, pp_instance *instp) {
         stp->operation = new_operation();
         stp->realized_char = 0;
         stp->tried_characters = NULL;
+        stp->character_queue = NULL;
 
         stp->operation->type = 0;
         stp->operation->removed_species_list = NULL;
