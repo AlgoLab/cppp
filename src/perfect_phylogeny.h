@@ -304,6 +304,8 @@ instance_cleanup(const pp_instance src, operation *op);
 
 /**
    \brief copy a state
+
+   The destination must have already been allocated
 */
 void copy_state(state_s* dst, const state_s* src);
 
@@ -321,15 +323,3 @@ read_state_from_file(char* filename);
 */
 void
 write_state_to_file(char* filename, state_s* stp);
-
-
-/**
-   \param src: the current state
-
-   \return the new state after the next character has been realized (if possible)
-
-   It assumes that the memory to store the next state has already been
-   allocated, but not necessarily initialized.
-*/
-state_s
-next_state(const state_s src);

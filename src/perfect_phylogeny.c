@@ -1009,6 +1009,7 @@ START_TEST(realize_3_0) {
 END_TEST
 #endif
 
+
 #ifdef TEST_EVERYTHING
 START_TEST(write_json_3) {
         state_s *stp = new_state();
