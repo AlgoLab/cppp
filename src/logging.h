@@ -18,23 +18,15 @@
   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 */
-#include "perfect_phylogeny.h"
+#include <glib.h>
+#include "getopt/cmdline.h"
+
+#define G_LOG_DOMAIN    ((gchar*) 0)
 
 /**
-   The strategy is a function that take as a parameter a pointer to the last
-   valid state (or \c NULL at the very first step), analyzes such state to
-   determine the order of realization of the characters.
+   \brief determine the logging
 
-   In other words, it computes in which order we try to realize the characters
-   at the current node of the decision tree
+   \param quiet: true if logging is disabled
+   \param filename: name of the logfile
 */
-typedef GSList* (*strategy_fn)(state_s *stp);
-
-/**
-   \brief visits the entire tree of the possible completions
-
-   \param inst: the initial instance
-*/
-
-void
-exhaustive_search(state_s *states, pp_instance inst, strategy_fn strategy);
+void start_logging(struct gengetopt_args_info args_info);
