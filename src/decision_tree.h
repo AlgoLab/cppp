@@ -28,7 +28,7 @@
    In other words, it computes in which order we try to realize the characters
    at the current node of the decision tree
 */
-typedef GSList* (*strategy_fn)(states_s *stp);
+typedef GSList* (*strategy_fn)(state_s *stp);
 
 /**
    \brief visits the entire tree of the possible completions

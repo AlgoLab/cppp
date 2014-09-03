@@ -21,7 +21,6 @@
 
 #include "getopt/cmdline.h"
 #include "cppp.h"
-#include "perfect_phylogeny.h"
 #include "logging.h"
 #include "decision_tree.h"
 
@@ -30,7 +29,7 @@ static gint cmp(gconstpointer a, gconstpointer b) {
 }
 
 static GSList*
-alphabetic(states_s *stp) {
+alphabetic(state_s *stp) {
         return (g_slist_sort(stp->instance->characters, cmp));
 }
 
