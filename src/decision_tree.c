@@ -28,10 +28,10 @@ static bool no_sibling_p(state_s *stp) {
         return (stp->character_queue == NULL);
 }
 
-uint32_t next_node(state_s **states, uint32_t level, strategy_fn node_init) {
+uint32_t next_node(state_s *states, uint32_t level, strategy_fn node_init) {
         state_s *current = states[level];
         if (current->tried_characters == NULL && no_siblings_p(current))
-		current->character_queue = node_init(states[level]);
+                current->character_queue = node_init(states[level]);
         if (no_sibling_p(current)) {
                 destroy_state(current);
                 return (level-1);
@@ -50,7 +50,7 @@ uint32_t next_node(state_s **states, uint32_t level, strategy_fn node_init) {
 }
 
 void
-exhaustive_search(state_s **states, const pp_instance inst, strategy_fn strategy) {
+exhaustive_search(state_s *states, const pp_instance inst, strategy_fn strategy) {
         first_state(states+0, &inst);
         uint32_t level = 0;
         while(level != -1) {

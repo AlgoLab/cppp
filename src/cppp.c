@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
 */
         state_s states[2*temp.num_species+temp.num_characters];
 
-        exhaustive_search(&states, temp, alphabetic);
+        exhaustive_search(states, temp, alphabetic);
         cmdline_parser_free(&args_info);
         return 0;
 }

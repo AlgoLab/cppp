@@ -37,4 +37,4 @@ typedef GSList* (*strategy_fn)(state_s *stp);
 */
 
 GSList *
-exhaustive_search(state_s **states, const pp_instance inst);
+exhaustive_search(state_s *states, const pp_instance inst, strategy_fn strategy);
