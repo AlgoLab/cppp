@@ -64,3 +64,9 @@ exhaustive_search(state_s *states, pp_instance inst, strategy_fn strategy) {
         for(uint8_t i=0; i <= level; i++)
                 destroy_state(states+i);
 }
+
+#ifdef TEST_EVERYTHING
+int main(void) {
+        return 0;
+}
+#endif

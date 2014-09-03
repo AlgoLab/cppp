@@ -28,3 +28,9 @@ void start_logging(struct gengetopt_args_info args_info) {
         if (args_info.quiet_given)   level = G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION;
         g_log_set_handler(G_LOG_DOMAIN, level, g_log_default_handler, NULL);
 }
+
+#ifdef TEST_EVERYTHING
+int main(void) {
+        return 0;
+}
+#endif

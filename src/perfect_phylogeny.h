@@ -206,26 +206,26 @@ igraph_t *
 get_conflict_graph(const pp_instance *instp);
 
 
-/**
-   Read an entry of an instance matrix
+/* /\** */
+/*    Read an entry of an instance matrix */
 
-   \param matrix
-   \param species: goes from 0 to the number of species - 1
-   \param character: goes from 0 to the number of characters - 1
-*/
-uint32_t
-matrix_get_value(pp_instance *instp, uint32_t species, uint32_t character);
+/*    \param matrix */
+/*    \param species: goes from 0 to the number of species - 1 */
+/*    \param character: goes from 0 to the number of characters - 1 */
+/* *\/ */
+/* uint32_t */
+/* matrix_get_value(pp_instance *instp, uint32_t species, uint32_t character); */
 
-/**
-   Set the value of an entry of an instance matrix
+/* /\** */
+/*    Set the value of an entry of an instance matrix */
 
-   \param matrix
-   \param species: goes from 0 to the number of species - 1
-   \param character: goes from 0 to the number of characters - 1
-   \param the value to write
-*/
-void
-matrix_set_value(pp_instance *instp, uint32_t species, uint32_t character, uint32_t value);
+/*    \param matrix */
+/*    \param species: goes from 0 to the number of species - 1 */
+/*    \param character: goes from 0 to the number of characters - 1 */
+/*    \param the value to write */
+/* *\/ */
+/* void */
+/* matrix_set_value(pp_instance *instp, uint32_t species, uint32_t character, uint32_t value); */
 
 /**
    \struct state_s

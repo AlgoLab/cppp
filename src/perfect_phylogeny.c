@@ -29,31 +29,99 @@
 #include <stdlib.h>
 #endif
 
-void
-copy_instance(pp_instance *dst, const pp_instance *src) {
-        assert(dst != NULL);
-        if (dst->red_black == NULL) dst->red_black = GC_MALLOC(sizeof(igraph_t));
-        if (dst->conflict == NULL)  dst->conflict  = GC_MALLOC(sizeof(igraph_t));
 
-        dst->num_species = src->num_species;
-        dst->num_characters = src->num_characters;
-        dst->num_species_orig = src->num_species_orig;
-        dst->num_characters_orig = src->num_characters_orig;
-
-        igraph_copy(dst->red_black, src->red_black);
-        igraph_copy(dst->conflict, src->conflict);
-        dst->matrix = src->matrix;
-        dst->species_label = GC_MALLOC(src->num_species_orig * sizeof(uint32_t));
-        memcpy(dst->species_label, src->species_label, src->num_species_orig * sizeof(uint32_t));
-        dst->character_label = GC_MALLOC(src->num_characters_orig * sizeof(uint32_t));
-        memcpy(dst->character_label, src->character_label, src->num_characters_orig * sizeof(uint32_t));
-        dst->conflict_label = GC_MALLOC(src->num_characters_orig * sizeof(uint32_t));
-        memcpy(dst->conflict_label, src->conflict_label, src->num_characters_orig * sizeof(uint32_t));
-        dst->root_state = GC_MALLOC(src->num_characters_orig * sizeof(uint32_t));
-        memcpy(dst->root_state, src->root_state, src->num_characters_orig * sizeof(uint32_t));
-        dst->species = g_slist_copy(src->species);
-        dst->characters = g_slist_copy(src->characters);
+static void
+init_instance(pp_instance *instp, uint32_t nspecies, uint32_t nchars) {
+        assert(instp != NULL);
+        if (instp->red_black == NULL) instp->red_black = GC_MALLOC(sizeof(igraph_t));
+        if (instp->conflict == NULL)  instp->conflict  = GC_MALLOC(sizeof(igraph_t));
+        instp->conflict = GC_MALLOC(sizeof(igraph_t));
+        igraph_empty(instp->conflict, nchars, IGRAPH_UNDIRECTED);
+        instp->red_black = GC_MALLOC(sizeof(igraph_t));
+        igraph_empty_attrs(instp->red_black, nspecies + nchars, IGRAPH_UNDIRECTED, 0);
+        instp->species_label = GC_MALLOC(nspecies * sizeof(uint32_t));
+        instp->character_label = GC_MALLOC(nchars * sizeof(uint32_t));
+        instp->conflict_label = GC_MALLOC(nspecies * sizeof(uint32_t));
+        instp->root_state = GC_MALLOC(nchars * sizeof(uint32_t));
 }
+
+/**
+   \brief some functions to abstract the access to the instance matrix
+*/
+
+static uint32_t
+matrix_get_value(pp_instance *inst, uint32_t species, uint32_t character) {
+        return inst->matrix[character + inst->num_characters*species];
+}
+
+static void
+matrix_set_value(pp_instance *inst, uint32_t species, uint32_t character, uint32_t value) {
+        inst->matrix[character + inst->num_characters*species] = value;
+}
+
+/**
+   \param instance
+
+   Updates an instance by computing the red-black and the conflict graphs
+   associated to a given matrix.
+
+   The input instance must have the \c matrix \c num_species and \c
+   num_characters fields already filled in. All other fields are computed by
+   this function.
+
+   In a red-black graph, the first \c instp->num_species ids correspond to species,
+   while the ids larger or equal to instp->num_species correspond to characters.
+   Notice that the label id must be conserved when modifying the graph (i.e.
+   realizing a character).
+
+   color attribute is \c SPECIES if the vertex is a species, otherwise it is \c BLACK
+   or \c RED (at the beginning, there can only be \c BLACK edges).
+
+*/
+static void
+matrix2instance(pp_instance *instp) {
+        assert(instp->matrix != NULL);
+        assert(instp->num_species != 0);
+        assert(instp->num_characters != 0);
+
+        init_instance(instp, instp->num_species, instp->num_characters);
+        instp->num_species_orig = instp->num_species;
+        instp->num_characters_orig = instp->num_characters;
+
+/* We start with the red-black graph */
+
+        for(uint32_t s=0; s<instp->num_species; s++) {
+                SETVAN(instp->red_black, "id", s, s);
+                instp->species_label[s] = s;
+                SETVAN(instp->red_black, "color", s, SPECIES);
+                instp->species = g_slist_append(instp->species, GINT_TO_POINTER(s));
+        }
+        for(uint32_t c=0; c<instp->num_characters; c++) {
+                SETVAN(instp->red_black, "id", c+instp->num_species, c);
+                instp->character_label[c] = c+instp->num_species;
+                instp->conflict_label[c] = c;
+                SETVAN(instp->red_black, "color", c+instp->num_species, BLACK);
+                instp->characters = g_slist_append(instp->characters, GINT_TO_POINTER(c));
+        }
+        for (uint32_t s=0; s<instp->num_species; s++)
+                for (uint32_t c=0; c<instp->num_characters; c++)
+                        if (matrix_get_value(instp, s, c) == 1)
+                                igraph_add_edge(instp->red_black, s, c+instp->num_species);
+
+        /* Now we compute the conflict graph */
+        for(uint32_t c1=0; c1<instp->num_characters; c1++)
+                for(uint32_t c2=c1+1; c2<instp->num_characters; c2++) {
+                        uint32_t states[2][2] = { {0, 0}, {0, 0} };
+                        for(uint32_t s=0; s<instp->num_species; s++)
+                                states[matrix_get_value(instp, s, c1)][matrix_get_value(instp, s, c2)] = 1;
+                        if(states[0][0] + states[0][1] + states[1][0] + states[1][1] == 4)
+                                igraph_add_edge(instp->conflict, instp->conflict_label[c1], instp->conflict_label[c2]);
+                }
+}
+
+
+
+
 
 void copy_state(state_s* dst, const state_s* src) {
         assert(dst != NULL);
@@ -77,51 +145,6 @@ void copy_operation(operation* dst, const operation* src) {
 
 
 
-#ifdef TEST_EVERYTHING
-static int g_slist_cmp(GSList* l1, GSList* l2) {
-        if (l1 == NULL && l2 == NULL) return 0;
-        if (l1 == NULL) return 1;
-        if (l2 == NULL) return -1;
-        gpointer x1 = g_slist_next(l1);
-        gpointer x2 = g_slist_next(l2);
-        for (;x1 != NULL && x2 != NULL; x1 = g_slist_next(l1), x2 = g_slist_next(l2)) {
-                if (x1 < x2) return 1;
-                if (x2 < x1) return -1;
-        }
-        if (x1 == NULL && x2 == NULL) return 0;
-        return (x1 == NULL) ? 1 : -1;
-}
-static uint32_t instance_cmp(pp_instance *instp1, pp_instance *instp2) {
-        uint32_t result = 0;
-        if (instp1->num_characters != instp2->num_characters) result += 1;
-        if (instp1->num_species != instp2->num_species) result += 2;
-        if (instp1->species_label == NULL || instp2->species_label == NULL ||
-            memcmp(instp1->species_label, instp2->species_label, sizeof(*(instp1->species_label)))) result += 4;
-        if (instp1->character_label == NULL || instp2->character_label == NULL ||
-            memcmp(instp1->character_label, instp2->character_label, sizeof(*(instp1->character_label)))) result += 8;
-        if (instp1->conflict_label == NULL || instp2->conflict_label == NULL ||
-            memcmp(instp1->conflict_label, instp2->conflict_label, sizeof(*(instp1->conflict_label)))) result += 16;
-        if (instp1->root_state == NULL || instp2->root_state == NULL ||
-            memcmp(instp1->root_state, instp2->root_state, sizeof(*(instp1->root_state)))) result += 32;
-        if (g_slist_cmp(instp1->species, instp2->species)) result += 64;
-        if (g_slist_cmp(instp1->characters, instp2->characters)) result += 128;
-        return result;
-}
-START_TEST(copy_instance_1) {
-        pp_instance inst = read_instance_from_filename("tests/input/read/1.txt");
-        pp_instance inst2 = { 0 };
-        copy_instance(&inst2, &inst);
-        ck_assert_int_eq(instance_cmp(&inst, &inst2),0);
-}
-END_TEST
-START_TEST(copy_instance_2) {
-        pp_instance inst = read_instance_from_filename("tests/input/read/2.txt");
-        pp_instance inst2 = { 0 };
-        copy_instance(&inst2, &inst);
-        ck_assert_int_eq(instance_cmp(&inst, &inst2),0);
-}
-END_TEST
-#endif
 
 /**
    To realize a character, first we have to find the id \c c of the vertex of
@@ -218,76 +241,6 @@ realize_character(const pp_instance src, const uint32_t character, operation *op
 /*     return 0; */
 /* } */
 
-/**
-   \param instance
-
-   Updates an instance by computing the red-black and the conflict graphs
-   associated to a given matrix.
-
-   In a red-black graph, the first \c instp->num_species ids correspond to species,
-   while the ids larger or equal to instp->num_species correspond to characters.
-   Notice that the label id must be conserved when modifying the graph (i.e.
-   realizing a character).
-
-   color attribute is \c SPECIES if the vertex is a species, otherwise it is \c BLACK
-   or \c RED (at the beginning, there can only be \c BLACK edges).
-
-*/
-static void
-matrix2graphs(pp_instance *instp) {
-        assert(instp->matrix != NULL);
-
-        instp->species_label = GC_MALLOC(instp->num_species * sizeof(uint32_t));
-        instp->character_label = GC_MALLOC(instp->num_characters * sizeof(uint32_t));
-        instp->conflict_label = GC_MALLOC(instp->num_species * sizeof(uint32_t));
-
-/* We start with the red-black graph */
-        instp->red_black = GC_MALLOC(sizeof(igraph_t));
-        igraph_empty_attrs(instp->red_black, instp->num_species+instp->num_characters, IGRAPH_UNDIRECTED, 0);
-
-        for(uint32_t s=0; s<instp->num_species; s++) {
-                SETVAN(instp->red_black, "id", s, s);
-                instp->species_label[s] = s;
-                SETVAN(instp->red_black, "color", s, SPECIES);
-        }
-        for(uint32_t c=0; c<instp->num_characters; c++) {
-                SETVAN(instp->red_black, "id", c+instp->num_species, c);
-                instp->character_label[c] = c+instp->num_species;
-                instp->conflict_label[c] = c;
-                SETVAN(instp->red_black, "color", c+instp->num_species, BLACK);
-        }
-        for (uint32_t s=0; s<instp->num_species; s++)
-                for (uint32_t c=0; c<instp->num_characters; c++)
-                        if (matrix_get_value(instp, s, c) == 1)
-                                igraph_add_edge(instp->red_black, s, c+instp->num_species);
-
-        /* Now we compute the conflict graph */
-        instp->conflict = GC_MALLOC(sizeof(igraph_t));
-        igraph_empty(instp->conflict, instp->num_characters, IGRAPH_UNDIRECTED);
-        // TODO
-        for(uint32_t c1=0; c1<instp->num_characters; c1++)
-                for(uint32_t c2=c1+1; c2<instp->num_characters; c2++) {
-                        uint32_t states[2][2] = { {0, 0}, {0, 0} };
-                        for(uint32_t s=0; s<instp->num_species; s++)
-                                states[matrix_get_value(instp, s, c1)][matrix_get_value(instp, s, c2)] = 1;
-                        if(states[0][0] + states[0][1] + states[1][0] + states[1][1] == 4)
-                                igraph_add_edge(instp->conflict, instp->conflict_label[c1], instp->conflict_label[c2]);
-                }
-}
-
-/**
-   \brief some functions to abstract the access to the instance matrix
-*/
-
-uint32_t
-matrix_get_value(pp_instance *inst, uint32_t species, uint32_t character) {
-        return inst->matrix[character + inst->num_characters*species];
-}
-
-void
-matrix_set_value(pp_instance *inst, uint32_t species, uint32_t character, uint32_t value) {
-        inst->matrix[character + inst->num_characters*species] = value;
-}
 
 pp_instance
 read_instance_from_filename(const char *filename) {
@@ -301,10 +254,7 @@ read_instance_from_filename(const char *filename) {
         pp_instance inst = { 0 };
         inst.num_species = num_species;
         inst.num_characters = num_characters;
-        inst.num_species_orig = num_species;
-        inst.num_characters_orig = num_characters;
         inst.matrix = GC_MALLOC(num_species * num_characters * sizeof(uint32_t));
-        inst.root_state = GC_MALLOC(num_species * sizeof(uint32_t));
         for(uint32_t s=0; s < num_species; s++)
                 for(uint32_t c=0; c < num_characters; c++) {
                         uint32_t x;
@@ -312,13 +262,11 @@ read_instance_from_filename(const char *filename) {
                         matrix_set_value(&inst, s, c, x);
                 }
 
-        matrix2graphs(&inst);
+        matrix2instance(&inst);
         char* str = NULL;
         str_instance(&inst, str);
         g_debug("%s", str);
         free(str);
-
-
         fclose(file);
         return inst;
 }
@@ -526,27 +474,26 @@ START_TEST(new_instance_1) {
 END_TEST
 #endif
 
-/* void */
-/* init_instance(pp_instance * instp) { */
-/*     assert(instp != NULL); */
-/*     instp->conflict = GC_MALLOC(sizeof(igraph_t)); */
-/*     igraph_empty(instp->conflict, instp->num_characters, IGRAPH_UNDIRECTED); */
-/*     instp->red_black = = GC_MALLOC(sizeof(igraph_t)); */
-/*     igraph_empty_attrs(instp->red_black, instp->num_species + instp->num_characters, IGRAPH_UNDIRECTED); */
-/*     instp->matrix =  NULL; */
-/*     instp->species_label = GC_MALLOC(instp->num_species * sizeof(uint32_t)); */
-/*     instp->character_label = GC_MALLOC(instp->num_characters * sizeof(uint32_t)); */
-/*     instp->conflict_label = GC_MALLOC(instp->num_species * sizeof(uint32_t)); */
-/* } */
 
+void
+copy_instance(pp_instance *dst, const pp_instance *src) {
+        assert(dst != NULL);
+        init_instance(dst, src->num_species, src->num_characters);
 
-/* #ifdef TEST_EVERYTHING */
-/* /\* START_TEST(init_instance_1) { *\/ */
-/* /\*     pp_instance inst = { 0 }; *\/ */
-/* /\*     null_instance_test(&inst); *\/ */
-/* /\* } *\/ */
-/* /\* END_TEST *\/ */
-/* #endif */
+        dst->num_species = src->num_species;
+        dst->num_characters = src->num_characters;
+        dst->num_species_orig = src->num_species_orig;
+        dst->num_characters_orig = src->num_characters_orig;
+        igraph_copy(dst->red_black, src->red_black);
+        igraph_copy(dst->conflict, src->conflict);
+        dst->matrix = src->matrix;
+        memcpy(dst->species_label, src->species_label, src->num_species_orig * sizeof(uint32_t));
+        memcpy(dst->character_label, src->character_label, src->num_characters_orig * sizeof(uint32_t));
+        memcpy(dst->conflict_label, src->conflict_label, src->num_characters_orig * sizeof(uint32_t));
+        memcpy(dst->root_state, src->root_state, src->num_characters_orig * sizeof(uint32_t));
+        dst->species = g_slist_copy(src->species);
+        dst->characters = g_slist_copy(src->characters);
+}
 
 void str_instance(const pp_instance* instp, char* str) {
         assert(0 <= asprintf(&str,
@@ -956,6 +903,7 @@ write_state_to_file(char* filename, state_s* stp) {
 /* END_TEST */
 #endif
 
+
 void first_state(state_s* stp, pp_instance *instp) {
         if(stp->instance != instp) {
                 stp->instance = new_instance();
@@ -1007,10 +955,7 @@ START_TEST(realize_3_0) {
         ck_assert_int_eq(stp2->realized_char, 0);
 }
 END_TEST
-#endif
 
-
-#ifdef TEST_EVERYTHING
 START_TEST(write_json_3) {
         state_s *stp = new_state();
         stp->instance = new_instance();
@@ -1021,10 +966,51 @@ START_TEST(write_json_3) {
         ck_assert_int_eq(stp->realized_char, stp2->realized_char);
 }
 END_TEST
-#endif
 
+static int g_slist_cmp(GSList* l1, GSList* l2) {
+        if (l1 == NULL && l2 == NULL) return 0;
+        if (l1 == NULL) return 1;
+        if (l2 == NULL) return -1;
+        GSList* x1 = g_slist_next(l1);
+        GSList* x2 = g_slist_next(l2);
+        for (;x1 != NULL && x2 != NULL; x1 = g_slist_next(x1), x2 = g_slist_next(x2)) {
+                int32_t d = GPOINTER_TO_INT(x2->data) - GPOINTER_TO_INT(x1->data);
+                if (d != 0) return d;
+        }
+        if (x1 == NULL && x2 == NULL) return 0;
+        return (x1 == NULL) ? 1 : -1;
+}
+static uint32_t instance_cmp(pp_instance *instp1, pp_instance *instp2) {
+        uint32_t result = 0;
+        if (instp1->num_characters != instp2->num_characters) result += 1;
+        if (instp1->num_species != instp2->num_species) result += 2;
+        if (instp1->species_label == NULL || instp2->species_label == NULL ||
+            memcmp(instp1->species_label, instp2->species_label, sizeof(*(instp1->species_label)))) result += 4;
+        if (instp1->character_label == NULL || instp2->character_label == NULL ||
+            memcmp(instp1->character_label, instp2->character_label, sizeof(*(instp1->character_label)))) result += 8;
+        if (instp1->conflict_label == NULL || instp2->conflict_label == NULL ||
+            memcmp(instp1->conflict_label, instp2->conflict_label, sizeof(*(instp1->conflict_label)))) result += 16;
+        if (instp1->root_state == NULL || instp2->root_state == NULL ||
+            memcmp(instp1->root_state, instp2->root_state, sizeof(*(instp1->root_state)))) result += 32;
+        if (g_slist_cmp(instp1->species, instp2->species)) result += 64;
+        if (g_slist_cmp(instp1->characters, instp2->characters)) result += 128;
+        return result;
+}
+START_TEST(copy_instance_1) {
+        pp_instance inst = read_instance_from_filename("tests/input/read/1.txt");
+        pp_instance inst2 = { 0 };
+        copy_instance(&inst2, &inst);
+        ck_assert_int_eq(instance_cmp(&inst, &inst2),0);
+}
+END_TEST
+START_TEST(copy_instance_2) {
+        pp_instance inst = read_instance_from_filename("tests/input/read/2.txt");
+        pp_instance inst2 = { 0 };
+        copy_instance(&inst2, &inst);
+        ck_assert_int_eq(instance_cmp(&inst, &inst2),0);
+}
+END_TEST
 
-#ifdef TEST_EVERYTHING
 static Suite * perfect_phylogeny_suite(void) {
         Suite *s;
         TCase *tc_core;
