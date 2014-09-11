@@ -315,11 +315,11 @@ void copy_state(state_s* dst, const state_s* src);
    file
 */
 state_s*
-read_state_from_file(char* filename);
+read_state(const char* filename);
 
 /**
    \brief write a state (instance, operation) to a
    file
 */
 void
-write_state_to_file(char* filename, state_s* stp);
+write_state(const char* filename, state_s* stp);

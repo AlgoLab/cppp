@@ -70,7 +70,7 @@ clean:
 	rm -rf ${TEST_DIR}/*.o ${OBJ_DIR} ${BIN_DIR} $(SRC_DIR)/*.d $(LIB_DIR)/getopt
 
 check: $(T_OBJECTS) bin
-	tests/internal/perfect_phylogeny.o
+	tests/bin/all_tests.sh
 
 doc: $(P) docs/latex/refman.pdf
 	doxygen && cd docs/latex/ && latexmk -recorder -use-make -pdf refman

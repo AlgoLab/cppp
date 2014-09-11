@@ -754,7 +754,7 @@ static GSList* json_get_list(json_t* root, char* field, bool optional) {
 
 
 state_s*
-read_state_from_file(char* filename) {
+read_state(const char* filename) {
         json_set_alloc_funcs(GC_malloc, GC_free);
         state_s* stp = new_state();
         operation* op = new_operation();
@@ -833,7 +833,7 @@ static json_t* array2json_array(uint32_t* p, size_t size) {
    include only the filenames and we export the graphs in GraphML
 */
 void
-write_state_to_file(char* filename, state_s* stp) {
+write_state(const char* filename, state_s* stp) {
         json_set_alloc_funcs(GC_malloc, GC_free);
         json_t* data = json_object();
         assert(!json_object_set(data, "realized_char", json_integer(stp->realized_char)));
@@ -895,9 +895,9 @@ write_state_to_file(char* filename, state_s* stp) {
 /* START_TEST(write_json_1) { */
 /*     state_s *stp = new_state(); */
 /*     stp->realized_char = 1; */
-/*     write_state_to_file("tests/api/1.json", stp); */
+/*     write_state("tests/api/1.json", stp); */
 
-/*     state_s *stp2 = read_state_from_file("tests/api/1.json"); */
+/*     state_s *stp2 = read_state("tests/api/1.json"); */
 /*     ck_assert_int_eq(stp->realized_char, stp2->realized_char); */
 /* } */
 /* END_TEST */
@@ -933,9 +933,9 @@ void first_state(state_s* stp, pp_instance *instp) {
 /*     stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(96)); */
 /*     stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(97)); */
 /*     stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(98)); */
-/*     write_state_to_file("tests/api/2.json", stp); */
+/*     write_state("tests/api/2.json", stp); */
 
-/*     state_s *stp2 = read_state_from_file("tests/api/2.json"); */
+/*     state_s *stp2 = read_state("tests/api/2.json"); */
 /*     ck_assert_int_eq(stp->realized_char, stp2->realized_char); */
 /*     for (size_t i=0; i<7; i++) */
 /*         ck_assert_int_eq(GPOINTER_TO_INT(g_slist_nth_data(stp->tried_characters, i)), */
@@ -944,13 +944,13 @@ void first_state(state_s* stp, pp_instance *instp) {
 /* END_TEST */
 
 START_TEST(realize_3_0) {
-        state_s *stp = read_state_from_file("tests/api/3.json");
+        state_s *stp = read_state("tests/api/3.json");
         operation* op = new_operation();
         pp_instance inst2 = realize_character(*stp->instance, 0, op);
         state_s* stp2 = new_state();
         copy_state(stp2, stp);
         stp2->instance = &inst2;
-        write_state_to_file("tests/api/3-0.json", stp2);
+        write_state("tests/api/3-0.json", stp2);
 
         ck_assert_int_eq(stp2->realized_char, 0);
 }
@@ -960,9 +960,9 @@ START_TEST(write_json_3) {
         state_s *stp = new_state();
         stp->instance = new_instance();
         *stp->instance = read_instance_from_filename("tests/input/read/3.txt");
-        write_state_to_file("tests/api/3.json", stp);
+        write_state("tests/api/3.json", stp);
 
-        state_s *stp2 = read_state_from_file("tests/api/3.json");
+        state_s *stp2 = read_state("tests/api/3.json");
         ck_assert_int_eq(stp->realized_char, stp2->realized_char);
 }
 END_TEST
@@ -1041,18 +1041,34 @@ static Suite * perfect_phylogeny_suite(void) {
         return s;
 }
 
-int main(void) {
-        int number_failed;
-        Suite *s;
-        SRunner *sr;
+int main(int argc, char **argv) {
         igraph_i_set_attribute_table(&igraph_cattribute_table);
-
-        s = perfect_phylogeny_suite();
-        sr = srunner_create(s);
-
-        srunner_run_all(sr, CK_NORMAL);
-        number_failed = srunner_ntests_failed(sr);
-        srunner_free(sr);
-        return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+        if(argc < 2) {
+                Suite *s;
+                SRunner *sr;
+                s = perfect_phylogeny_suite();
+                sr = srunner_create(s);
+                srunner_run_all(sr, CK_NORMAL);
+                int number_failed = srunner_ntests_failed(sr);
+                srunner_free(sr);
+                return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+        }
+        json_t* data = json_load_file(argv[1], JSON_DISABLE_EOF_CHECK , NULL);
+        assert(data != NULL && "Could not parse JSON file\n");
+        unsigned int test_type = json_integer_value(json_object_get(data,"test"));
+        if (test_type == 1) {
+                const char *input_json_filename = json_string_value(json_object_get(data,"input"));
+                json_t* listc = json_object_get(data, "characters");
+                size_t index;
+                json_t *value;
+                state_s *stp = read_state(input_json_filename);
+                json_array_foreach(listc, index, value) {
+                        operation* op = new_operation();
+                        pp_instance inst2 = realize_character(*stp->instance, json_integer_value(value), op);
+                        stp->instance = &inst2;
+                }
+                write_state(json_string_value(json_object_get(data,"output")), stp);
+        }
+        return EXIT_SUCCESS;
 }
 #endif
