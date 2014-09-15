@@ -2,6 +2,7 @@
 SRC_DIR	=src
 OBJ_DIR	=obj
 LIB_DIR =lib
+TEST_DIR = tests
 INTERNAL_TEST_DIR = tests/internal
 API_TEST_DIR = tests/public
 BIN_DIR	=bin
@@ -67,15 +68,50 @@ ${API_TEST_DIR}/%.o: $(API_TEST_DIR)/%.c
 
 clean:
 	@echo "Cleaning..."
-	rm -rf ${TEST_DIR}/*.o ${OBJ_DIR} ${BIN_DIR} $(SRC_DIR)/*.d $(LIB_DIR)/getopt
+	rm -rf ${TEST_DIR}/*.o ${TEST_DIR}/bin/* ${TEST_DIR}/*/output/* ${OBJ_DIR} ${BIN_DIR} $(SRC_DIR)/*.d $(LIB_DIR)/getopt
 
-check: $(T_OBJECTS) bin
-	tests/bin/all_tests.sh
+# The regression tests are stored in a directory tree as follows:
+# tests/
+# tests/TYPE                : TYPE is api for perfect_phylogeny tests. Contains the description of each test
+# tests/TYPE/input          : contains the input files. They can be instances or graphs
+# tests/TYPE/output         : the outputs of the execution of the tests, and diffs wrt expected results
+# tests/TYPE/ok             : the expected results
+#
+# The filenames follow this scheme:
+# test description name: t*.json
+# actual results and expected results: *.json
+# The stem of the filenames (the expansion of *) must be the same for all tests
+#
+PP_TESTS_DIR := tests/api
+# PP_TESTS_DESC := $(wildcard $(PP_TESTS_DIR)/t*.json)
+PP_TESTS_OK   := $(wildcard $(PP_TESTS_DIR)/ok/*)
+# PP_TESTS_OK_T stores a result for each test description
+# It checks that I never forget to write the expected results
+# PP_TESTS_OK_T doesn't contain the graph files
+PP_TESTS_OK_T := $(PP_TESTS_OK:$(PP_TESTS_DIR)/t%.json=$(PP_TESTS_DIR)/ok/%.json)
+PP_TESTS_OUT  := $(PP_TESTS_OK:$(PP_TESTS_DIR)/ok/%=$(PP_TESTS_DIR)/output/%)
+PP_TESTS_DIFF := $(PP_TESTS_OK:$(PP_TESTS_DIR)/ok/%=$(PP_TESTS_DIR)/output/%.diff)
+
+check: bin $(T_OBJECTS) unit-tests regression-tests
+
+# Implicit rules to perform the regression tests
+$(PP_TESTS_DIR)/output/%.json $(PP_TESTS_DIR)/output/%.json-conflict.graphml $(PP_TESTS_DIR)/output/%.json-redblack.graphml: $(PP_TESTS_DIR)/t%.json $(T_OBJECTS)
+	tests/internal/perfect_phylogeny.o $<
+
+# We must ignore diff's return value, otherwise make complains
+$(PP_TESTS_DIR)/output/%.diff: $(PP_TESTS_DIR)/output/%
+	-diff -uNEZwB $< $(PP_TESTS_DIR)/ok/$* > $@
+
+regression-tests: $(PP_TESTS_DIFF) $(PP_TESTS_OK_T) $(PP_TESTS_OUT)
+	cat $(PP_TESTS_DIFF)
+
+unit-tests: $(T_OBJECTS) bin
+	tests/internal/perfect_phylogeny.o
 
 doc: $(P) docs/latex/refman.pdf
 	doxygen && cd docs/latex/ && latexmk -recorder -use-make -pdf refman
 
-.PHONY: all clean doc
+.PHONY: all clean doc unit-tests
 
 ifneq "$(MAKECMDGOALS)" "clean"
 -include ${SOURCES:.c=.d}

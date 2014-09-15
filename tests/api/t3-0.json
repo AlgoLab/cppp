@@ -1,0 +1,6 @@
+{
+    "test": 1,
+    "input": "tests/api/input/3.json",
+    "output": "tests/api/output/3-0.json",
+    "characters": [ 0 ]
+}
