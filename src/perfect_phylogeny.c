@@ -1041,6 +1041,14 @@ static Suite * perfect_phylogeny_suite(void) {
         return s;
 }
 
+/**
+   This file is mainly used as a library.
+
+   The standalone file is used for testing. If it is invoked without arguments,
+   it runs a battery of unit tests, defined with the *check* package.
+   It is invoked with a filename argument, the filename is a json file
+   describing the regression test.
+*/
 int main(int argc, char **argv) {
         igraph_i_set_attribute_table(&igraph_cattribute_table);
         if(argc < 2) {
@@ -1053,7 +1061,8 @@ int main(int argc, char **argv) {
                 srunner_free(sr);
                 return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
         }
-        json_t* data = json_load_file(argv[1], JSON_DISABLE_EOF_CHECK , NULL);
+        json_error_t error;
+        json_t* data = json_load_file(argv[1], 0, &error);
         assert(data != NULL && "Could not parse JSON file\n");
         unsigned int test_type = json_integer_value(json_object_get(data,"test"));
         if (test_type == 1) {
