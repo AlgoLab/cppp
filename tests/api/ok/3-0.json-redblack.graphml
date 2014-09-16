@@ -47,6 +47,10 @@
       <data key="v_id">4</data>
       <data key="v_color">1</data>
     </node>
+    <edge source="n0" target="n5">
+    </edge>
+    <edge source="n0" target="n8">
+    </edge>
     <edge source="n1" target="n6">
     </edge>
     <edge source="n2" target="n7">
@@ -54,12 +58,6 @@
     <edge source="n3" target="n6">
     </edge>
     <edge source="n1" target="n5">
-    </edge>
-    <edge source="n5" target="n5">
-    </edge>
-    <edge source="n5" target="n6">
-    </edge>
-    <edge source="n5" target="n7">
     </edge>
   </graph>
 </graphml>
