@@ -66,9 +66,13 @@ ${API_TEST_DIR}/%.o: $(API_TEST_DIR)/%.c
 	$(CC_FULL) -MM -MF $(patsubst %.c,%.d,$<)  -MT $@ $<
 	$(CC_FULL) $(CFLAGS_TEST) -o $@ $< `tail -n +2 $(patsubst %.c,%.d,$<) | grep -oP "\bsrc\/[^\s]+" | tr ' ' '\n' | perl -e 's/\.[ch]$$/.o/' -p | perl -e 's/^src/obj/' -p | uniq | tr '\n' ' '` $(LIBS)$  $(LDLIBS) $(LDLIBS_TEST)
 
-clean:
+clean: clean-test
 	@echo "Cleaning..."
-	rm -rf ${TEST_DIR}/*.o ${TEST_DIR}/bin/* ${TEST_DIR}/*/output/* ${OBJ_DIR} ${BIN_DIR} $(SRC_DIR)/*.d $(LIB_DIR)/getopt
+	rm -rf  ${OBJ_DIR} ${BIN_DIR} $(SRC_DIR)/*.d $(LIB_DIR)/getopt
+
+clean-test:
+	@echo "Cleaning tests..."
+	rm -rf ${TEST_DIR}/*.o ${TEST_DIR}/bin/* ${TEST_DIR}/*/output/*
 
 # The regression tests are stored in a directory tree as follows:
 # tests/
@@ -92,7 +96,7 @@ PP_TESTS_OK_T := $(PP_TESTS_OK:$(PP_TESTS_DIR)/t%.json=$(PP_TESTS_DIR)/ok/%.json
 PP_TESTS_OUT  := $(PP_TESTS_OK:$(PP_TESTS_DIR)/ok/%=$(PP_TESTS_DIR)/output/%)
 PP_TESTS_DIFF := $(PP_TESTS_OK:$(PP_TESTS_DIR)/ok/%=$(PP_TESTS_DIR)/output/%.diff)
 
-check: bin $(T_OBJECTS) unit-tests regression-tests
+check: bin $(T_OBJECTS) unit-test regression-test
 
 # Implicit rules to perform the regression tests
 $(PP_TESTS_DIR)/output/%.json $(PP_TESTS_DIR)/output/%.json-conflict.graphml $(PP_TESTS_DIR)/output/%.json-redblack.graphml: $(PP_TESTS_DIR)/t%.json $(T_OBJECTS)
@@ -102,16 +106,16 @@ $(PP_TESTS_DIR)/output/%.json $(PP_TESTS_DIR)/output/%.json-conflict.graphml $(P
 $(PP_TESTS_DIR)/output/%.diff: $(PP_TESTS_DIR)/output/%
 	-diff -uNEZwB $< $(PP_TESTS_DIR)/ok/$* > $@
 
-regression-tests: $(PP_TESTS_DIFF) $(PP_TESTS_OK_T) $(PP_TESTS_OUT)
+regression-test: $(PP_TESTS_DIFF) $(PP_TESTS_OK_T) $(PP_TESTS_OUT)
 	cat $(PP_TESTS_DIFF)
 
-unit-tests: $(T_OBJECTS) bin
+unit-test: $(T_OBJECTS) bin
 	tests/internal/perfect_phylogeny.o
 
 doc: $(P) docs/latex/refman.pdf
 	doxygen && cd docs/latex/ && latexmk -recorder -use-make -pdf refman
 
-.PHONY: all clean doc unit-tests
+.PHONY: all clean doc unit-test clean-test
 
 ifneq "$(MAKECMDGOALS)" "clean"
 -include ${SOURCES:.c=.d}

@@ -165,53 +165,45 @@ realize_character(const pp_instance src, const uint32_t character, operation *op
         assert(op != NULL);
         pp_instance dst;
         copy_instance(&dst, &src);
-        igraph_real_t c = dst.character_label[character];
+        igraph_integer_t c = (igraph_integer_t) dst.character_label[character];
         int ret = 0;
 
         igraph_vector_t conn_comp;
-        igraph_vector_init(&conn_comp, 0);
+        igraph_vector_init(&conn_comp, 1);
         ret = igraph_subcomponent(dst.red_black, &conn_comp, c, IGRAPH_ALL);
         assert(ret == 0);
         igraph_vector_sort(&conn_comp);
 
 
         igraph_vector_t adjacent;
-        igraph_vector_init(&adjacent, 0);
+        igraph_vector_init(&adjacent, 1);
         ret = igraph_neighbors(dst.red_black, &adjacent, c, IGRAPH_ALL);
         assert(ret == 0);
         igraph_vector_t not_adjacent;
-        igraph_vector_init(&not_adjacent, 0);
+        igraph_vector_init(&not_adjacent, 1);
         igraph_vector_difference_sorted(&conn_comp, &adjacent, &not_adjacent);
 
         int color = VAN(dst.red_black, "color", c);
         assert(color != SPECIES);
         if (color == BLACK) {
+                igraph_es_t es;
+                igraph_es_incident(&es, c, IGRAPH_ALL);
+                igraph_delete_edges(dst.red_black, es);
+                igraph_es_destroy(&es);
+
                 igraph_vector_t new_red;
                 size_t l=igraph_vector_size(&not_adjacent);
-                igraph_vector_init(&new_red, 2*l);
+                igraph_vector_init(&new_red, 0);
                 for (size_t i=0; i<l; i++) {
-                        VECTOR(new_red)[2*i] = c;
-                        VECTOR(new_red)[2*i+1] = VECTOR(not_adjacent)[i];
+                        uint32_t v = VECTOR(not_adjacent)[i];
+                        /* check if v is a species */
+                        if (v < dst.num_species && v != c) {
+                                igraph_vector_push_back(&new_red, c);
+                                igraph_vector_push_back(&new_red, v);
+                        }
                 }
                 igraph_add_edges(dst.red_black, &new_red, 0);
                 igraph_vector_destroy(&new_red);
-
-                igraph_vector_t to_delete;
-                l=igraph_vector_size(&adjacent);
-                igraph_vector_init(&to_delete, 2*l);
-                igraph_es_t edges_to_delete;
-                for (size_t i=0; i<l; i++) {
-                        VECTOR(to_delete)[2*i] = c;
-                        VECTOR(to_delete)[2*i+1] = VECTOR(adjacent)[i];
-                }
-                igraph_es_pairs(&edges_to_delete, &to_delete, IGRAPH_UNDIRECTED);
-                igraph_delete_edges(dst.red_black, edges_to_delete);
-                igraph_vector_destroy(&to_delete);
-                igraph_vector_destroy(&not_adjacent);
-                igraph_vector_destroy(&adjacent);
-                igraph_vector_destroy(&conn_comp);
-                igraph_es_destroy(&edges_to_delete);
-
                 op->type = 1;
                 SETVAN(dst.red_black, "color", c, RED);
                 dst.root_state[character] = 1;
@@ -226,6 +218,9 @@ realize_character(const pp_instance src, const uint32_t character, operation *op
                         op->removed_characters_list = g_slist_append(op->removed_characters_list, GINT_TO_POINTER(character));
                         dst.root_state[character] = -1;
                 }
+        igraph_vector_destroy(&not_adjacent);
+        igraph_vector_destroy(&adjacent);
+        igraph_vector_destroy(&conn_comp);
         return dst;
 }
 
@@ -856,7 +851,7 @@ write_state(const char* filename, state_s* stp) {
                 asprintf(&g_filename, "%s-redblack.graphml", filename);
                 fp = fopen(g_filename, "w");
                 assert(fp != NULL);
-                assert(!igraph_write_graph_graphml(stp->instance->red_black, fp));
+                assert(!igraph_write_graph_graphml(stp->instance->red_black, fp, true));
                 fclose(fp);
                 assert(!json_object_set(instp, "red_black_file", json_string(g_filename)));
         }
@@ -864,7 +859,7 @@ write_state(const char* filename, state_s* stp) {
         if (stp->instance->conflict != NULL) {
                 asprintf(&g_filename, "%s-conflict.graphml", filename);
                 fp = fopen(g_filename, "w");
-                assert(!igraph_write_graph_graphml(stp->instance->conflict, fp));
+                assert(!igraph_write_graph_graphml(stp->instance->conflict, fp, true));
                 fclose(fp);
                 assert(!json_object_set(instp, "conflict_file", json_string(g_filename)));
         }
