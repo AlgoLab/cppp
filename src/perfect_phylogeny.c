@@ -39,10 +39,7 @@ init_instance(pp_instance *instp, uint32_t nspecies, uint32_t nchars) {
         igraph_empty(instp->conflict, nchars, IGRAPH_UNDIRECTED);
         instp->red_black = GC_MALLOC(sizeof(igraph_t));
         igraph_empty_attrs(instp->red_black, nspecies + nchars, IGRAPH_UNDIRECTED, 0);
-        instp->species_label = GC_MALLOC(nspecies * sizeof(uint32_t));
-        instp->character_label = GC_MALLOC(nchars * sizeof(uint32_t));
-        instp->conflict_label = GC_MALLOC(nspecies * sizeof(uint32_t));
-        instp->root_state = GC_MALLOC(nchars * sizeof(uint32_t));
+        instp->current = GC_MALLOC(nchars * sizeof(uint32_t));
 }
 
 /**
@@ -92,16 +89,11 @@ matrix2instance(pp_instance *instp) {
 
         for(uint32_t s=0; s<instp->num_species; s++) {
                 SETVAN(instp->red_black, "id", s, s);
-                instp->species_label[s] = s;
                 SETVAN(instp->red_black, "color", s, SPECIES);
-                instp->species = g_slist_append(instp->species, GINT_TO_POINTER(s));
         }
         for(uint32_t c=0; c<instp->num_characters; c++) {
-                SETVAN(instp->red_black, "id", c+instp->num_species, c);
-                instp->character_label[c] = c+instp->num_species;
-                instp->conflict_label[c] = c;
-                SETVAN(instp->red_black, "color", c+instp->num_species, BLACK);
-                instp->characters = g_slist_append(instp->characters, GINT_TO_POINTER(c));
+                SETVAN(instp->red_black, "id", c + instp->num_species, c);
+                SETVAN(instp->red_black, "color", c + instp->num_species, BLACK);
         }
         for (uint32_t s=0; s<instp->num_species; s++)
                 for (uint32_t c=0; c<instp->num_characters; c++)
@@ -115,7 +107,7 @@ matrix2instance(pp_instance *instp) {
                         for(uint32_t s=0; s<instp->num_species; s++)
                                 states[matrix_get_value(instp, s, c1)][matrix_get_value(instp, s, c2)] = 1;
                         if(states[0][0] + states[0][1] + states[1][0] + states[1][1] == 4)
-                                igraph_add_edge(instp->conflict, instp->conflict_label[c1], instp->conflict_label[c2]);
+                                igraph_add_edge(instp->conflict, c1, c2);
                 }
 }
 
@@ -165,7 +157,7 @@ realize_character(const pp_instance src, const uint32_t character, operation *op
         assert(op != NULL);
         pp_instance dst;
         copy_instance(&dst, &src);
-        igraph_integer_t c = (igraph_integer_t) dst.character_label[character];
+        igraph_integer_t c = (igraph_integer_t) src.num_species_orig + character;
         int ret = 0;
 
         igraph_vector_t conn_comp;
@@ -173,7 +165,6 @@ realize_character(const pp_instance src, const uint32_t character, operation *op
         ret = igraph_subcomponent(dst.red_black, &conn_comp, c, IGRAPH_ALL);
         assert(ret == 0);
         igraph_vector_sort(&conn_comp);
-
 
         igraph_vector_t adjacent;
         igraph_vector_init(&adjacent, 1);
@@ -198,15 +189,15 @@ realize_character(const pp_instance src, const uint32_t character, operation *op
         }
         int color = VAN(dst.red_black, "color", c);
         assert(color != SPECIES);
-		igraph_es_t es;
-		igraph_es_incident(&es, c, IGRAPH_ALL);
-		igraph_delete_edges(dst.red_black, es);
-		igraph_es_destroy(&es);
+        igraph_es_t es;
+        igraph_es_incident(&es, c, IGRAPH_ALL);
+        igraph_delete_edges(dst.red_black, es);
+        igraph_es_destroy(&es);
         if (color == BLACK) {
                 igraph_add_edges(dst.red_black, &new_red, 0);
                 op->type = 1;
                 SETVAN(dst.red_black, "color", c, RED);
-                dst.root_state[character] = 1;
+                dst.current[character] = 1;
         }
         if (color == RED) {
                 if (igraph_vector_size(&not_adjacent) > 0) {
@@ -216,7 +207,7 @@ realize_character(const pp_instance src, const uint32_t character, operation *op
                         op->type = 2;
                         SETVAN(dst.red_black, "color", c, RED + 1);
                         op->removed_characters_list = g_slist_append(op->removed_characters_list, GINT_TO_POINTER(character));
-                        dst.root_state[character] = 2;
+                        dst.current[character] = -1;
                 }
         }
         igraph_vector_destroy(&new_red);
@@ -295,21 +286,20 @@ instance_cleanup(const pp_instance src, operation *op) {
         assert(err != 0);
 
         // Looking for null species
-        for (uint32_t i=0; i < dst.num_species_orig; i++) {
-                uint32_t id = dst.species_label[i];
+        for (uint32_t id=0; id < dst.num_species_orig; id++) {
                 igraph_vector_t v;
                 err = igraph_vector_init_seq(&v, id, id);
                 err = igraph_degree(src.red_black, &sizes, igraph_vss_vector(&v), 0, IGRAPH_LOOPS);
                 assert(err != 0);
                 if (VECTOR(sizes)[0] == 1) {
-                        op->removed_species_list = g_slist_append(op->removed_species_list, GINT_TO_POINTER(i));
+                        op->removed_species_list = g_slist_append(op->removed_species_list, GINT_TO_POINTER(id));
                         op->type = 3;
                 }
         }
 
         // Looking for null characters
         for (uint32_t i=0; i < dst.num_characters_orig; i++) {
-                uint32_t id = dst.character_label[i];
+                uint32_t id = dst.num_species_orig + i;
                 igraph_vector_t v;
                 err = igraph_vector_init_seq(&v, id, id);
                 err = igraph_degree(src.red_black, &sizes, igraph_vss_vector(&v), 0, IGRAPH_LOOPS);
@@ -356,15 +346,11 @@ static void test_matrix_pp(pp_instance inst, const uint32_t num_species, const u
                         else
                                 ck_assert_int_lt(eid, 0);
                 }
-        for (uint32_t i=0; i<inst.num_species; i++)
-                ck_assert_int_eq(inst.species_label[i], i);
-        for (uint32_t i=0; i<inst.num_characters; i++)
-                ck_assert_int_eq(inst.character_label[i], i+inst.num_species);
         if (conflict != NULL) {
                 for (uint32_t c1=0; c1<inst.num_characters; c1++)
                         for (uint32_t c2=0; c2<inst.num_characters; c2++) {
                                 igraph_integer_t eid;
-                                igraph_get_eid(inst.conflict, &eid, inst.conflict_label[c1], inst.conflict_label[c2], 0, 0);
+                                igraph_get_eid(inst.conflict, &eid, c1, c2, 0, 0);
                                 if (conflict[c1][c2] == 1)
                                         ck_assert_msg(eid >= 0, "Characters %d %d\n", c1, c2);
                                 else
@@ -457,12 +443,7 @@ static void null_instance_test(pp_instance *instp) {
         ck_assert_msg(instp->conflict == NULL, "instp->red_black has not been freed\n");
         ck_assert_msg(instp->red_black == NULL, "instp->red_black has not been freed\n");
         ck_assert_msg(instp->matrix == NULL, "instp->red_black has not been freed\n");
-        ck_assert_msg(instp->species_label == NULL, "instp->red_black has not been freed\n");
-        ck_assert_msg(instp->character_label == NULL, "instp->red_black has not been freed\n");
-        ck_assert_msg(instp->conflict_label == NULL, "instp->red_black has not been freed\n");
-        ck_assert_msg(instp->root_state == NULL, "instp->root_state has not been freed\n");
-        ck_assert_msg(instp->species == NULL, "instp->species has not been freed\n");
-        ck_assert_msg(instp->characters == NULL, "instp->characters has not been freed\n");
+        ck_assert_msg(instp->current == NULL, "instp->current has not been freed\n");
 }
 
 START_TEST(new_instance_1) {
@@ -485,12 +466,7 @@ copy_instance(pp_instance *dst, const pp_instance *src) {
         igraph_copy(dst->red_black, src->red_black);
         igraph_copy(dst->conflict, src->conflict);
         dst->matrix = src->matrix;
-        memcpy(dst->species_label, src->species_label, src->num_species_orig * sizeof(uint32_t));
-        memcpy(dst->character_label, src->character_label, src->num_characters_orig * sizeof(uint32_t));
-        memcpy(dst->conflict_label, src->conflict_label, src->num_characters_orig * sizeof(uint32_t));
-        memcpy(dst->root_state, src->root_state, src->num_characters_orig * sizeof(uint32_t));
-        dst->species = g_slist_copy(src->species);
-        dst->characters = g_slist_copy(src->characters);
+        memcpy(dst->current, src->current, src->num_characters_orig * sizeof(uint32_t));
 }
 
 void str_instance(const pp_instance* instp, char* str) {
@@ -503,12 +479,7 @@ void str_instance(const pp_instance* instp, char* str) {
                              "  red_black: %p\n"
                              "  conflict: %p\n"
                              "  matrix: %p\n"
-                             "  species_label: %p\n"
-                             "  character_label: %p\n"
-                             "  conflict_label: %p\n"
-                             "  root_state: %p\n"
-                             "  species: %p\n"
-                             "  characters: %p\n"
+                             "  current: %p\n"
                              "}",
                              instp->num_species,
                              instp->num_characters,
@@ -517,13 +488,8 @@ void str_instance(const pp_instance* instp, char* str) {
                              (void *) instp->red_black,
                              (void *) instp->conflict,
                              (void *) instp->matrix,
-                             (void *) instp->species_label,
-                             (void *) instp->character_label,
-                             (void *) instp->conflict_label,
-                             (void *) instp->root_state,
-                             (void *) instp->species,
-                             (void *) instp->characters
-                       ));
+                             (void *) instp->current
+			   ));
 }
 
 void
@@ -533,10 +499,7 @@ destroy_instance(pp_instance *instp) {
         /* if (instp->red_black != NULL) */
         /*     igraph_destroy(instp->red_black); */
         /* free(instp->matrix); */
-        /* free(instp->species_label); */
-        /* free(instp->character_label); */
-        /* free(instp->conflict_label); */
-        /* free(instp->root_state); */
+        /* free(instp->current); */
         /* g_slist_free(instp->species); */
         /* g_slist_free(instp->characters); */
 }
@@ -670,29 +633,9 @@ free_state(state_s *stp) {
 uint32_t check_state(const state_s* stp) {
         uint32_t err = 0;
         pp_instance* instp = stp->instance;
-        if (instp->num_species != g_slist_length(instp->species)) {
+        if (instp->num_species < 0) {
                 err += 1;
-                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", instp->num_species, g_slist_length(instp->species));
-        }
-        if (instp->num_characters != g_slist_length(instp->characters)) {
-                err += 2;
-                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", instp->num_characters, g_slist_length(instp->characters));
-        }
-        if (instp->num_species != sizeof(instp->species_label)/sizeof(instp->species_label[0])) {
-                err += 4;
-                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %lu)", instp->num_species , sizeof(instp->species_label)/sizeof(instp->species_label[0]));
-        }
-        if (instp->num_species != sizeof(instp->root_state)/sizeof(instp->root_state[0])) {
-                err += 8;
-                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %lu)", instp->num_species , sizeof(instp->root_state)/sizeof(instp->root_state[0]));
-        }
-        if (instp->num_characters != sizeof(instp->character_label)/sizeof(instp->character_label[0])) {
-                err += 16;
-                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %lu)", instp->num_characters, sizeof(instp->character_label)/sizeof(instp->character_label[0]));
-        }
-        if (instp->num_characters != sizeof(instp->conflict_label)/sizeof(instp->conflict_label[0])) {
-                err += 32;
-                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %lu)", instp->num_characters, sizeof(instp->conflict_label)/sizeof(instp->conflict_label[0]));
+                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", instp->num_species, 0);
         }
         return err;
 }
@@ -760,7 +703,8 @@ read_state(const char* filename) {
         stp->instance = instp;
         stp->operation = op;
 
-        json_t* data = json_load_file(filename, JSON_DISABLE_EOF_CHECK , NULL);
+        json_error_t jerr;
+        json_t* data = json_load_file(filename, JSON_DISABLE_EOF_CHECK, &jerr);
         assert(data != NULL && "Could not parse JSON file\n");
 
         stp->realized_char = json_get_integer(data, "realized_char");
@@ -773,12 +717,7 @@ read_state(const char* filename) {
                 stp->instance->num_characters = json_get_integer(instpj, "num_characters");
                 stp->instance->num_species_orig = json_get_integer(instpj, "num_species_orig");
                 stp->instance->num_characters_orig = json_get_integer(instpj, "num_characters_orig");
-                stp->instance->species_label = json_get_array(instpj, "species_label");
-                stp->instance->character_label = json_get_array(instpj, "character_label");
-                stp->instance->conflict_label = json_get_array(instpj, "conflict_label");
-                stp->instance->root_state = json_get_array(instpj, "root_state");
-                stp->instance->species = json_get_list(instpj, "species", false);
-                stp->instance->characters = json_get_list(instpj, "characters", false);
+                stp->instance->current = json_get_array(instpj, "current");
 
                 // Graphs
                 FILE* fp;
@@ -870,12 +809,7 @@ write_state(const char* filename, state_s* stp) {
 
         if (stp->instance->matrix != NULL)
                 assert(!json_object_set(instp, "matrix", array2json_array(stp->instance->matrix, stp->instance->num_species * stp->instance->num_characters)));
-        assert(!json_object_set(instp, "species_label", array2json_array(stp->instance->species_label, stp->instance->num_species)));
-        assert(!json_object_set(instp, "character_label", array2json_array(stp->instance->character_label, stp->instance->num_characters)));
-        assert(!json_object_set(instp, "conflict_label", array2json_array(stp->instance->conflict_label, stp->instance->num_characters)));
-        assert(!json_object_set(instp, "root_state", array2json_array(stp->instance->root_state, stp->instance->num_species)));
-        assert(!json_object_set(instp, "species", gslist2json_array(stp->instance->species)));
-        assert(!json_object_set(instp, "characters", gslist2json_array(stp->instance->characters)));
+        assert(!json_object_set(instp, "current", array2json_array(stp->instance->current, stp->instance->num_species)));
 
         /* operation */
         if (stp->operation != NULL) {
@@ -917,6 +851,15 @@ void first_state(state_s* stp, pp_instance *instp) {
         stp->operation->removed_characters_list = NULL;
         stp->operation->removed_red_black_list = NULL;
         stp->operation->removed_conflict_list = NULL;
+}
+
+
+GSList* characters_list(state_s * stp) {
+        GSList* list = NULL;
+        for (uint32_t i=0; i < stp->instance->num_characters_orig; i++)
+                if (stp->instance->current[i] != -1)
+                        list = g_slist_prepend(list, GINT_TO_POINTER(stp->instance->current[i]));
+        return g_slist_reverse(list);
 }
 
 
@@ -982,16 +925,8 @@ static uint32_t instance_cmp(pp_instance *instp1, pp_instance *instp2) {
         uint32_t result = 0;
         if (instp1->num_characters != instp2->num_characters) result += 1;
         if (instp1->num_species != instp2->num_species) result += 2;
-        if (instp1->species_label == NULL || instp2->species_label == NULL ||
-            memcmp(instp1->species_label, instp2->species_label, sizeof(*(instp1->species_label)))) result += 4;
-        if (instp1->character_label == NULL || instp2->character_label == NULL ||
-            memcmp(instp1->character_label, instp2->character_label, sizeof(*(instp1->character_label)))) result += 8;
-        if (instp1->conflict_label == NULL || instp2->conflict_label == NULL ||
-            memcmp(instp1->conflict_label, instp2->conflict_label, sizeof(*(instp1->conflict_label)))) result += 16;
-        if (instp1->root_state == NULL || instp2->root_state == NULL ||
-            memcmp(instp1->root_state, instp2->root_state, sizeof(*(instp1->root_state)))) result += 32;
-        if (g_slist_cmp(instp1->species, instp2->species)) result += 64;
-        if (g_slist_cmp(instp1->characters, instp2->characters)) result += 128;
+        if (instp1->current == NULL || instp2->current == NULL ||
+            memcmp(instp1->current, instp2->current, sizeof(*(instp1->current)))) result += 4;
         return result;
 }
 START_TEST(copy_instance_1) {

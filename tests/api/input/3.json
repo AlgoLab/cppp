@@ -1,28 +1,7 @@
 {
     "character_queue": [],
     "instance": {
-        "character_label": [
-            5,
-            6,
-            7,
-            8,
-            9
-        ],
-        "characters": [
-            0,
-            1,
-            2,
-            3,
-            4
-        ],
         "conflict_file": "tests/api/3.json-conflict.graphml",
-        "conflict_label": [
-            0,
-            1,
-            2,
-            3,
-            4
-        ],
         "matrix": [
             0,
             0,
@@ -55,26 +34,12 @@
         "num_species": 5,
         "num_species_orig": 5,
         "red_black_file": "tests/api/3.json-redblack.graphml",
-        "root_state": [
+        "current": [
             0,
             0,
             0,
             0,
             0
-        ],
-        "species": [
-            0,
-            1,
-            2,
-            3,
-            4
-        ],
-        "species_label": [
-            0,
-            1,
-            2,
-            3,
-            4
         ]
     },
     "operation": {

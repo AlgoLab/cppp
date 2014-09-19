@@ -65,18 +65,7 @@
    The \c matrix field can be \c NULL, if we are not interested in the matrix
    any more.
 
-   The fields \c species_label and \c character_label allow to quickly identify
-   the vertex of a red-black (or conflict) graph with a certain label, since
-   they map each original species/character to the id of the corresponding
-   vertex of the red-black graph. If the species/character is not in the current
-   set, than those arrays have value \c UINT32_MAX or \c -1.
-
-   Similarly, \c conflict_label maps each original character to the id of the
-   corresponding vertex of the conflict graph.
-   If the character is not in the current set, than the array has value \c
-   UINT32_MAX or \c -1.
-
-   The \c root_state gives the states of the root for each original species. The
+   The \c root_state gives the current state for each original species. The
    species that are not in the current instance have value \c UINT32_MAX or \c
    -1.
 
@@ -91,12 +80,7 @@ typedef struct pp_instance {
         igraph_t *red_black;
         igraph_t *conflict;
         uint32_t *matrix;
-        uint32_t *species_label;
-        uint32_t *character_label;
-        uint32_t *conflict_label;
-        uint32_t *root_state;
-        GSList   *species;
-        GSList   *characters;
+        uint32_t *current;
 } pp_instance;
 
 /**
@@ -127,7 +111,6 @@ void str_instance(const pp_instance* instp, char* str);
 */
 void
 copy_instance(pp_instance *dst, const pp_instance *src);
-
 
 /**
    \struct operation
@@ -323,3 +306,10 @@ read_state(const char* filename);
 */
 void
 write_state(const char* filename, state_s* stp);
+
+/**
+   \brief computes a list of the characters that can be realized
+
+   \param pointer to the state
+*/
+GSList* characters_list(state_s * stp);

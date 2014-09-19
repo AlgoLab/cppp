@@ -24,15 +24,10 @@
 #include "logging.h"
 #include "decision_tree.h"
 
-static gint cmp(gconstpointer a, gconstpointer b) {
-        return (GPOINTER_TO_INT(a) < GPOINTER_TO_INT(b)) ? -1 : (GPOINTER_TO_INT(a) > GPOINTER_TO_INT(b));
-}
-
 static GSList*
 alphabetic(state_s *stp) {
-        return (g_slist_sort(stp->instance->characters, cmp));
+        return (characters_list(stp));
 }
-
 
 int main(int argc, char **argv) {
         static struct gengetopt_args_info args_info;
