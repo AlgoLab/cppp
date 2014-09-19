@@ -28,9 +28,27 @@ no_sibling_p(state_s *stp) {
         return (stp->character_queue == NULL);
 }
 
+/**
+   \brief computes the next node of the decision tree
+
+   \param states: the set of states, since the decision tree can move to the
+   next level or to get back to the previous level
+   \param level: the current level
+   \param strategy_fn: a pointer to the function encoding the order of the
+   characters that we will try in the current level
+
+   \return the new level. It can differ from the input level at most by 1.
+
+   We keep track of the lists of \c tried_character (that is the characters that
+   we have already tried to realized in the current level) and of \c
+   character_queue (that is the characters left to try) to determine at which
+   stage we are. More precisely, if \c tried_character is \c NULL, we are at the
+   beginning, and if character_queue is \c NULL we are at the end.
+*/
 static uint32_t
 next_node(state_s *states, uint32_t level, strategy_fn node_init) {
         state_s *current = states + level;
+        printf("level: %d\n", level);
         if (current->tried_characters == NULL && no_sibling_p(current))
                 current->character_queue = node_init(current);
         if (no_sibling_p(current)) {
@@ -39,9 +57,10 @@ next_node(state_s *states, uint32_t level, strategy_fn node_init) {
         }
         current->realized_char = GPOINTER_TO_INT(g_slist_nth_data(current->character_queue, 0));
         current->character_queue = g_slist_nth(current->character_queue, 1);
+        current->tried_characters = g_slist_append(current->tried_characters, GINT_TO_POINTER(current->realized_char));
         pp_instance modified = realize_character(*current->instance, current->realized_char, current->operation);
         if (current->operation->type > 0) {
-                init_state(states + level + 1);
+                init_state(states + (level + 1));
                 state_s *next = states + level + 1;
                 copy_state(next, current);
                 copy_instance(next->instance, &modified);
@@ -53,16 +72,15 @@ next_node(state_s *states, uint32_t level, strategy_fn node_init) {
 void
 exhaustive_search(state_s *states, pp_instance inst, strategy_fn strategy) {
         first_state(states+0, &inst);
-        uint32_t level = 0;
-        while(level != -1) {
-                level = next_node(states, level, strategy);
+        uint32_t level = next_node(states, 0, strategy);
+        for(;level != -1; level = next_node(states, level, strategy)) {
+                instance_cleanup((states + level)->instance);
                 if ((states + level)->instance->num_species == 0) {
                         printf("Solution found\n");
+                        return;
                 }
         }
         printf("END\n");
-        for(uint8_t i=0; i <= level; i++)
-                destroy_state(states+i);
 }
 
 #ifdef TEST_EVERYTHING

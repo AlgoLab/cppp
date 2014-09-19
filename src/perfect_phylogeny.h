@@ -282,8 +282,7 @@ void first_state(state_s* stp, pp_instance *instp);
    therefore it is necessary to include this function in a \c while loop to
    completely simplify the instance
 */
-pp_instance
-instance_cleanup(const pp_instance src, operation *op);
+void instance_cleanup(pp_instance *src);
 
 /**
    \brief copy a state

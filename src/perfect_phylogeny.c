@@ -270,50 +270,29 @@ read_instance_from_filename(const char *filename) {
 
 */
 
-pp_instance
-instance_cleanup(const pp_instance src, operation *op) {
-        // remove isolated species and characters
-        assert(op != NULL);
-        int err;
-        pp_instance dst;
-        copy_instance(&dst, &src);
-        igraph_vector_t clusters, sizes, isolated;
-        err = igraph_vector_init(&clusters, 0);
-        assert(err != 0);
-        err = igraph_vector_init(&sizes, 1);
-        assert(err != 0);
-        err = igraph_vector_init(&isolated, 0);
-        assert(err != 0);
-
+void instance_cleanup(pp_instance *instp) {
         // Looking for null species
-        for (uint32_t id=0; id < dst.num_species_orig; id++) {
-                igraph_vector_t v;
-                err = igraph_vector_init_seq(&v, id, id);
-                err = igraph_degree(src.red_black, &sizes, igraph_vss_vector(&v), 0, IGRAPH_LOOPS);
-                assert(err != 0);
-                if (VECTOR(sizes)[0] == 1) {
-                        op->removed_species_list = g_slist_append(op->removed_species_list, GINT_TO_POINTER(id));
-                        op->type = 3;
-                }
+        for (uint32_t id=0; id < instp->num_species_orig; id++) {
+                igraph_es_t es;
+                igraph_integer_t size;
+                igraph_es_incident(&es, id, IGRAPH_ALL);
+                igraph_es_size(instp->red_black, &es, &size);
+                if (size == 0)
+                        (instp->num_species)--;
         }
 
         // Looking for null characters
-        for (uint32_t i=0; i < dst.num_characters_orig; i++) {
-                uint32_t id = dst.num_species_orig + i;
-                igraph_vector_t v;
-                err = igraph_vector_init_seq(&v, id, id);
-                err = igraph_degree(src.red_black, &sizes, igraph_vss_vector(&v), 0, IGRAPH_LOOPS);
-                assert(err != 0);
-                if (VECTOR(sizes)[0] == 1) {
-                        op->removed_characters_list = g_slist_append(op->removed_characters_list, GINT_TO_POINTER(i));
-                        op->type = 3;
-                }
+        for (uint32_t c=instp->num_species_orig; c < instp->num_species_orig + instp->num_characters_orig; c++) {
+                igraph_es_t es;
+                igraph_integer_t size;
+                igraph_es_incident(&es, c, IGRAPH_ALL);
+                igraph_es_size(instp->red_black, &es, &size);
+                if (size == 0)
+                        (instp->num_characters)--;
         }
-
 /* TODO (if necessary) */
 /* we remove duplicated characters */
 /* we remove duplicated species */
-        return dst;
 }
 
 igraph_t *
@@ -606,14 +585,11 @@ new_state(void) {
 void
 init_state(state_s *stp) {
         assert(stp != NULL);
-        state_s temp = {
-                .operation = new_operation(),
-                .instance = new_instance(),
-                .realized_char = 0,
-                .tried_characters = NULL,
-                .character_queue = NULL,
-        };
-        *stp = temp;
+        stp->operation = new_operation();
+        stp->instance = new_instance();
+        stp->realized_char = 0;
+        stp->tried_characters = NULL;
+        stp->character_queue = NULL;
 }
 
 void
@@ -692,7 +668,6 @@ static GSList* json_get_list(json_t* root, char* field, bool optional) {
         } else
                 return NULL;
 }
-
 
 state_s*
 read_state(const char* filename) {
