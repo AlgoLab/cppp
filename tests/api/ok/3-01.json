@@ -1,0 +1,62 @@
+{
+    "character_queue": [],
+    "instance": {
+        "character_label": [
+            5,
+            6,
+            7,
+            8,
+            9
+        ],
+        "characters": [
+            0,
+            1,
+            2,
+            3,
+            4
+        ],
+        "conflict_file": "tests/api/output/3-01.json-conflict.graphml",
+        "conflict_label": [
+            0,
+            1,
+            2,
+            3,
+            4
+        ],
+        "num_characters": 5,
+        "num_characters_orig": 5,
+        "num_species": 5,
+        "num_species_orig": 5,
+        "red_black_file": "tests/api/output/3-01.json-redblack.graphml",
+        "root_state": [
+            1,
+            1,
+            0,
+            0,
+            0
+        ],
+        "species": [
+            0,
+            1,
+            2,
+            3,
+            4
+        ],
+        "species_label": [
+            0,
+            1,
+            2,
+            3,
+            4
+        ]
+    },
+    "operation": {
+        "removed_characters_list": [],
+        "removed_conflict_list": [],
+        "removed_red_black_list": [],
+        "removed_species_list": [],
+        "type": 0
+    },
+    "realized_char": 0,
+    "tried_characters": []
+}
