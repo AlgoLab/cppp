@@ -104,7 +104,7 @@ $(PP_TESTS_DIR)/output/%.json $(PP_TESTS_DIR)/output/%.json-conflict.graphml $(P
 
 # We must ignore diff's return value, otherwise make complains
 $(PP_TESTS_DIR)/output/%.diff: $(PP_TESTS_DIR)/output/%
-	-diff -uNEZwB $< $(PP_TESTS_DIR)/ok/$* > $@
+	-diff -u --strip-trailing-cr --ignore-all-space $< $(PP_TESTS_DIR)/ok/$* > $@
 
 regression-test: $(PP_TESTS_DIFF) $(PP_TESTS_OK_T) $(PP_TESTS_OUT)
 	cat $(PP_TESTS_DIFF)
