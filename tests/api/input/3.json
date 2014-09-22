@@ -34,6 +34,20 @@
         "num_species": 5,
         "num_species_orig": 5,
         "red_black_file": "tests/api/3.json-redblack.graphml",
+        "characters": [
+            1,
+            1,
+            1,
+            1,
+            1
+        ],
+        "species": [
+            1,
+            1,
+            1,
+            1,
+            1
+        ],
         "current": [
             0,
             0,

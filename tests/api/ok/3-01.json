@@ -1,19 +1,33 @@
 {
     "character_queue": [],
     "instance": {
+        "characters": [
+            1,
+            0,
+            1,
+            1,
+            0
+        ],
         "conflict_file": "tests/api/output/3-01.json-conflict.graphml",
         "current": [
             1,
+            4294967295,
+            0,
+            0,
+            4294967295
+        ],
+        "num_characters": 3,
+        "num_characters_orig": 5,
+        "num_species": 3,
+        "num_species_orig": 5,
+        "red_black_file": "tests/api/output/3-01.json-redblack.graphml",
+        "species": [
+            1,
+            1,
             1,
             0,
-            0,
             0
-        ],
-        "num_characters": 5,
-        "num_characters_orig": 5,
-        "num_species": 5,
-        "num_species_orig": 5,
-        "red_black_file": "tests/api/output/3-01.json-redblack.graphml"
+        ]
     },
     "operation": {
         "removed_characters_list": [],

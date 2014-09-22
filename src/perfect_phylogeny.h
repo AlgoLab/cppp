@@ -65,11 +65,9 @@
    The \c matrix field can be \c NULL, if we are not interested in the matrix
    any more.
 
-   The \c root_state gives the current state for each original species. The
-   species that are not in the current instance have value \c UINT32_MAX or \c
-   -1.
+   The \c current gives the current state for each original species.
 
-   \c species and \c characters are the list of current species and characters
+   \c species and \c characters are two arrays whose values are 1 for the current species and characters
    respectively.
 */
 typedef struct pp_instance {
@@ -81,6 +79,8 @@ typedef struct pp_instance {
         igraph_t *conflict;
         uint32_t *matrix;
         uint32_t *current;
+        uint32_t *species;
+        uint32_t *characters;
 } pp_instance;
 
 /**
@@ -312,3 +312,13 @@ write_state(const char* filename, state_s* stp);
    \param pointer to the state
 */
 GSList* characters_list(state_s * stp);
+
+/**
+   \brief delete a species from the set of current species from an instance
+*/
+void delete_species(pp_instance *instp, uint32_t s);
+
+/**
+   \brief delete a character from the set of current character from an instance
+*/
+void delete_character(pp_instance *instp, uint32_t c);

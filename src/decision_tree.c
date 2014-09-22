@@ -51,6 +51,8 @@ next_node(state_s *states, uint32_t level, strategy_fn node_init) {
         printf("level: %d\n", level);
         if (current->tried_characters == NULL && no_sibling_p(current))
                 current->character_queue = node_init(current);
+        printf("level: %d - tried: %d - queue: %d\n", level,
+               g_slist_length(current->tried_characters), g_slist_length(current->character_queue));
         if (no_sibling_p(current)) {
                 destroy_state(current);
                 return (level - 1);
