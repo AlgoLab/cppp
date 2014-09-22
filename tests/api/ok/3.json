@@ -29,13 +29,6 @@
             0
         ]
     },
-    "operation": {
-        "removed_characters_list": [],
-        "removed_conflict_list": [],
-        "removed_red_black_list": [],
-        "removed_species_list": [],
-        "type": 0
-    },
     "realized_char": 0,
     "tried_characters": []
 }

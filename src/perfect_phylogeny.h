@@ -69,6 +69,11 @@
 
    \c species and \c characters are two arrays whose values are 1 for the current species and characters
    respectively.
+
+   \c operation is the code for the most recent operation:
+   0 => realize an inactive character
+   1 => realize an active character
+   -1 => failure
 */
 typedef struct pp_instance {
         uint32_t num_species;
@@ -81,6 +86,7 @@ typedef struct pp_instance {
         uint32_t *current;
         uint32_t *species;
         uint32_t *characters;
+        uint32_t operation;
 } pp_instance;
 
 /**
@@ -112,58 +118,12 @@ void str_instance(const pp_instance* instp, char* str);
 void
 copy_instance(pp_instance *dst, const pp_instance *src);
 
-/**
-   \struct operation
-   \brief an operation that has been, or can be, applied to an instance.
-
-   The \c type can take the following values:
-
-   * \c 0 => no operation
-   * \c 1 => realized a positive character
-   * \c 2 => realized a negative character, a character has been freed
-   * \c 3 => null characters/species have been removed
-
-   \c removed_species_list and \c removed_characters_list are lists of original
-   species and characters, while \c removed_red_black_list and \c
-   removed_conflict_list are lists of vertices of the red-black and conflict graphs.
-*/
-typedef struct operation {
-        uint32_t type;
-        GSList *removed_species_list;
-        GSList *removed_characters_list;
-        GSList *removed_red_black_list;
-        GSList *removed_conflict_list;
-} operation;
-
-/**
-   \brief managing operations: \c new_operation \c init_operation \c
-   destroy_operation
-*/
-operation *
-new_operation(void);
-
-void
-init_operation(operation *op);
-
-void
-destroy_operation(operation *op);
-
-void
-free_operation(operation *op);
-
-void
-copy_operation(operation* dst, const operation* src);
-/**
-   \param filename: the corresponding file contains an input matrix
-   \return pp: the corresponding instance
-*/
 pp_instance
 read_instance_from_filename(const char *filename);
 
 /**
    \param src: instance
    \param character: the character \b name to be realized
-   \param op: a pointer to an operation. It must have been already initialized
 
    \return the instance after the realization of \c character
 
@@ -171,7 +131,7 @@ read_instance_from_filename(const char *filename);
    allocated. It must be freed with \c destroy_instance after it has been used.
 */
 pp_instance
-realize_character(const pp_instance src, const uint32_t character, operation *op);
+realize_character(const pp_instance src, const uint32_t character);
 
 
 /**
@@ -219,13 +179,14 @@ get_conflict_graph(const pp_instance *instp);
    It stores everything that is necessary to construct the final phylogeny and
    to determine the next step of the strategy.
 
-   It consists of \c operation, \c instance, \c realized_char and \c
-   tried_chars which are respectively the operation to apply to the current
-   instance (\c instance), the character to realize and the list of characters
-   that we have previously tried to realize (without success)
+   It consists of \c instance, \c realized_char, \c
+   tried_chars, and \c character_queue which are respectively the current
+   instance, the character to realize and the list of characters
+   that we have previously tried to realize and the candidate characters left.
+
+   Notice that the last character in \c tried_characters is equal to \c realized_char
 */
 typedef struct state_s {
-        operation *operation;
         pp_instance *instance;
         uint32_t realized_char;
         GSList *tried_characters;
@@ -293,14 +254,14 @@ void copy_state(state_s* dst, const state_s* src);
 
 
 /**
-   \brief read a state (instance, operation) from a
+   \brief read a state (instance) from a
    file
 */
 state_s*
 read_state(const char* filename);
 
 /**
-   \brief write a state (instance, operation) to a
+   \brief write a state (instance) to a
    file
 */
 void
