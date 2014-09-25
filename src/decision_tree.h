@@ -33,8 +33,11 @@ typedef GSList* (*strategy_fn)(state_s *stp);
 /**
    \brief visits the entire tree of the possible completions
 
-   \param inst: the initial instance
+   \param states: an array of states. In \c states[0] is stored the initial
+   instance
+   \param strategy: the callback function that determines the order according to
+   which all characters are tried
 */
 
 void
-exhaustive_search(state_s *states, pp_instance inst, strategy_fn strategy);
+exhaustive_search(state_s *states, strategy_fn strategy);

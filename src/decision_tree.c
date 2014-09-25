@@ -54,30 +54,30 @@ next_node(state_s *states, uint32_t level, strategy_fn node_init) {
         printf("level: %d - tried: %d - queue: %d\n", level,
                g_slist_length(current->tried_characters), g_slist_length(current->character_queue));
         if (no_sibling_p(current)) {
-                destroy_state(current);
+                /* destroy_state(current); */
                 return (level - 1);
         }
         current->realized_char = GPOINTER_TO_INT(g_slist_nth_data(current->character_queue, 0));
         current->character_queue = g_slist_nth(current->character_queue, 1);
-        current->tried_characters = g_slist_append(current->tried_characters, GINT_TO_POINTER(current->realized_char));
-        pp_instance modified = realize_character(*current->instance, current->realized_char, current->operation);
-        if (current->operation->type > 0) {
-                init_state(states + (level + 1));
-                state_s *next = states + level + 1;
-                copy_state(next, current);
-                copy_instance(next->instance, &modified);
+        current->tried_characters = g_slist_prepend(current->tried_characters, GINT_TO_POINTER(current->realized_char));
+        state_s modified = realize_character(*current, current->realized_char);
+        if (modified.operation > 0) {
+                reset_state(current + 1);
+                state_s *next = current + 1;
+                copy_state(next, &modified);
+                next->character_queue = NULL;
+                next->tried_characters = NULL;
                 return (level + 1);
         }
         return (level);
 }
 
 void
-exhaustive_search(state_s *states, pp_instance inst, strategy_fn strategy) {
-        first_state(states+0, &inst);
+exhaustive_search(state_s *states, strategy_fn strategy) {
         uint32_t level = next_node(states, 0, strategy);
         for(;level != -1; level = next_node(states, level, strategy)) {
-                instance_cleanup((states + level)->instance);
-                if ((states + level)->instance->num_species == 0) {
+                cleanup(states + level);
+                if ((states + level)->num_species == 0) {
                         printf("Solution found\n");
                         return;
                 }

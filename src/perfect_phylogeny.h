@@ -59,118 +59,6 @@
 #define RED   2
 
 /**
-   \struct pp_instance
-   \brief the data structure to store a single instance
-
-   The \c matrix field can be \c NULL, if we are not interested in the matrix
-   any more.
-
-   The \c current gives the current state for each original species.
-
-   \c species and \c characters are two arrays whose values are 1 for the current species and characters
-   respectively.
-
-   \c operation is the code for the most recent operation:
-   0 => realize an inactive character
-   1 => realize an active character
-   -1 => failure
-*/
-typedef struct pp_instance {
-        uint32_t num_species;
-        uint32_t num_characters;
-        uint32_t num_species_orig;
-        uint32_t num_characters_orig;
-        igraph_t *red_black;
-        igraph_t *conflict;
-        uint32_t *matrix;
-        uint32_t *current;
-        uint32_t *species;
-        uint32_t *characters;
-        uint32_t operation;
-} pp_instance;
-
-/**
-   \brief managing instances: \c new_instance \c init_instance \c
-   destroy_instance \c free_instance
-
-   \c destroy_instance does not free the instance, while \c free_instance does
-*/
-pp_instance *
-new_instance(void);
-
-/* void */
-/* init_instance(pp_instance * instp, uint32_t num_species, uint32_t num_characters); */
-
-void
-destroy_instance(pp_instance *instp);
-
-void
-free_instance(pp_instance *instp);
-
-void str_instance(const pp_instance* instp, char* str);
-/**
-   \brief copy an instance
-
-   \param src, dst: pointers to the instances
-
-   The instance must have already been allocated.
-*/
-void
-copy_instance(pp_instance *dst, const pp_instance *src);
-
-pp_instance
-read_instance_from_filename(const char *filename);
-
-/**
-   \param src: instance
-   \param character: the character \b name to be realized
-
-   \return the instance after the realization of \c character
-
-   The memory necessary to store the newly created instance is automatically
-   allocated. It must be freed with \c destroy_instance after it has been used.
-*/
-pp_instance
-realize_character(const pp_instance src, const uint32_t character);
-
-
-/**
-   \param inst: instance
-   \return the red-black graph associated to the input instance
-*/
-igraph_t *
-get_red_black_graph(const pp_instance *instp);
-
-/**
-   \param inst: instance
-   \return the conflict graph associated to the input instance
-*/
-igraph_t *
-get_conflict_graph(const pp_instance *instp);
-
-
-/* /\** */
-/*    Read an entry of an instance matrix */
-
-/*    \param matrix */
-/*    \param species: goes from 0 to the number of species - 1 */
-/*    \param character: goes from 0 to the number of characters - 1 */
-/* *\/ */
-/* uint32_t */
-/* matrix_get_value(pp_instance *instp, uint32_t species, uint32_t character); */
-
-/* /\** */
-/*    Set the value of an entry of an instance matrix */
-
-/*    \param matrix */
-/*    \param species: goes from 0 to the number of species - 1 */
-/*    \param character: goes from 0 to the number of characters - 1 */
-/*    \param the value to write */
-/* *\/ */
-/* void */
-/* matrix_set_value(pp_instance *instp, uint32_t species, uint32_t character, uint32_t value); */
-
-/**
    \struct state_s
    \brief an instance and the
    possible completions that have
@@ -185,16 +73,40 @@ get_conflict_graph(const pp_instance *instp);
    that we have previously tried to realize and the candidate characters left.
 
    Notice that the last character in \c tried_characters is equal to \c realized_char
+
+   The \c matrix field can be \c NULL, if we are not interested in the matrix
+   any more.
+
+   The \c current gives the current state for each original species.
+
+   \c species and \c characters are two arrays whose values are 1 for the current species and characters
+   respectively.
+
+   \c operation is the code for the most recent operation:
+   0 => failure
+   1 => realize an inactive character
+   2 => realize an active character
 */
 typedef struct state_s {
-        pp_instance *instance;
         uint32_t realized_char;
+        uint32_t num_species;
+        uint32_t num_characters;
+        uint32_t num_species_orig;
+        uint32_t num_characters_orig;
+        igraph_t *red_black;
+        igraph_t *conflict;
+        uint32_t *matrix;
+        uint32_t *current;
+        uint32_t *species;
+        uint32_t *characters;
+        uint32_t operation;
         GSList *tried_characters;
         GSList *character_queue;
 } state_s;
 
+
 /**
-   \brief managing states: \c new_state \c init_state \c
+   \brief managing states: \c new_state \c reset_state \c
    destroy_state
 */
 
@@ -202,7 +114,7 @@ state_s *
 new_state(void);
 
 void
-init_state(state_s * stp);
+reset_state(state_s * stp);
 
 void
 destroy_state(state_s *stp);
@@ -223,11 +135,10 @@ uint32_t check_state(const state_s* stp);
    It assumes that the input state \c stp has already been allocated.
    The function updates the state so that it is consistent with the input instance.
 */
-void first_state(state_s* stp, pp_instance *instp);
-
+void first_state(state_s* stp);
 
 /**
-   \brief simplify the instance, if possible
+   \brief simplify the current instance, if possible
 
    \param instance to be simplified
    \return simplified instance
@@ -243,7 +154,7 @@ void first_state(state_s* stp, pp_instance *instp);
    therefore it is necessary to include this function in a \c while loop to
    completely simplify the instance
 */
-void instance_cleanup(pp_instance *src);
+void cleanup(state_s *src);
 
 /**
    \brief copy a state
@@ -254,15 +165,13 @@ void copy_state(state_s* dst, const state_s* src);
 
 
 /**
-   \brief read a state (instance) from a
-   file
+   \brief read a state from a file
 */
 state_s*
 read_state(const char* filename);
 
 /**
-   \brief write a state (instance) to a
-   file
+   \brief write a state to a file
 */
 void
 write_state(const char* filename, state_s* stp);
@@ -275,11 +184,37 @@ write_state(const char* filename, state_s* stp);
 GSList* characters_list(state_s * stp);
 
 /**
-   \brief delete a species from the set of current species from an instance
+   \brief delete a species from the set of current species
 */
-void delete_species(pp_instance *instp, uint32_t s);
+void delete_species(state_s* stp, uint32_t s);
 
 /**
-   \brief delete a character from the set of current character from an instance
+   \brief delete a character from the set of current character
 */
-void delete_character(pp_instance *instp, uint32_t c);
+void delete_character(state_s* stp, uint32_t c);
+
+state_s* read_instance_from_filename(const char *filename);
+/**
+   \param character: the character \b name to be realized
+
+   \return the state after the realization of \c character
+
+   The memory necessary to store the newly created instance is automatically
+   allocated. It must be freed with \c destroy_instance after it has been used.
+*/
+state_s* realize_character(const state_s* src, const uint32_t character);
+
+
+/**
+   \param inst: state_s
+   \return the red-black graph associated to the input instance
+*/
+igraph_t *
+get_red_black_graph(const state_s *stp);
+
+/**
+   \param inst: state_s
+   \return the conflict graph associated to the input instance
+*/
+igraph_t *
+get_conflict_graph(const state_s *stp);

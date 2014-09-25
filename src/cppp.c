@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
         start_logging(args_info);
 
         igraph_i_set_attribute_table(&igraph_cattribute_table);
-        pp_instance temp = read_instance_from_filename(args_info.inputs[0]);
+        state_s* temp = read_instance_from_filename(args_info.inputs[0]);
 
 /**
    Notice that each character is realized at most twice (once positive and once
@@ -44,9 +44,9 @@ int main(int argc, char **argv) {
 
    Therefore each partial solution con contain at most 2n+m statuses.
 */
-        state_s states[2*temp.num_species+temp.num_characters];
-
-        exhaustive_search(states, temp, alphabetic);
+        state_s states[2 * temp->num_species + temp->num_characters];
+        copy_state(states, temp);
+        exhaustive_search(states, alphabetic);
         cmdline_parser_free(&args_info);
         return 0;
 }

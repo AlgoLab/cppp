@@ -31,24 +31,24 @@
 
 
 static void
-init_instance(pp_instance *instp, uint32_t nspecies, uint32_t nchars) {
-        assert(instp != NULL);
-        if (instp->red_black == NULL) instp->red_black = GC_MALLOC(sizeof(igraph_t));
-        if (instp->conflict == NULL)  instp->conflict  = GC_MALLOC(sizeof(igraph_t));
-        instp->conflict = GC_MALLOC(sizeof(igraph_t));
-        igraph_empty(instp->conflict, nchars, IGRAPH_UNDIRECTED);
-        instp->red_black = GC_MALLOC(sizeof(igraph_t));
-        igraph_empty_attrs(instp->red_black, nspecies + nchars, IGRAPH_UNDIRECTED, 0);
-        instp->current = GC_MALLOC(nchars * sizeof(uint32_t));
-        instp->species = GC_MALLOC(nchars * sizeof(uint32_t));
-        instp->characters = GC_MALLOC(nchars * sizeof(uint32_t));
-        instp->operation = 0;
+reset_instance(state_s *stp, uint32_t nspecies, uint32_t nchars) {
+        assert(stp != NULL);
+        if (stp->red_black == NULL) stp->red_black = GC_MALLOC(sizeof(igraph_t));
+        if (stp->conflict == NULL)  stp->conflict  = GC_MALLOC(sizeof(igraph_t));
+        stp->conflict = GC_MALLOC(sizeof(igraph_t));
+        igraph_empty(stp->conflict, nchars, IGRAPH_UNDIRECTED);
+        stp->red_black = GC_MALLOC(sizeof(igraph_t));
+        igraph_empty_attrs(stp->red_black, nspecies + nchars, IGRAPH_UNDIRECTED, 0);
+        stp->current = GC_MALLOC(nchars * sizeof(uint32_t));
+        stp->species = GC_MALLOC(nchars * sizeof(uint32_t));
+        stp->characters = GC_MALLOC(nchars * sizeof(uint32_t));
+        stp->operation = 0;
         for (uint32_t i=0; i < nspecies; i++) {
-                instp->species[i] = 1;
+                stp->species[i] = 1;
         }
         for (uint32_t i=0; i < nchars; i++) {
-                instp->current[i] = 0;
-                instp->characters[i] = 1;
+                stp->current[i] = 0;
+                stp->characters[i] = 1;
         }
 }
 
@@ -57,17 +57,17 @@ init_instance(pp_instance *instp, uint32_t nspecies, uint32_t nchars) {
 */
 
 static uint32_t
-matrix_get_value(pp_instance *inst, uint32_t species, uint32_t character) {
-        return inst->matrix[character + inst->num_characters * species];
+matrix_get_value(state_s *stp, uint32_t species, uint32_t character) {
+        return stp->matrix[character + stp->num_characters * species];
 }
 
 static void
-matrix_set_value(pp_instance *inst, uint32_t species, uint32_t character, uint32_t value) {
-        inst->matrix[character + inst->num_characters * species] = value;
+matrix_set_value(state_s *stp, uint32_t species, uint32_t character, uint32_t value) {
+        stp->matrix[character + stp->num_characters * species] = value;
 }
 
 /**
-   \param instance
+   \param state
 
    Updates an instance by computing the red-black and the conflict graphs
    associated to a given matrix.
@@ -76,8 +76,8 @@ matrix_set_value(pp_instance *inst, uint32_t species, uint32_t character, uint32
    num_characters fields already filled in. All other fields are computed by
    this function.
 
-   In a red-black graph, the first \c instp->num_species ids correspond to species,
-   while the ids larger or equal to instp->num_species correspond to characters.
+   In a red-black graph, the first \c stp->num_species ids correspond to species,
+   while the ids larger or equal to stp->num_species correspond to characters.
    Notice that the label id must be conserved when modifying the graph (i.e.
    realizing a character).
 
@@ -86,38 +86,38 @@ matrix_set_value(pp_instance *inst, uint32_t species, uint32_t character, uint32
 
 */
 static void
-matrix2instance(pp_instance *instp) {
-        assert(instp->matrix != NULL);
-        assert(instp->num_species != 0);
-        assert(instp->num_characters != 0);
+matrix2instance(state_s *stp) {
+        assert(stp->matrix != NULL);
+        assert(stp->num_species != 0);
+        assert(stp->num_characters != 0);
 
-        init_instance(instp, instp->num_species, instp->num_characters);
-        instp->num_species_orig = instp->num_species;
-        instp->num_characters_orig = instp->num_characters;
+        reset_instance(stp, stp->num_species, stp->num_characters);
+        stp->num_species_orig = stp->num_species;
+        stp->num_characters_orig = stp->num_characters;
 
 /* We start with the red-black graph */
 
-        for(uint32_t s=0; s < instp->num_species; s++) {
-                SETVAN(instp->red_black, "id", s, s);
-                SETVAN(instp->red_black, "color", s, SPECIES);
+        for(uint32_t s=0; s < stp->num_species; s++) {
+                SETVAN(stp->red_black, "id", s, s);
+                SETVAN(stp->red_black, "color", s, SPECIES);
         }
-        for(uint32_t c=0; c < instp->num_characters; c++) {
-                SETVAN(instp->red_black, "id", c + instp->num_species, c);
-                SETVAN(instp->red_black, "color", c + instp->num_species, BLACK);
+        for(uint32_t c=0; c < stp->num_characters; c++) {
+                SETVAN(stp->red_black, "id", c + stp->num_species, c);
+                SETVAN(stp->red_black, "color", c + stp->num_species, BLACK);
         }
-        for (uint32_t s=0; s<instp->num_species; s++)
-                for (uint32_t c=0; c<instp->num_characters; c++)
-                        if (matrix_get_value(instp, s, c) == 1)
-                                igraph_add_edge(instp->red_black, s, c+instp->num_species);
+        for (uint32_t s=0; s<stp->num_species; s++)
+                for (uint32_t c=0; c<stp->num_characters; c++)
+                        if (matrix_get_value(stp, s, c) == 1)
+                                igraph_add_edge(stp->red_black, s, c+stp->num_species);
 
         /* Now we compute the conflict graph */
-        for(uint32_t c1 = 0; c1 < instp->num_characters; c1++)
-                for(uint32_t c2 = c1 + 1; c2 < instp->num_characters; c2++) {
+        for(uint32_t c1 = 0; c1 < stp->num_characters; c1++)
+                for(uint32_t c2 = c1 + 1; c2 < stp->num_characters; c2++) {
                         uint32_t states[2][2] = { {0, 0}, {0, 0} };
-                        for(uint32_t s=0; s<instp->num_species; s++)
-                                states[matrix_get_value(instp, s, c1)][matrix_get_value(instp, s, c2)] = 1;
+                        for(uint32_t s=0; s<stp->num_species; s++)
+                                states[matrix_get_value(stp, s, c1)][matrix_get_value(stp, s, c2)] = 1;
                         if(states[0][0] + states[0][1] + states[1][0] + states[1][1] == 4)
-                                igraph_add_edge(instp->conflict, c1, c2);
+                                igraph_add_edge(stp->conflict, c1, c2);
                 }
 }
 
@@ -127,12 +127,26 @@ matrix2instance(pp_instance *instp) {
 
 void copy_state(state_s* dst, const state_s* src) {
         assert(dst != NULL);
-        if (dst->instance == NULL) dst->instance = new_instance();
-        copy_instance(dst->instance, src->instance);
         dst->realized_char = src->realized_char;
         dst->tried_characters = g_slist_copy(src->tried_characters);
         dst->character_queue = g_slist_copy(src->character_queue);
+
+        reset_instance(dst, src->num_species, src->num_characters);
+
+        dst->num_species = src->num_species;
+        dst->num_characters = src->num_characters;
+        dst->num_species_orig = src->num_species_orig;
+        dst->num_characters_orig = src->num_characters_orig;
+        igraph_copy(dst->red_black, src->red_black);
+        igraph_copy(dst->conflict, src->conflict);
+        dst->matrix = src->matrix;
+        memcpy(dst->current, src->current, src->num_characters_orig * sizeof(uint32_t));
+        assert(dst->current[0] == src->current[0]);
+        memcpy(dst->species, src->species, src->num_species_orig * sizeof(uint32_t));
+        memcpy(dst->characters, src->characters, src->num_characters_orig * sizeof(uint32_t));
+        dst->operation = src->operation;
 }
+
 
 /**
    To realize a character, first we have to find the id \c c of the vertex of
@@ -148,22 +162,32 @@ void copy_state(state_s* dst, const state_s* src) {
    other hand, if A is not equal to B, we return that the realization is
    impossible, setting \c error=1.
 */
-pp_instance
-realize_character(const pp_instance src, const uint32_t character) {
-        pp_instance dst;
-        copy_instance(&dst, &src);
-        igraph_integer_t c = (igraph_integer_t) src.num_species_orig + character;
+state_s*
+realize_character(const state_s* src, const uint32_t character) {
+        state_s* dst = new_state();
+        copy_state(dst, src);
+        printf("=====================\n");
+        json_t* p_src = build_json_state(src, "", "");
+        char* pp = json_dumps(p_src, JSON_SORT_KEYS | JSON_INDENT(2));
+        printf("%s\n", pp);
+        assert(check_state(src) == 0);
+        json_t* p_dst = build_json_state(dst, "", "");
+        pp = json_dumps(p_dst, JSON_SORT_KEYS | JSON_INDENT(2));
+        printf("%s\n", pp);
+        assert(dst->current[0] == src->current[0]);
+        assert(check_state(dst) == 0);
+        igraph_integer_t c = (igraph_integer_t) src->num_species_orig + character;
         int ret = 0;
 
         igraph_vector_t conn_comp;
         igraph_vector_init(&conn_comp, 1);
-        ret = igraph_subcomponent(dst.red_black, &conn_comp, c, IGRAPH_ALL);
+        ret = igraph_subcomponent(dst->red_black, &conn_comp, c, IGRAPH_ALL);
         assert(ret == 0);
         igraph_vector_sort(&conn_comp);
 
         igraph_vector_t adjacent;
         igraph_vector_init(&adjacent, 1);
-        ret = igraph_neighbors(dst.red_black, &adjacent, c, IGRAPH_ALL);
+        ret = igraph_neighbors(dst->red_black, &adjacent, c, IGRAPH_ALL);
         assert(ret == 0);
         igraph_vector_t not_adjacent;
         igraph_vector_init(&not_adjacent, 0);
@@ -176,39 +200,42 @@ realize_character(const pp_instance src, const uint32_t character) {
         for (size_t i=0; i<l; i++) {
                 uint32_t v = VECTOR(temp)[i];
                 /* check if v is a species */
-                if (v < dst.num_species && v != c) {
+                if (v < dst->num_species && v != c) {
                         igraph_vector_push_back(&new_red, c);
                         igraph_vector_push_back(&new_red, v);
                         igraph_vector_push_back(&not_adjacent, v);
                 }
         }
-        int color = VAN(dst.red_black, "color", c);
+        int color = VAN(dst->red_black, "color", c);
         assert(color != SPECIES);
         igraph_es_t es;
         igraph_es_incident(&es, c, IGRAPH_ALL);
-        igraph_delete_edges(dst.red_black, es);
+        igraph_delete_edges(dst->red_black, es);
         igraph_es_destroy(&es);
         /* igraph_vector_print(&adjacent); */
         /* igraph_vector_print(&not_adjacent); */
         g_debug("CHAR %d\n", character);
+        assert(check_state(dst) == 0);
         if (color == BLACK) {
-                igraph_add_edges(dst.red_black, &new_red, 0);
-                dst.operation = 1;
-                SETVAN(dst.red_black, "color", c, RED);
-                dst.current[character] = 1;
+                igraph_add_edges(dst->red_black, &new_red, 0);
+                dst->operation = 1;
+                SETVAN(dst->red_black, "color", c, RED);
+                dst->current[character] = 1;
         }
         if (color == RED) {
                 /* igraph_vector_print(&adjacent); */
                 if (igraph_vector_size(&not_adjacent) > 0) {
-                        dst.operation = -1;
+                        dst->operation = 0;
                 } else {
-                        dst.operation = 2;
-                        SETVAN(dst.red_black, "color", c, RED + 1);
-                        delete_character(&dst, character);
+                        dst->operation = 2;
+                        SETVAN(dst->red_black, "color", c, RED + 1);
+                        delete_character(dst, character);
                 }
         }
         /* igraph_write_graph_edgelist(dst.red_black, stdout); */
-        instance_cleanup(&dst);
+        assert(check_state(dst) == 0);
+        cleanup(dst);
+        assert(check_state(dst) == 0);
         igraph_vector_destroy(&new_red);
         igraph_vector_destroy(&temp);
         igraph_vector_destroy(&not_adjacent);
@@ -229,8 +256,34 @@ realize_character(const pp_instance src, const uint32_t character) {
 /*     return 0; */
 /* } */
 
+static void str_state(const state_s* stp, char* str) {
+        assert(0 <= asprintf(&str,
+				 "Instance: {\n"
+				 "  num_species: %d\n"
+				 "  num_characters: %d\n"
+				 "  num_species_orig: %d\n"
+				 "  num_characters_orig: %d\n"
+				 "  red_black: %p\n"
+				 "  conflict: %p\n"
+				 "  matrix: %p\n"
+				 "  current: %p\n"
+				 "  species: %p\n"
+				 "  characters: %p\n"
+				 "}",
+				 stp->num_species,
+				 stp->num_characters,
+				 stp->num_species_orig,
+				 stp->num_characters_orig,
+				 (void *) stp->red_black,
+				 (void *) stp->conflict,
+				 (void *) stp->matrix,
+				 (void *) stp->current,
+				 (void *) stp->species,
+				 (void *) stp->characters
+			   ));
+}
 
-pp_instance
+state_s*
 read_instance_from_filename(const char *filename) {
         FILE* file;
         file = fopen(filename, "r");
@@ -239,24 +292,24 @@ read_instance_from_filename(const char *filename) {
         uint32_t num_species, num_characters;
 
         assert(fscanf(file, "%"SCNu32" %"SCNu32, &num_species, &num_characters) != EOF);
-        pp_instance inst = { 0 };
-        inst.num_species = num_species;
-        inst.num_characters = num_characters;
-        inst.matrix = GC_MALLOC(num_species * num_characters * sizeof(uint32_t));
+        state_s* stp = new_state();
+        stp->num_species = num_species;
+        stp->num_characters = num_characters;
+        stp->matrix = GC_MALLOC(num_species * num_characters * sizeof(uint32_t));
         for(uint32_t s=0; s < num_species; s++)
                 for(uint32_t c=0; c < num_characters; c++) {
                         uint32_t x;
                         assert(fscanf(file, "%"SCNu32, &x) != EOF);
-                        matrix_set_value(&inst, s, c, x);
+                        matrix_set_value(stp, s, c, x);
                 }
 
-        matrix2instance(&inst);
+        matrix2instance(stp);
         char* str = NULL;
-        str_instance(&inst, str);
+        str_state(stp, str);
         g_debug("%s", str);
         free(str);
         fclose(file);
-        return inst;
+        return stp;
 }
 
 #ifdef TEST_EVERYTHING
@@ -269,29 +322,29 @@ read_instance_from_filename(const char *filename) {
 
   We remove null characters and species.
 */
-void instance_cleanup(pp_instance *instp) {
+void cleanup(state_s *stp) {
         g_debug("Cleanup\n");
         // Looking for null species
-        for (uint32_t s=0; s < instp->num_species_orig; s++)
-                if (instp->species[s]) {
+        for (uint32_t s=0; s < stp->num_species_orig; s++)
+                if (stp->species[s]) {
                         igraph_es_t es;
                         igraph_integer_t size;
                         igraph_es_incident(&es, s, IGRAPH_ALL);
-                        igraph_es_size(instp->red_black, &es, &size);
+                        igraph_es_size(stp->red_black, &es, &size);
                         if (size == 0)
-                                delete_species(instp, s);
+                                delete_species(stp, s);
                         igraph_es_destroy(&es);
                 }
 
         // Looking for null characters
-        for (uint32_t c = 0; c < instp->num_characters_orig; c++)
-                if (instp->characters[c]) {
+        for (uint32_t c = 0; c < stp->num_characters_orig; c++)
+                if (stp->characters[c]) {
                         igraph_es_t es;
                         igraph_integer_t size;
-                        igraph_es_incident(&es, instp->num_species_orig + c, IGRAPH_ALL);
-                        igraph_es_size(instp->red_black, &es, &size);
+                        igraph_es_incident(&es, stp->num_species_orig + c, IGRAPH_ALL);
+                        igraph_es_size(stp->red_black, &es, &size);
                         if (size == 0)
-                                delete_character(instp, c);
+                                delete_character(stp, c);
                         igraph_es_destroy(&es);
                 }
 /* TODO (if necessary) */
@@ -300,19 +353,19 @@ void instance_cleanup(pp_instance *instp) {
 }
 
 igraph_t *
-get_red_black_graph(const pp_instance *inst) {
+get_red_black_graph(const state_s *inst) {
         // TODO
         return NULL;
 }
 
 igraph_t *
-get_conflict_graph(const pp_instance *inst) {
+get_conflict_graph(const state_s *inst) {
         // TODO
         return NULL;
 }
 
 #ifdef TEST_EVERYTHING
-static void test_matrix_pp(pp_instance inst, const uint32_t num_species, const uint32_t num_characters,
+static void test_matrix_pp(state_s inst, const uint32_t num_species, const uint32_t num_characters,
                            const uint32_t data[inst.num_species][inst.num_characters],
                            const uint32_t conflict[inst.num_characters][inst.num_characters]) {
         ck_assert_int_eq(inst.num_species, num_species);
@@ -356,7 +409,7 @@ START_TEST(test_read_instance_from_filename_1) {
                 {1, 0, 0, 1},
                 {0, 1, 1, 0}
         };
-        pp_instance inst = read_instance_from_filename("tests/input/read/1.txt");
+        state_s inst = read_instance_from_filename("tests/input/read/1.txt");
         test_matrix_pp(inst, 4, 4, data, conflict);
 }
 END_TEST
@@ -375,7 +428,7 @@ START_TEST(test_read_instance_from_filename_2) {
                 {1, 0, 1},
                 {1, 1, 0}
         };
-        pp_instance inst = read_instance_from_filename("tests/input/read/2.txt");
+        state_s inst = read_instance_from_filename("tests/input/read/2.txt");
         test_matrix_pp(inst, 6, 3, data, conflict);
         //    igraph_write_graph_gml(inst.red_black, stdout, 0, 0);
 }
@@ -396,7 +449,7 @@ START_TEST(test_read_instance_from_filename_3) {
                 {0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0}
         };
-        pp_instance inst = read_instance_from_filename("tests/input/read/3.txt");
+        state_s inst = read_instance_from_filename("tests/input/read/3.txt");
         test_matrix_pp(inst, 5, 5, data, conflict);
         //igraph_write_graph_gml(inst.red_black, stdout, 0, 0);
 }
@@ -404,187 +457,81 @@ END_TEST
 
 #endif
 
-/**
-   \brief managing instances: \c new_instance \c init_instance \c
-   destroy_instance \c free_instance
-
-   \c destroy_instance does not free the instance, while \c free_instance does
-*/
-pp_instance *
-new_instance(void) {
-        pp_instance *instp = GC_MALLOC(sizeof(pp_instance));
-        return instp;
-}
-
 #ifdef TEST_EVERYTHING
-static void null_instance_test(pp_instance *instp) {
-        ck_assert_msg(instp != NULL, "op has been freed\n");
-        ck_assert_int_eq(instp->num_species, 0);
-        ck_assert_int_eq(instp->num_characters, 0);
-        ck_assert_int_eq(instp->num_species_orig, 0);
-        ck_assert_int_eq(instp->num_characters_orig, 0);
-        ck_assert_msg(instp->conflict == NULL, "instp->red_black has not been freed\n");
-        ck_assert_msg(instp->red_black == NULL, "instp->red_black has not been freed\n");
-        ck_assert_msg(instp->matrix == NULL, "instp->red_black has not been freed\n");
-        ck_assert_msg(instp->current == NULL, "instp->current has not been freed\n");
+static void null_state_test(state_s *stp) {
+        ck_assert_msg(stp != NULL, "stp has been freed\n");
+        ck_assert_int_eq(stp->num_species, 0);
+        ck_assert_int_eq(stp->num_characters, 0);
+        ck_assert_int_eq(stp->num_species_orig, 0);
+        ck_assert_int_eq(stp->num_characters_orig, 0);
+        ck_assert_msg(stp->conflict == NULL, "stp->red_black has not been freed\n");
+        ck_assert_msg(stp->red_black == NULL, "stp->red_black has not been freed\n");
+        ck_assert_msg(stp->matrix == NULL, "stp->red_black has not been freed\n");
+        ck_assert_msg(stp->current == NULL, "stp->current has not been freed\n");
 }
 
-START_TEST(new_instance_1) {
-        pp_instance * instp = new_instance();
-        null_instance_test(instp);
+START_TEST(new_state_1) {
+        state_s * stp = new_state();
+        null_state_test(stp);
 }
 END_TEST
 #endif
 
 
-void
-copy_instance(pp_instance *dst, const pp_instance *src) {
-        assert(dst != NULL);
-        init_instance(dst, src->num_species, src->num_characters);
-
-        dst->num_species = src->num_species;
-        dst->num_characters = src->num_characters;
-        dst->num_species_orig = src->num_species_orig;
-        dst->num_characters_orig = src->num_characters_orig;
-        igraph_copy(dst->red_black, src->red_black);
-        igraph_copy(dst->conflict, src->conflict);
-        dst->matrix = src->matrix;
-        memcpy(dst->current, src->current, src->num_characters_orig * sizeof(uint32_t));
-        memcpy(dst->species, src->species, src->num_species_orig * sizeof(uint32_t));
-        memcpy(dst->characters, src->characters, src->num_characters_orig * sizeof(uint32_t));
-        dst->operation = src->operation;
-}
-
-void str_instance(const pp_instance* instp, char* str) {
-        assert(0 <= asprintf(&str,
-				 "Instance: {\n"
-				 "  num_species: %d\n"
-				 "  num_characters: %d\n"
-				 "  num_species_orig: %d\n"
-				 "  num_characters_orig: %d\n"
-				 "  red_black: %p\n"
-				 "  conflict: %p\n"
-				 "  matrix: %p\n"
-				 "  current: %p\n"
-				 "  species: %p\n"
-				 "  characters: %p\n"
-				 "}",
-				 instp->num_species,
-				 instp->num_characters,
-				 instp->num_species_orig,
-				 instp->num_characters_orig,
-				 (void *) instp->red_black,
-				 (void *) instp->conflict,
-				 (void *) instp->matrix,
-				 (void *) instp->current,
-				 (void *) instp->species,
-				 (void *) instp->characters
-			   ));
-}
-
-void
-destroy_instance(pp_instance *instp) {
-        /* if (instp->conflict != NULL) */
-        /*     igraph_destroy(instp->conflict); */
-        /* if (instp->red_black != NULL) */
-        /*     igraph_destroy(instp->red_black); */
-        /* free(instp->matrix); */
-        /* free(instp->current); */
-        /* g_slist_free(instp->species); */
-        /* g_slist_free(instp->characters); */
-}
-
-#ifdef TEST_EVERYTHING
-/* START_TEST(destroy_instance_1) { */
-/*     pp_instance *instp = new_instance(); */
-/*     destroy_instance(instp); */
-/*     null_instance_test(instp); */
-/* } */
-/* END_TEST */
-#endif
-
-
-void
-free_instance(pp_instance *instp) {
-        /* destroy_instance(instp); */
-        /* free(instp); */
-}
-
-
-
 state_s*
 new_state(void) {
         state_s *stp = GC_MALLOC(sizeof(state_s));
-        init_state(stp);
+        reset_state(stp);
         return stp;
 }
 
 void
-init_state(state_s *stp) {
+reset_state(state_s *stp) {
         assert(stp != NULL);
-        stp->instance = new_instance();
         stp->realized_char = 0;
         stp->tried_characters = NULL;
         stp->character_queue = NULL;
 }
 
-void
-destroy_state(state_s *stp) {
-        /* free_instance(stp->instance); */
-        /* if (stp->tried_characters != NULL) */
-        /*     g_slist_free(stp->tried_characters); */
-}
-
-void
-free_state(state_s *stp) {
-        /* destroy_state(stp); */
-        /* free(stp); */
-}
-
 uint32_t check_state(const state_s* stp) {
         uint32_t err = 0;
-        return err;
-}
-
-static uint32_t check_instance(const pp_instance* instp) {
-        uint32_t err = 0;
-        if (instp->num_species == -1 || instp->num_species > instp->num_species_orig) {
+        if (stp->num_species == -1 || stp->num_species > stp->num_species_orig) {
                 err += 1;
-                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", instp->num_species, 0);
+                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_species, 0);
         }
-        if (instp->num_characters == -1 || instp->num_characters > instp->num_characters_orig) {
+        if (stp->num_characters == -1 || stp->num_characters > stp->num_characters_orig) {
                 err += 2;
-                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", instp->num_characters, 0);
+                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_characters, 0);
         }
 
         uint32_t count = 0;
-        for (uint32_t s = 0; s < instp->num_species_orig; s++) {
-                if (instp->species[s])
+        for (uint32_t s = 0; s < stp->num_species_orig; s++) {
+                if (stp->species[s])
                         count++;
         }
-        if (count != instp->num_species) {
+        if (count != stp->num_species) {
                 err += 4;
-                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", instp->num_species, count);
+                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_species, count);
         }
 
         count = 0;
-        for (uint32_t c = 0; c < instp->num_characters_orig; c++) {
-                if (instp->characters[c])
+        for (uint32_t c = 0; c < stp->num_characters_orig; c++) {
+                if (stp->characters[c])
                         count++;
         }
-        if (count != instp->num_characters) {
+        if (count != stp->num_characters) {
                 err += 8;
-                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", instp->num_characters, count);
+                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_characters, count);
         }
 
         count = 0;
-        for (uint32_t c = 0; c < instp->num_characters_orig; c++) {
-                if (instp->current[c] != -1)
+        for (uint32_t c = 0; c < stp->num_characters_orig; c++) {
+                if (stp->current[c] != -1)
                         count++;
         }
-        if (count != instp->num_characters) {
+        if (count != stp->num_characters) {
                 err += 16;
-                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", instp->num_characters, count);
+                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_characters, count);
         }
         return err;
 }
@@ -646,8 +593,6 @@ state_s*
 read_state(const char* filename) {
         json_set_alloc_funcs(GC_malloc, GC_free);
         state_s* stp = new_state();
-        pp_instance* instp = new_instance();
-        stp->instance = instp;
 
         json_error_t jerr;
         json_t* data = json_load_file(filename, JSON_DISABLE_EOF_CHECK, &jerr);
@@ -657,30 +602,28 @@ read_state(const char* filename) {
         stp->tried_characters = json_get_list(data, "tried_characters", true);
         stp->character_queue = json_get_list(data, "character_queue", true);
 
-        json_t* instpj = json_object_get(data, "instance");
-        if (instpj != NULL) {
-                stp->instance->num_species = json_get_integer(instpj, "num_species");
-                stp->instance->num_characters = json_get_integer(instpj, "num_characters");
-                stp->instance->num_species_orig = json_get_integer(instpj, "num_species_orig");
-                stp->instance->num_characters_orig = json_get_integer(instpj, "num_characters_orig");
-                stp->instance->current = json_get_array(instpj, "current");
-                stp->instance->species = json_get_array(instpj, "species");
-                stp->instance->characters = json_get_array(instpj, "characters");
+        stp->num_species = json_get_integer(data, "num_species");
+        stp->num_characters = json_get_integer(data, "num_characters");
+        stp->num_species_orig = json_get_integer(data, "num_species_orig");
+        stp->num_characters_orig = json_get_integer(data, "num_characters_orig");
+        stp->current = json_get_array(data, "current");
+        stp->species = json_get_array(data, "species");
+        stp->characters = json_get_array(data, "characters");
 
-                // Graphs
-                FILE* fp;
-                stp->instance->red_black = GC_MALLOC(sizeof(igraph_t));
-                fp = fopen(json_get_string(instpj, "red_black_file"), "r");
-                assert(fp != NULL && "Cannot open file\n");
-                igraph_read_graph_graphml(stp->instance->red_black, fp, 0);
-                fclose(fp);
+        // Graphs
+        FILE* fp;
+        stp->red_black = GC_MALLOC(sizeof(igraph_t));
+        fp = fopen(json_get_string(data, "red_black_file"), "r");
+        assert(fp != NULL && "Cannot open file\n");
+        igraph_read_graph_graphml(stp->red_black, fp, 0);
+        fclose(fp);
 
-                stp->instance->conflict = GC_MALLOC(sizeof(igraph_t));
-                fp = fopen(json_get_string(instpj, "conflict_file"), "r");
-                assert(fp != NULL && "Cannot open file\n");
-                igraph_read_graph_graphml(stp->instance->conflict, fp, 0);
-                fclose(fp);
-        }
+        stp->conflict = GC_MALLOC(sizeof(igraph_t));
+        fp = fopen(json_get_string(data, "conflict_file"), "r");
+        assert(fp != NULL && "Cannot open file\n");
+        igraph_read_graph_graphml(stp->conflict, fp, 0);
+        fclose(fp);
+
 
         return stp;
 }
@@ -708,48 +651,48 @@ static json_t* array2json_array(uint32_t* p, size_t size) {
    XML that is quite readable), instead of encoding the graphs in JSON, we
    include only the filenames and we export the graphs in GraphML
 */
-void
-write_state(const char* filename, state_s* stp) {
+static json_t* build_json_state(const state_s* stp, const char* redblack_filename, const char* conflict_filename) {
         json_set_alloc_funcs(GC_malloc, GC_free);
         json_t* data = json_object();
         assert(!json_object_set(data, "realized_char", json_integer(stp->realized_char)));
         assert(!json_object_set(data, "tried_characters", gslist2json_array(stp->tried_characters)));
         assert(!json_object_set(data, "character_queue", gslist2json_array(stp->character_queue)));
+        assert(!json_object_set(data, "num_species", json_integer(stp->num_species)));
+        assert(!json_object_set(data, "num_characters", json_integer(stp->num_characters)));
+        assert(!json_object_set(data, "num_species_orig", json_integer(stp->num_species_orig)));
+        assert(!json_object_set(data, "num_characters_orig", json_integer(stp->num_characters_orig)));
+        if (stp->matrix != NULL)
+                assert(!json_object_set(data, "matrix", array2json_array(stp->matrix, stp->num_species * stp->num_characters)));
+        assert(!json_object_set(data, "current", array2json_array(stp->current, stp->num_characters_orig)));
+        assert(!json_object_set(data, "species", array2json_array(stp->species, stp->num_species_orig)));
+        assert(!json_object_set(data, "characters", array2json_array(stp->characters, stp->num_characters_orig)));
+        assert(!json_object_set(data, "red_black_file", json_string(redblack_filename)));
+        assert(!json_object_set(data, "conflict_file", json_string(conflict_filename)));
 
-        json_t* instp = json_object();
-        assert(!json_object_set(data, "instance", instp));
-
-        /* pp_instance */
-        assert(!json_object_set(instp, "num_species", json_integer(stp->instance->num_species)));
-        assert(!json_object_set(instp, "num_characters", json_integer(stp->instance->num_characters)));
-        assert(!json_object_set(instp, "num_species_orig", json_integer(stp->instance->num_species_orig)));
-        assert(!json_object_set(instp, "num_characters_orig", json_integer(stp->instance->num_characters_orig)));
-
-        char* g_filename = NULL;
+        return data;
+}
+void
+write_state(const char* filename, state_s* stp) {
+        json_set_alloc_funcs(GC_malloc, GC_free);
+        char* rb_filename = strdup("");
+        char* c_filename = strdup("");
         FILE* fp = NULL;
-        if (stp->instance->red_black != NULL) {
-                asprintf(&g_filename, "%s-redblack.graphml", filename);
-                fp = fopen(g_filename, "w");
+        if (stp->red_black != NULL) {
+                asprintf(&rb_filename, "%s-redblack.graphml", filename);
+                fp = fopen(rb_filename, "w");
                 assert(fp != NULL);
-                assert(!igraph_write_graph_graphml(stp->instance->red_black, fp, true));
+                assert(!igraph_write_graph_graphml(stp->red_black, fp, true));
                 fclose(fp);
-                assert(!json_object_set(instp, "red_black_file", json_string(g_filename)));
         }
-
-        if (stp->instance->conflict != NULL) {
-                asprintf(&g_filename, "%s-conflict.graphml", filename);
-                fp = fopen(g_filename, "w");
-                assert(!igraph_write_graph_graphml(stp->instance->conflict, fp, true));
+        if (stp->conflict != NULL) {
+                asprintf(&c_filename, "%s-conflict.graphml", filename);
+                fp = fopen(c_filename, "w");
+                assert(!igraph_write_graph_graphml(stp->conflict, fp, true));
                 fclose(fp);
-                assert(!json_object_set(instp, "conflict_file", json_string(g_filename)));
         }
-        free(g_filename);
-
-        if (stp->instance->matrix != NULL)
-                assert(!json_object_set(instp, "matrix", array2json_array(stp->instance->matrix, stp->instance->num_species * stp->instance->num_characters)));
-        assert(!json_object_set(instp, "current", array2json_array(stp->instance->current, stp->instance->num_characters_orig)));
-        assert(!json_object_set(instp, "species", array2json_array(stp->instance->species, stp->instance->num_species_orig)));
-        assert(!json_object_set(instp, "characters", array2json_array(stp->instance->characters, stp->instance->num_characters_orig)));
+        json_t* data = build_json_state(stp, rb_filename, c_filename);
+        free(rb_filename);
+        free(c_filename);
 
         assert(!json_dump_file(data, filename, JSON_INDENT(4) | JSON_SORT_KEYS) && "Cannot write JSON file\n");
 }
@@ -765,11 +708,7 @@ write_state(const char* filename, state_s* stp) {
 /* END_TEST */
 #endif
 
-void first_state(state_s* stp, pp_instance *instp) {
-        if(stp->instance != instp) {
-                stp->instance = new_instance();
-                copy_instance(stp->instance, instp);
-        }
+void first_state(state_s* stp) {
         stp->realized_char = 0;
         stp->tried_characters = NULL;
         stp->character_queue = NULL;
@@ -778,29 +717,29 @@ void first_state(state_s* stp, pp_instance *instp) {
 
 GSList* characters_list(state_s * stp) {
         GSList* list = NULL;
-        for (uint32_t c=0; c < stp->instance->num_characters_orig; c++)
-                if (stp->instance->characters[c])
+        for (uint32_t c=0; c < stp->num_characters_orig; c++)
+                if (stp->characters[c])
                         list = g_slist_prepend(list, GINT_TO_POINTER(c));
         return g_slist_reverse(list);
 }
 
 
-void delete_species(pp_instance *instp, uint32_t s) {
+void delete_species(state_s *stp, uint32_t s) {
         g_debug("Deleting species %d\n", s);
-        assert(s < instp->num_species_orig);
-        assert(instp->species[s] > 0);
-        instp->species[s] = 0;
-        (instp->num_species)--;
+        assert(s < stp->num_species_orig);
+        assert(stp->species[s] > 0);
+        stp->species[s] = 0;
+        (stp->num_species)--;
 }
 
-void delete_character(pp_instance *instp, uint32_t c) {
+void delete_character(state_s *stp, uint32_t c) {
         g_debug("Deleting character %d\n", c);
-        assert(c < instp->num_characters_orig);
-        assert(instp->characters[c] > 0);
-        assert(instp->current[c] != -1);
-        instp->characters[c] = 0;
-        instp->current[c] = -1;
-        (instp->num_characters)--;
+        assert(c < stp->num_characters_orig);
+        assert(stp->characters[c] > 0);
+        assert(stp->current[c] != -1);
+        stp->characters[c] = 0;
+        stp->current[c] = -1;
+        (stp->num_characters)--;
 }
 
 
@@ -826,20 +765,16 @@ void delete_character(pp_instance *instp, uint32_t c) {
 /* END_TEST */
 START_TEST(realize_3_0) {
         state_s *stp = read_state("tests/api/3.json");
-        pp_instance inst2 = realize_character(*stp->instance, 0);
         state_s* stp2 = new_state();
-        copy_state(stp2, stp);
-        stp2->instance = &inst2;
+        *stp2 = realize_character(*stp, 0);
         write_state("tests/api/3-0.json", stp2);
-
         ck_assert_int_eq(stp2->realized_char, 0);
 }
 END_TEST
 
 START_TEST(write_json_3) {
         state_s *stp = new_state();
-        stp->instance = new_instance();
-        *stp->instance = read_instance_from_filename("tests/input/read/3.txt");
+        *stp = read_instance_from_filename("tests/input/read/3.txt");
         write_state("tests/api/3.json", stp);
 
         state_s *stp2 = read_state("tests/api/3.json");
@@ -860,26 +795,26 @@ END_TEST
 /*         if (x1 == NULL && x2 == NULL) return 0; */
 /*         return (x1 == NULL) ? 1 : -1; */
 /* } */
-static uint32_t instance_cmp(pp_instance *instp1, pp_instance *instp2) {
+static uint32_t instance_cmp(state_s *stp1, state_s *stp2) {
         uint32_t result = 0;
-        if (instp1->num_characters != instp2->num_characters) result += 1;
-        if (instp1->num_species != instp2->num_species) result += 2;
-        if (instp1->current == NULL || instp2->current == NULL ||
-		memcmp(instp1->current, instp2->current, sizeof(*(instp1->current)))) result += 4;
+        if (stp1->num_characters != stp2->num_characters) result += 1;
+        if (stp1->num_species != stp2->num_species) result += 2;
+        if (stp1->current == NULL || stp2->current == NULL ||
+		memcmp(stp1->current, stp2->current, sizeof(*(stp1->current)))) result += 4;
         return result;
 }
-START_TEST(copy_instance_1) {
-        pp_instance inst = read_instance_from_filename("tests/input/read/1.txt");
-        pp_instance inst2 = { 0 };
-        copy_instance(&inst2, &inst);
-        ck_assert_int_eq(instance_cmp(&inst, &inst2),0);
+START_TEST(copy_state_1) {
+        state_s st = read_instance_from_filename("tests/input/read/1.txt");
+        state_s st2 = { 0 };
+        copy_state(&st2, &st);
+        ck_assert_int_eq(instance_cmp(&st, &st2),0);
 }
 END_TEST
-START_TEST(copy_instance_2) {
-        pp_instance inst = read_instance_from_filename("tests/input/read/2.txt");
-        pp_instance inst2 = { 0 };
-        copy_instance(&inst2, &inst);
-        ck_assert_int_eq(instance_cmp(&inst, &inst2),0);
+START_TEST(copy_state_2) {
+        state_s st = read_instance_from_filename("tests/input/read/2.txt");
+        state_s st2 = { 0 };
+        copy_state(&st2, &st);
+        ck_assert_int_eq(instance_cmp(&st, &st2),0);
 }
 END_TEST
 
@@ -892,13 +827,13 @@ static Suite * perfect_phylogeny_suite(void) {
 /* Core test case */
         tc_core = tcase_create("Core");
 
-/* tcase_add_test(tc_core, init_instance_1); */
+/* tcase_add_test(tc_core, reset_instance_1); */
         tcase_add_test(tc_core, test_read_instance_from_filename_1);
         tcase_add_test(tc_core, test_read_instance_from_filename_2);
-        tcase_add_test(tc_core, new_instance_1);
+        tcase_add_test(tc_core, new_state_1);
 /* tcase_add_test(tc_core, destroy_instance_1); */
-        tcase_add_test(tc_core, copy_instance_1);
-        tcase_add_test(tc_core, copy_instance_2);
+        tcase_add_test(tc_core, copy_state_1);
+        tcase_add_test(tc_core, copy_state_2);
 
         tcase_add_test(tc_core, test_read_instance_from_filename_3);
 /* tcase_add_test(tc_core, write_json_1); */
@@ -920,7 +855,7 @@ static Suite * perfect_phylogeny_suite(void) {
    describing the regression test.
 
    If the json file contains an empty list of characters to be realized, then
-   cleanup the instance.
+   cleanup the state.
 */
 int main(int argc, char **argv) {
         igraph_i_set_attribute_table(&igraph_cattribute_table);
@@ -944,18 +879,15 @@ int main(int argc, char **argv) {
                 size_t index;
                 json_t *value;
                 state_s *stp = read_state(input_json_filename);
-                assert(check_instance(stp->instance) == 0);
                 assert(check_state(stp) == 0);
                 if (json_array_size(listc) > 0)
                         json_array_foreach(listc, index, value) {
-                                pp_instance inst2 = realize_character(*stp->instance, json_integer_value(value));
-                                stp->instance = &inst2;
-                                assert(check_instance(stp->instance) == 0);
+                                state_s st2 = realize_character(*stp, json_integer_value(value));
+                                stp = &st2;
                                 assert(check_state(stp) == 0);
                         }
                 else
-                        instance_cleanup(stp->instance);
-                assert(check_instance(stp->instance) == 0);
+                        cleanup(stp);
                 assert(check_state(stp) == 0);
                 write_state(json_string_value(json_object_get(data,"output")), stp);
         }
