@@ -106,12 +106,15 @@ typedef struct state_s {
 
 
 /**
-   \brief managing states: \c new_state \c reset_state \c
-   destroy_state
+   \brief managing states: \c new_state to allocate the main structure,
+   \c init_state allocates the whole structure when passed the number of species
+   and characters,  \c reset_state allocates the whole structure, taking the
+   number of original species and characters from the structure.
 */
-
 state_s *
 new_state(void);
+
+void init_state(state_s *stp, uint32_t nspecies, uint32_t nchars);
 
 void
 reset_state(state_s * stp);
@@ -128,14 +131,6 @@ free_state(state_s *stp);
    \return 0 if all check have been passed, otherwise an error code larger than 0.
 */
 uint32_t check_state(const state_s* stp);
-
-/**
-   \brief creates the initial state corresponding to an instance
-
-   It assumes that the input state \c stp has already been allocated.
-   The function updates the state so that it is consistent with the input instance.
-*/
-void first_state(state_s* stp);
 
 /**
    \brief simplify the current instance, if possible
@@ -202,7 +197,7 @@ state_s* read_instance_from_filename(const char *filename);
    The memory necessary to store the newly created instance is automatically
    allocated. It must be freed with \c destroy_instance after it has been used.
 */
-state_s* realize_character(const state_s* src, const uint32_t character);
+void realize_character(state_s* dst, const state_s* src, const uint32_t character);
 
 
 /**
