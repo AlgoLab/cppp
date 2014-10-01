@@ -277,12 +277,11 @@ void copy_state(state_s* dst, const state_s* src) {
    other hand, if A is not equal to B, we return that the realization is
    impossible, setting \c error=1.
 
-   If necessary, to memory to store the new state is allocated.
+   The memory to store the new state must be allocated before calling the procedure.
 */
 void
 realize_character(state_s* dst, const state_s* src, const uint32_t character) {
-        if (dst == NULL)
-                dst = new_state();
+        assert (dst != NULL);
         copy_state(dst, src);
         /* printf("=====================\n"); */
         /* json_t* p_src = build_json_state(src, "", ""); */
@@ -331,6 +330,8 @@ realize_character(state_s* dst, const state_s* src, const uint32_t character) {
         igraph_es_incident(&es, c, IGRAPH_ALL);
         igraph_delete_edges(dst->red_black, es);
         igraph_es_destroy(&es);
+        /* printf("===CONCOMP===ADJACENT===NOT_ADJ===\n"); */
+        /* igraph_vector_print(&conn_comp); */
         /* igraph_vector_print(&adjacent); */
         /* igraph_vector_print(&not_adjacent); */
         g_debug("CHAR %d\n", character);
@@ -351,6 +352,7 @@ realize_character(state_s* dst, const state_s* src, const uint32_t character) {
                         delete_character(dst, character);
                 }
         }
+        dst->realized_char = character;
         /* igraph_write_graph_edgelist(dst.red_black, stdout); */
         assert(check_state(dst) == 0);
         cleanup(dst);
@@ -889,7 +891,7 @@ int main(int argc, char **argv) {
                         json_array_foreach(listc, index, value) {
                                 state_s* stp2 = new_state();
                                 realize_character(stp2, stp, json_integer_value(value));
-                                copy_state(stp2, stp);
+                                copy_state(stp, stp2);
                                 assert(check_state(stp) == 0);
                         }
                 else

@@ -1,6 +1,5 @@
 {
     "character_queue": [],
-    "instance": {
         "characters": [
             1,
             0,
@@ -20,6 +19,7 @@
         "num_characters_orig": 5,
         "num_species": 3,
         "num_species_orig": 5,
+    "realized_char": 1,
         "red_black_file": "tests/api/output/3-01.json-redblack.graphml",
         "species": [
             1,
@@ -27,8 +27,6 @@
             1,
             0,
             0
-        ]
-    },
-    "realized_char": 0,
+        ],
     "tried_characters": []
 }
