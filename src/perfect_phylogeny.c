@@ -281,6 +281,7 @@ void copy_state(state_s* dst, const state_s* src) {
 */
 void
 realize_character(state_s* dst, const state_s* src, const uint32_t character) {
+        assert (src != NULL);
         assert (dst != NULL);
         copy_state(dst, src);
         /* printf("=====================\n"); */
@@ -655,15 +656,14 @@ reset_state(state_s *stp) {
         stp->realized_char = 0;
         stp->tried_characters = NULL;
         stp->character_queue = NULL;
-        if (stp->red_black == NULL) stp->red_black = GC_MALLOC(sizeof(igraph_t));
-        if (stp->conflict == NULL)  stp->conflict  = GC_MALLOC(sizeof(igraph_t));
-        if (stp->current == NULL) stp->current = GC_MALLOC(stp->num_characters_orig * sizeof(uint32_t));
-        if (stp->species == NULL) stp->species = GC_MALLOC(stp->num_species_orig * sizeof(uint32_t));
-        assert(abs(stp->species - stp->current) >= stp->num_species_orig);
+        stp->red_black = GC_MALLOC(sizeof(igraph_t));
+        stp->conflict  = GC_MALLOC(sizeof(igraph_t));
+        stp->current = GC_MALLOC(stp->num_characters_orig * sizeof(uint32_t));
+        stp->species = GC_MALLOC(stp->num_species_orig * sizeof(uint32_t));
+        stp->characters = GC_MALLOC(stp->num_characters_orig * sizeof(uint32_t));
 
-        if (stp->characters == NULL) stp->characters = GC_MALLOC(stp->num_characters_orig * sizeof(uint32_t));
-        igraph_empty(stp->conflict, stp->num_characters_orig, IGRAPH_UNDIRECTED);
-        igraph_empty(stp->red_black, stp->num_species_orig + stp->num_characters_orig, IGRAPH_UNDIRECTED);
+        igraph_empty_attrs(stp->conflict, stp->num_characters_orig, IGRAPH_UNDIRECTED, 0);
+        igraph_empty_attrs(stp->red_black, stp->num_species_orig + stp->num_characters_orig, IGRAPH_UNDIRECTED, 0);
         stp->operation = 0;
         for (uint32_t i=0; i < stp->num_species_orig; i++) {
                 stp->species[i] = 1;

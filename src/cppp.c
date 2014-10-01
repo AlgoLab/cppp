@@ -30,12 +30,12 @@ alphabetic(state_s *stp) {
 }
 
 int main(int argc, char **argv) {
+        igraph_i_set_attribute_table(&igraph_cattribute_table);
         static struct gengetopt_args_info args_info;
         assert(cmdline_parser(argc, argv, &args_info) == 0);
         assert(args_info.inputs_num >= 1);
         start_logging(args_info);
 
-        igraph_i_set_attribute_table(&igraph_cattribute_table);
         state_s* temp = read_instance_from_filename(args_info.inputs[0]);
 
 /**
