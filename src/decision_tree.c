@@ -57,14 +57,14 @@ next_node(state_s *states, uint32_t level, strategy_fn node_init) {
                 /* destroy_state(current); */
                 return (level - 1);
         }
-        current->realized_char = GPOINTER_TO_INT(g_slist_nth_data(current->character_queue, 0));
+        uint32_t to_realize = GPOINTER_TO_INT(g_slist_nth_data(current->character_queue, 0));
         current->character_queue = g_slist_nth(current->character_queue, 1);
         current->tried_characters = g_slist_prepend(current->tried_characters, GINT_TO_POINTER(current->realized_char));
-        state_s modified = realize_character(*current, current->realized_char);
-        if (modified.operation > 0) {
-                reset_state(current + 1);
+        state_s* modified = new_state();
+        realize_character(modified, current, to_realize);
+        if (modified->operation > 0) {
                 state_s *next = current + 1;
-                copy_state(next, &modified);
+                copy_state(next, modified);
                 next->character_queue = NULL;
                 next->tried_characters = NULL;
                 return (level + 1);
@@ -79,6 +79,8 @@ exhaustive_search(state_s *states, strategy_fn strategy) {
                 cleanup(states + level);
                 if ((states + level)->num_species == 0) {
                         printf("Solution found\n");
+                        for (uint32_t i=0; i <= level; i++)
+                                printf("Character %d: %d\n", i, (states + level)->realized_char);
                         return;
                 }
         }
