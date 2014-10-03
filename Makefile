@@ -87,7 +87,6 @@ clean-test:
 # The stem of the filenames (the expansion of *) must be the same for all tests
 #
 PP_TESTS_DIR := tests/api
-# PP_TESTS_DESC := $(wildcard $(PP_TESTS_DIR)/t*.json)
 PP_TESTS_OK   := $(wildcard $(PP_TESTS_DIR)/ok/*)
 # PP_TESTS_OK_T stores a result for each test description
 # It checks that I never forget to write the expected results
@@ -96,9 +95,11 @@ PP_TESTS_OK_T := $(PP_TESTS_OK:$(PP_TESTS_DIR)/t%.json=$(PP_TESTS_DIR)/ok/%.json
 PP_TESTS_OUT  := $(PP_TESTS_OK:$(PP_TESTS_DIR)/ok/%=$(PP_TESTS_DIR)/output/%)
 PP_TESTS_DIFF := $(PP_TESTS_OK:$(PP_TESTS_DIR)/ok/%=$(PP_TESTS_DIR)/output/%.diff)
 
-check: bin $(T_OBJECTS) unit-test regression-test
+check: bin $(T_OBJECTS) unit-test api-test
 
-# Implicit rules to perform the regression tests
+tests: check regression-test
+
+# Implicit rules to perform the API tests
 $(PP_TESTS_DIR)/output/%.json $(PP_TESTS_DIR)/output/%.json-conflict.graphml $(PP_TESTS_DIR)/output/%.json-redblack.graphml: $(PP_TESTS_DIR)/t%.json $(T_OBJECTS)
 	tests/internal/perfect_phylogeny.o $<
 
@@ -106,11 +107,28 @@ $(PP_TESTS_DIR)/output/%.json $(PP_TESTS_DIR)/output/%.json-conflict.graphml $(P
 $(PP_TESTS_DIR)/output/%.diff: $(PP_TESTS_DIR)/output/%
 	-diff -u --strip-trailing-cr --ignore-all-space $< $(PP_TESTS_DIR)/ok/$* > $@
 
-regression-test: $(PP_TESTS_DIFF) $(PP_TESTS_OK_T) $(PP_TESTS_OUT)
+api-test: $(PP_TESTS_DIFF) $(PP_TESTS_OK_T) $(PP_TESTS_OUT)
 	cat $(PP_TESTS_DIFF)
 
 unit-test: $(T_OBJECTS) bin
 	tests/internal/perfect_phylogeny.o
+
+# The regression tests directory structure is:
+# tests/regression/input    : input matrix
+# tests/regression/output   : actual outputs and diffs
+# tests/regression/ok       : expected outputs
+REG_TESTS_DIR := tests/regression
+REG_TESTS_OK   := $(wildcard $(REG_TESTS_DIR)/ok/*)
+REG_TESTS_OUT  := $(REG_TESTS_OK:$(REG_TESTS_DIR)/ok/%=$(REG_TESTS_DIR)/output/%.out)
+REG_TESTS_DIFF := $(REG_TESTS_OK:$(REG_TESTS_DIR)/ok/%=$(REG_TESTS_DIR)/output/%.diff)
+
+$(REG_TESTS_DIR)/output/%.diff: $(REG_TESTS_DIR)/output/% bin
+	-diff -u --strip-trailing-cr --ignore-all-space $< $(PP_TESTS_DIR)/ok/$* > $@
+
+%.out: bin
+
+regression-test: $(REG_TESTS_DIFF) $(REG_TESTS_OK_T) $(REG_TESTS_OUT)
+	cat $(REG_TESTS_DIFF)
 
 doc: $(P) docs/latex/refman.pdf
 	doxygen && cd docs/latex/ && latexmk -recorder -use-make -pdf refman
