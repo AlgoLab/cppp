@@ -72,7 +72,7 @@ clean: clean-test
 
 clean-test:
 	@echo "Cleaning tests..."
-	rm -rf ${TEST_DIR}/*.o ${TEST_DIR}/bin/* ${TEST_DIR}/*/output/*
+	rm -rf ${TEST_DIR}/*.o ${TEST_DIR}/*/output/*
 
 # The regression tests are stored in a directory tree as follows:
 # tests/
