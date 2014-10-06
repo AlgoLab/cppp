@@ -48,11 +48,11 @@ no_sibling_p(state_s *stp) {
 static uint32_t
 next_node(state_s *states, uint32_t level, strategy_fn node_init) {
         state_s *current = states + level;
-        printf("level: %d\n", level);
+        g_debug("level: %d\n", level);
         if (current->tried_characters == NULL && no_sibling_p(current))
                 current->character_queue = node_init(current);
-        printf("level: %d - tried: %d - queue: %d\n", level,
-               g_slist_length(current->tried_characters), g_slist_length(current->character_queue));
+        g_debug("level: %d - tried: %d - queue: %d\n", level,
+		g_slist_length(current->tried_characters), g_slist_length(current->character_queue));
         if (no_sibling_p(current)) {
                 /* destroy_state(current); */
                 return (level - 1);
@@ -72,19 +72,16 @@ next_node(state_s *states, uint32_t level, strategy_fn node_init) {
         return (level);
 }
 
-void
+bool
 exhaustive_search(state_s *states, strategy_fn strategy) {
         uint32_t level = next_node(states, 0, strategy);
         for(;level != -1; level = next_node(states, level, strategy)) {
                 cleanup(states + level);
                 if ((states + level)->num_species == 0) {
-                        printf("Solution found\n");
-                        for (uint32_t i=0; i <= level; i++)
-                                printf("Character %d: %d\n", i, (states + level)->realized_char);
-                        return;
+                        return true;
                 }
         }
-        printf("END\n");
+        return false;
 }
 
 #ifdef TEST_EVERYTHING

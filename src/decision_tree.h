@@ -37,7 +37,9 @@ typedef GSList* (*strategy_fn)(state_s *stp);
    instance
    \param strategy: the callback function that determines the order according to
    which all characters are tried
+
+   returns \c true iff a solution is found
 */
 
-void
+bool
 exhaustive_search(state_s *states, strategy_fn strategy);

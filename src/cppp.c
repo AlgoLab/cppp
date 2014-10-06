@@ -46,7 +46,15 @@ int main(int argc, char **argv) {
 */
         state_s states[2 * temp->num_species + temp->num_characters];
         copy_state(states, temp);
-        exhaustive_search(states, alphabetic);
+        FILE* outf = fopen(args_info.output_arg, "w");
+        assert(outf != NULL);
+        if (exhaustive_search(states, alphabetic)) {
+                for (uint32_t level=0; (states + level)->num_species > 0; level++)
+                        fprintf(outf, "Character %d: %d\n", level, (states + level)->realized_char);
+        } else {
+                fprintf(outf, "Not found\n");
+        }
+        fclose(outf);
         cmdline_parser_free(&args_info);
         return 0;
 }
