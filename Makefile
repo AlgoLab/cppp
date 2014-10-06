@@ -119,21 +119,15 @@ unit-test: $(T_OBJECTS) bin
 # tests/regression/ok       : expected outputs
 REG_TESTS_DIR := tests/regression
 REG_TESTS_OK   := $(wildcard $(REG_TESTS_DIR)/ok/*)
-REG_TESTS_OUT  := $(REG_TESTS_OK:$(REG_TESTS_DIR)/ok/%=$(REG_TESTS_DIR)/output/%.out)
 REG_TESTS_DIFF := $(REG_TESTS_OK:$(REG_TESTS_DIR)/ok/%=$(REG_TESTS_DIR)/output/%.diff)
 
-$(REG_TESTS_DIR)/output/%.diff: $(REG_TESTS_DIR)/output/% bin
-	-diff -u --strip-trailing-cr --ignore-all-space $< $(PP_TESTS_DIR)/ok/$* > $@
-
-%.out: bin
-
-regression-test: $(REG_TESTS_DIFF) $(REG_TESTS_OK_T) $(REG_TESTS_OUT)
-	cat $(REG_TESTS_DIFF)
+regression-test: $(P) $(REG_TESTS_OK)
+	tests/bin/run-tests.sh && cat $(REG_TESTS_DIFF)
 
 doc: $(P) docs/latex/refman.pdf
 	doxygen && cd docs/latex/ && latexmk -recorder -use-make -pdf refman
 
-.PHONY: all clean doc unit-test clean-test
+.PHONY: all clean doc unit-test clean-test regression-test api-test
 
 ifneq "$(MAKECMDGOALS)" "clean"
 -include ${SOURCES:.c=.d}
