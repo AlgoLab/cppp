@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
         assert(outf != NULL);
         if (exhaustive_search(states, alphabetic)) {
                 for (uint32_t level=0; (states + level)->num_species > 0; level++)
-                        fprintf(outf, "Character %d: %d\n", level, (states + level)->realized_char);
+                        fprintf(outf, "%d\n", (states + level)->realized_char);
         } else {
                 fprintf(outf, "Not found\n");
         }

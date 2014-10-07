@@ -122,7 +122,8 @@ REG_TESTS_OK   := $(wildcard $(REG_TESTS_DIR)/ok/*)
 REG_TESTS_DIFF := $(REG_TESTS_OK:$(REG_TESTS_DIR)/ok/%=$(REG_TESTS_DIR)/output/%.diff)
 
 regression-test: $(P) $(REG_TESTS_OK)
-	tests/bin/run-tests.sh && cat $(REG_TESTS_DIFF)
+	tests/bin/run-tests.sh
+
 
 doc: $(P) docs/latex/refman.pdf
 	doxygen && cd docs/latex/ && latexmk -recorder -use-make -pdf refman

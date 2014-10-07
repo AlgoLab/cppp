@@ -319,7 +319,7 @@ realize_character(state_s* dst, const state_s* src, const uint32_t character) {
         for (size_t i=0; i<l; i++) {
                 uint32_t v = VECTOR(temp)[i];
                 /* check if v is a species */
-                if (v < dst->num_species && v != c) {
+                if (v < dst->num_species_orig && v != c) {
                         igraph_vector_push_back(&new_red, c);
                         igraph_vector_push_back(&new_red, v);
                         igraph_vector_push_back(&not_adjacent, v);
