@@ -188,7 +188,28 @@ void delete_species(state_s* stp, uint32_t s);
 */
 void delete_character(state_s* stp, uint32_t c);
 
-state_s* read_instance_from_filename(const char *filename);
+/**
+   \struct data common to all instances in a file
+*/
+typedef struct instances_schema_s {
+        FILE* file;
+        uint32_t num_species;
+        uint32_t num_characters;
+        char* filename;
+} instances_schema_s;
+
+/* /\** */
+/*    \brief open the file containing the instances */
+/*    \param the filename */
+/* *\/ */
+/* instances_schema_s open_instance_file(const char *); */
+
+/**
+   \brief read another instance from file, if possible
+   \param the filename
+*/
+state_s* read_instance_from_filename(instances_schema_s* global_props);
+
 /**
    \param character: the character \b name to be realized
 

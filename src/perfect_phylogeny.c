@@ -404,10 +404,16 @@ static void str_state(const state_s* stp, char* str) {
 			   ));
 }
 
+
 /**
    \brief read the file containing an instance of the ppp problem and computes the
    corresponding state
    \param filename
+
+   Reads an instance from file. If \c global_props contains a \c NULL \c file,
+   then also the first row of the file, storing the number of species and
+   characters must be read.
+   If the file contains no instances to be read, then the function returns \c NULL.
 
    Updates an instance by computing the red-black and the conflict graphs
    associated to a given matrix.
@@ -422,45 +428,52 @@ static void str_state(const state_s* stp, char* str) {
 
 */
 state_s*
-read_instance_from_filename(const char *filename) {
-        FILE* file;
-        file = fopen(filename, "r");
-        assert(file != NULL);
-        assert(!feof(file));
-        uint32_t num_species, num_characters;
+read_instance_from_filename(instances_schema_s* global_props) {
+        assert(global_props->filename != NULL);
+        if (global_props->file == NULL) {
+                global_props->file = fopen(global_props->filename, "r");
+                assert(global_props->file != NULL);
+                assert(!feof(global_props->file));
 
-        assert(fscanf(file, "%"SCNu32" %"SCNu32, &num_species, &num_characters) != EOF);
+                assert(fscanf(global_props->file, "%"SCNu32" %"SCNu32, &(global_props->num_species),
+				  &(global_props->num_characters)) != EOF);
+        }
+
         state_s* stp = new_state();
-        init_state(stp, num_species, num_characters);
-        stp->num_species = num_species;
-        stp->num_characters = num_characters;
-        stp->matrix = GC_MALLOC(num_species * num_characters * sizeof(uint32_t));
-        for(uint32_t s=0; s < num_species; s++)
-                for(uint32_t c=0; c < num_characters; c++) {
+        init_state(stp, global_props->num_species, global_props->num_characters);
+        stp->num_species = global_props->num_species;
+        stp->num_characters = global_props->num_characters;
+        stp->matrix = GC_MALLOC(stp->num_species * stp->num_characters * sizeof(uint32_t));
+        for(uint32_t s=0; s < stp->num_species; s++)
+                for(uint32_t c=0; c < stp->num_characters; c++) {
                         uint32_t x;
-                        assert(fscanf(file, "%"SCNu32, &x) != EOF);
+                        assert(fscanf(global_props->file, "%"SCNu32, &x) != EOF || s == 0 && c == 0);
+                        if (feof(global_props->file)) {
+                                fclose(global_props->file);
+                                return NULL;
+                        }
                         matrix_set_value(stp, s, c, x);
                 }
 
 /* red-black graph */
-        for(uint32_t s=0; s < num_species; s++) {
+        for(uint32_t s=0; s < stp->num_species; s++) {
                 SETVAN(stp->red_black, "id", s, s);
                 SETVAN(stp->red_black, "color", s, SPECIES);
         }
-        for(uint32_t c=0; c < num_characters; c++) {
-                SETVAN(stp->red_black, "id", c + num_species, c);
-                SETVAN(stp->red_black, "color", c + num_species, BLACK);
+        for(uint32_t c=0; c < stp->num_characters; c++) {
+                SETVAN(stp->red_black, "id", c + stp->num_species, c);
+                SETVAN(stp->red_black, "color", c + stp->num_species, BLACK);
         }
-        for (uint32_t s=0; s < num_species; s++)
-                for (uint32_t c=0; c < num_characters; c++)
+        for (uint32_t s=0; s < stp->num_species; s++)
+                for (uint32_t c=0; c < stp->num_characters; c++)
                         if (matrix_get_value(stp, s, c) == 1)
-                                igraph_add_edge(stp->red_black, s, c + num_species);
+                                igraph_add_edge(stp->red_black, s, c + stp->num_species);
 
         /* conflict graph */
-        for(uint32_t c1 = 0; c1 < num_characters; c1++)
-                for(uint32_t c2 = c1 + 1; c2 < num_characters; c2++) {
+        for(uint32_t c1 = 0; c1 < stp->num_characters; c1++)
+                for(uint32_t c2 = c1 + 1; c2 < stp->num_characters; c2++) {
                         uint32_t states[2][2] = { {0, 0}, {0, 0} };
-                        for(uint32_t s=0; s < num_species; s++)
+                        for(uint32_t s=0; s < stp->num_species; s++)
                                 states[matrix_get_value(stp, s, c1)][matrix_get_value(stp, s, c2)] = 1;
                         if(states[0][0] + states[0][1] + states[1][0] + states[1][1] == 4)
                                 igraph_add_edge(stp->conflict, c1, c2);
@@ -471,7 +484,6 @@ read_instance_from_filename(const char *filename) {
         str_state(stp, str);
         g_debug("%s", str);
         free(str);
-        fclose(file);
         assert(check_state(stp) == 0);
         return stp;
 }
@@ -573,7 +585,11 @@ START_TEST(test_read_instance_from_filename_1) {
                 {1, 0, 0, 1},
                 {0, 1, 1, 0}
         };
-        state_s* inst = read_instance_from_filename("tests/input/read/1.txt");
+        instances_schema_s props = {
+                .file = NULL,
+                .filename = "tests/input/read/1.txt"
+        };
+        state_s* inst = read_instance_from_filename(&props);
         test_matrix_pp(inst, 4, 4, data, conflict);
 }
 END_TEST
@@ -592,7 +608,11 @@ START_TEST(test_read_instance_from_filename_2) {
                 {1, 0, 1},
                 {1, 1, 0}
         };
-        state_s* instp = read_instance_from_filename("tests/input/read/2.txt");
+        instances_schema_s props = {
+                .file = NULL,
+                .filename = "tests/input/read/2.txt"
+        };
+        state_s* instp = read_instance_from_filename(&props);
         test_matrix_pp(instp, 6, 3, data, conflict);
         //    igraph_write_graph_gml(inst.red_black, stdout, 0, 0);
 }
@@ -613,7 +633,11 @@ START_TEST(test_read_instance_from_filename_3) {
                 {0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0}
         };
-        state_s* instp = read_instance_from_filename("tests/input/read/3.txt");
+        instances_schema_s props = {
+                .file = NULL,
+                .filename = "tests/input/read/3.txt"
+        };
+        state_s* instp = read_instance_from_filename(&props);
         test_matrix_pp(instp, 5, 5, data, conflict);
         //igraph_write_graph_gml(inst.red_black, stdout, 0, 0);
 }
@@ -788,7 +812,11 @@ END_TEST
 
 START_TEST(write_json_3) {
         state_s *stp = new_state();
-        stp = read_instance_from_filename("tests/input/read/3.txt");
+        instances_schema_s props = {
+                .file = NULL,
+                .filename = "tests/input/read/3.txt"
+        };
+        stp = read_instance_from_filename(&props);
         assert(check_state(stp) == 0);
         write_state("tests/api/3t.json", stp);
 
@@ -811,14 +839,22 @@ END_TEST
 /*         return (x1 == NULL) ? 1 : -1; */
 /* } */
 START_TEST(copy_state_1) {
-        state_s* stp = read_instance_from_filename("tests/input/read/1.txt");
+        instances_schema_s props = {
+                .file = NULL,
+                .filename = "tests/input/read/1.txt"
+        };
+        state_s* stp = read_instance_from_filename(&props);
         state_s* stp2 = new_state();
         copy_state(stp2, stp);
         ck_assert_int_eq(state_cmp(stp, stp2),0);
 }
 END_TEST
 START_TEST(copy_state_2) {
-        state_s* stp = read_instance_from_filename("tests/input/read/2.txt");
+        instances_schema_s props = {
+                .file = NULL,
+                .filename = "tests/input/read/2.txt"
+        };
+        state_s* stp = read_instance_from_filename(&props);
         state_s* stp2 = new_state();
         copy_state(stp2, stp);
         ck_assert_int_eq(state_cmp(stp, stp2),0);

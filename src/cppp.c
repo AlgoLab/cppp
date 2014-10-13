@@ -35,24 +35,30 @@ int main(int argc, char **argv) {
         assert(cmdline_parser(argc, argv, &args_info) == 0);
         assert(args_info.inputs_num >= 1);
         start_logging(args_info);
+        FILE* outf = fopen(args_info.output_arg, "w");
 
-        state_s* temp = read_instance_from_filename(args_info.inputs[0]);
-
+        instances_schema_s props = {
+                .file = NULL,
+                .filename = args_info.inputs[0]
+        };
+        for (state_s* temp = read_instance_from_filename(&props);
+             temp != NULL; temp = read_instance_from_filename(&props)) {
 /**
    Notice that each character is realized at most twice (once positive and once
    negative) and that each species can be declared null at most once.
 
    Therefore each partial solution con contain at most 2n+m statuses.
 */
-        state_s states[2 * temp->num_species + temp->num_characters];
-        copy_state(states, temp);
-        FILE* outf = fopen(args_info.output_arg, "w");
-        assert(outf != NULL);
-        if (exhaustive_search(states, alphabetic)) {
-                for (uint32_t level=0; (states + level)->num_species > 0; level++)
-                        fprintf(outf, "%d\n", (states + level)->realized_char);
-        } else {
-                fprintf(outf, "Not found\n");
+                state_s states[2 * temp->num_species + temp->num_characters];
+                copy_state(states, temp);
+                assert(outf != NULL);
+                if (exhaustive_search(states, alphabetic)) {
+                        for (uint32_t level=0; (states + level)->num_species > 0; level++)
+                                fprintf(outf, "%d ", (states + level)->realized_char);
+                        fprintf(outf, "\n");
+                } else {
+                        fprintf(outf, "Not found\n");
+                }
         }
         fclose(outf);
         cmdline_parser_free(&args_info);
