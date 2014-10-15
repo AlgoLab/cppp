@@ -59,6 +59,15 @@
 #define RED   2
 
 /**
+   Limits:
+
+   Enforce a maximum number of species and characters, to avoid a number of
+   mallocs
+*/
+#define MAX_SPECIES 1024
+#define MAX_CHARACTERS 1024
+
+/**
    \struct state_s
    \brief an instance and the
    possible completions that have
@@ -73,9 +82,6 @@
    that we have previously tried to realize and the candidate characters left.
 
    Notice that the last character in \c tried_characters is equal to \c realized_char
-
-   The \c matrix field can be \c NULL, if we are not interested in the matrix
-   any more.
 
    The \c current gives the current state for each original species.
 
@@ -95,10 +101,9 @@ typedef struct state_s {
         uint32_t num_characters_orig;
         igraph_t *red_black;
         igraph_t *conflict;
-        uint32_t *matrix;
-        uint32_t *current;
-        uint32_t *species;
-        uint32_t *characters;
+        uint32_t current[MAX_CHARACTERS];
+        uint32_t species[MAX_SPECIES];
+        uint32_t characters[MAX_CHARACTERS];
         uint32_t operation;
         GSList *tried_characters;
         GSList *character_queue;
@@ -106,13 +111,11 @@ typedef struct state_s {
 
 
 /**
-   \brief managing states: \c new_state to allocate the main structure,
+   \brief managing states:
    \c init_state allocates the whole structure when passed the number of species
    and characters,  \c reset_state allocates the whole structure, taking the
    number of original species and characters from the structure.
 */
-state_s *
-new_state(void);
 
 void init_state(state_s *stp, uint32_t nspecies, uint32_t nchars);
 
@@ -162,8 +165,8 @@ void copy_state(state_s* dst, const state_s* src);
 /**
    \brief read a state from a file
 */
-state_s*
-read_state(const char* filename);
+void
+read_state(state_s* stp, const char* filename);
 
 /**
    \brief write a state to a file
@@ -206,9 +209,13 @@ typedef struct instances_schema_s {
 
 /**
    \brief read another instance from file, if possible
+   \param a pointer to the state
    \param the filename
+
+   The output state has \c num_species_orig equal to 0 iff there is no instance
+   to read in the file
 */
-state_s* read_instance_from_filename(instances_schema_s* global_props);
+void read_instance_from_filename(state_s* stp, instances_schema_s* global_props);
 
 /**
    \param character: the character \b name to be realized
@@ -216,7 +223,7 @@ state_s* read_instance_from_filename(instances_schema_s* global_props);
    \return the state after the realization of \c character
 
    The memory necessary to store the newly created instance is automatically
-   allocated. It must be freed with \c destroy_instance after it has been used.
+   allocated. It must be freed with \c destroy_state after it has been used.
 */
 void realize_character(state_s* dst, const state_s* src, const uint32_t character);
 

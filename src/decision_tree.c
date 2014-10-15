@@ -67,13 +67,16 @@ next_node(state_s *states, uint32_t level, strategy_fn node_init) {
         /* for (size_t x = 0; x < level; x++) */
         /*         printf("%d ", (states + x)->realized_char); */
         /* printf("\n"); */
-        if (no_sibling_p(current))
+        if (no_sibling_p(current)) {
+                destroy_state(current);
                 return (level - 1);
+        }
         uint32_t to_realize = GPOINTER_TO_INT(g_slist_nth_data(current->character_queue, 0));
         /* printf("Realizing: %d\n", to_realize); */
         current->character_queue = g_slist_nth(current->character_queue, 1);
         current->tried_characters = g_slist_prepend(current->tried_characters, GINT_TO_POINTER(to_realize));
-        state_s* modified = new_state();
+        state_s mod = {};
+        state_s* modified = &mod;
         realize_character(modified, current, to_realize);
         /* printf("Result %d (%d)\n", modified->operation, level); */
         if (modified->operation > 0) {

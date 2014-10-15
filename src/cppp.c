@@ -41,16 +41,19 @@ int main(int argc, char **argv) {
                 .file = NULL,
                 .filename = args_info.inputs[0]
         };
-        for (state_s* temp = read_instance_from_filename(&props);
-             temp != NULL; temp = read_instance_from_filename(&props)) {
+        state_s temp;
+        for (read_instance_from_filename(&temp, &props);
+             props.num_species > 0; read_instance_from_filename(&temp, &props)) {
 /**
    Notice that each character is realized at most twice (once positive and once
    negative) and that each species can be declared null at most once.
 
    Therefore each partial solution con contain at most 2n+m statuses.
 */
-                state_s states[2 * temp->num_species + temp->num_characters];
-                copy_state(states, temp);
+                state_s states[2 * props.num_species + props.num_characters];
+                for (uint32_t level=0; level < 2 * props.num_species + props.num_characters; level++)
+                        init_state(states + level, props.num_species, props.num_characters);
+                copy_state(states, &temp);
                 assert(outf != NULL);
                 if (exhaustive_search(states, alphabetic)) {
                         for (uint32_t level=0; (states + level)->num_species > 0; level++)
