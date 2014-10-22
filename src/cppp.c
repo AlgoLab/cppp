@@ -47,9 +47,9 @@ int main(int argc, char **argv) {
    Notice that each character is realized at most twice (once positive and once
    negative) and that each species can be declared null at most once.
 
-   Therefore each partial solution con contain at most 2n+m statuses.
+   Therefore each partial solution con contain at most 2m+n statuses.
 */
-                state_s states[2 * temp->num_species + temp->num_characters];
+                state_s states[temp->num_species + 2 * temp->num_characters];
                 copy_state(states, temp);
                 assert(outf != NULL);
                 if (exhaustive_search(states, alphabetic)) {
