@@ -24,4 +24,4 @@ do
     cat "$f" >> modified.csv
 done
 
-cp results.csv modified.csv ~/temp/tmp/
+cp results.csv modified.csv /tmp/
