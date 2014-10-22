@@ -1,6 +1,8 @@
 cppp
 lib/msdir/
 
+#Temp files
+\#*\#
 
 # Object files
 *.o
@@ -51,5 +53,15 @@ doc/
 # Misc
 *.log
 
-# Test results
+# Test
 tests/regression/output/*
+tests/bin/*
+
+# Global
+GTAGS
+GPATH
+GRTAGS
+GSYMS
+
+# Documentation
+docs/*
