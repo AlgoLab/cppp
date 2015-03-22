@@ -2,7 +2,7 @@
 
 require 'fileutils'
 
-[60].each do |n|
+[10, 20, 30, 40, 50, 60].each do |n|
   [2*n/4, 3*n/4, 4*n/4, 5*n/4, 6*n/4].each do |m|
     dirname = "exp/#{n}/#{m}"
     system("mkdir -p #{dirname}") unless Dir.exists?(dirname)
