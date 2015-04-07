@@ -19,7 +19,7 @@ DEBUG_LIBS = check #efence
 LIBS 	= $(LIB_DIR)/getopt/cmdline.o
 CFLAGS_EXTRA =  -m64 -std=c11 -Wall -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes
 CFLAGS_LIBS = `pkg-config --cflags $(STD_LIBS)`
-CFLAGS_TEST =  -DTEST_EVERYTHING  `pkg-config --cflags $(DEBUG_LIBS)`
+CFLAGS_TEST =  -fno-omit-frame-pointer -DTEST_EVERYTHING  `pkg-config --cflags $(DEBUG_LIBS)`
 LDLIBS = `pkg-config --libs $(STD_LIBS)`
 LDLIBS_TEST = `pkg-config --libs $(DEBUG_LIBS)`
 CFLAGS = $(CFLAGS_STD) $(CFLAGS_EXTRA) $(CFLAGS_LIB)
