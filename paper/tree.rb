@@ -8,6 +8,7 @@ require 'ostruct'
 require 'pp'
 require 'matrix'
 require 'bio'
+require 'set'
 
 
 class OptparseExample
@@ -74,18 +75,19 @@ class LabeledMatrix
   end
 
   def c_label(num)
-    c = num / 2
-    sign = num - (c * 2)
-    if (sign > 0)
-      return "C%04d-" % c
-    else
-      return "C%04d+" % c
-    end
+    return "C%05d" % (num + 1)
   end
 
 
   def initialize(arr)
     m = arr.map { |r| r.chomp }
+    @c_labels = Array.new
+    if m[0][0] == "\#"
+      # The first line contains the optional list of characters, separated
+      # by ,;
+      header = m[0][1..-1]
+      @c_labels = header.split(/[,;]/)
+    end
     @c_num = m[0].length
     @s_num = m.length
 
@@ -95,7 +97,7 @@ class LabeledMatrix
       row.chomp.split('').map.with_index { |x, idx| @matrix[c_label(idx)] << x }
     end
 
-    @c_labels = @matrix.keys
+    @c_labels = @matrix.keys unless @c_labels.length > 0
     @s_labels = m.map.with_index { |x, i| s_label(i) }
     @s_chars  = m[0].split('').map.with_index   { |x, i| c_label(i) }
   end
@@ -149,39 +151,44 @@ class LabeledMatrix
   # Partition the characters in the portions starting with the maximal characters
   # i.e. each maximal characters begins a new portion
   def partition(characters_set)
+    # Copy the characters_set array, otherwise it is passed as reference
     maximals = find_maximal_chars(Marshal.load(Marshal.dump(characters_set)))
-    if maximals.length < 2
-      # There is only one maximal character
-      lengths = [ characters_set.length ]
-    else
-      lengths = maximals.each_cons(2).map { |a, b| characters_set.index(b) - characters_set.index(a) }
-      lengths.push(@s_num - lengths.last)
+    classes = Array.new
+    # For each maximal character m, get the species that have m
+    # If the matrix has a perfect phylogeny, the union of the characters possessed
+    # by those species is a class of the partition
+    maximals.map { |m| species(m) }.each do |species_set|
+      char_set = species_set.map.inject(Set.new) { |s, x| s.union(characters(x).to_set) }.intersection(characters_set.to_set)
+      char_array = char_set.to_a
+      # puts "characters_set: #{characters_set}"
+      # puts "maximals: #{maximals}"
+      # puts "char_array: #{char_array}"
+      classes.push(char_array.sort { |a,b| characters_set.index(a) <=> characters_set.index(b) } )
     end
-    return maximals.zip(lengths).map { |c, l| characters_set.slice(characters_set.index(c), l) }
+    return classes
   end
 end
 
-def build_tree(matrix, tree, root, characters)
+def build_tree(matrix, characters)
   # tree is the tree currently built, the subtree computed will be grafted at root
   # characters is the sorted list of characters to be realized
   # We will compute the subtree on the input characters
-  puts "build_tree: #{characters}"
-  if characters.size > 0
+  if characters.size == 0
     # If characters.size == 0, then there is no subtree to compute
-    subtrees = matrix.partition(characters)
-    subtrees.each do |characters_subtree|
-      # Since partition splits the characters into disconnected parts of the
-      # input matrix, each class of the partition corresponds to a separate subtree.
-      # We realize the first character of each subtree, that is the maximal character
-      # of each component.
-      # Then we recurse on each component.
-      c = characters_subtree.shift
-      leaf = Bio::Tree::Node::new()
-      edge = tree.add_edge(root, leaf)
-      edge.distance_string = c
-      build_tree(matrix, tree, leaf, characters_subtree)
-    end
+    return ''
   end
+  subtrees = matrix.partition(characters)
+  inner = subtrees.map do |characters_subtree|
+    # Since partition splits the characters into disconnected parts of the
+    # input matrix, each class of the partition corresponds to a separate subtree.
+    # We realize the first character of each subtree, that is the maximal character
+    # of each component.
+    # Then we recurse on each component.
+    c = characters_subtree.shift
+    rest = build_tree(matrix, characters_subtree)
+    "#{rest}\:#{c}"
+  end.join(',')
+  return "\(#{inner}\)"
 end
 
 
@@ -189,9 +196,5 @@ end
 m = LabeledMatrix.new(File.readlines options.matrix)
 m.remove_null
 m.sort_columns
-m.pp
-t = Bio::Tree::new()
-# root = Bio::Tree::Node::new("root")
-# node = t.add_node()
-build_tree(m, t, t.root, m.c_labels)
-t.output_newick(options=:indent)
+#m.pp
+puts "#{build_tree(m, m.c_labels)}"
