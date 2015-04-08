@@ -35,6 +35,12 @@ class OptparseExample
         options.matrix = matrix
       end
 
+      # -p options means to generate the characters names for persistent perfect phylogeny
+      # i.e. alternating positive and negative characters
+      opts.on("-p", "--persistent") do
+        options.persistent = true
+      end
+
       # No argument, shows at tail.  This will print an options summary.
       # Try it and see!
       opts.on_tail("-h", "--help", "Show this message") do
@@ -75,7 +81,17 @@ class LabeledMatrix
   end
 
   def c_label(num)
-    return "C%05d" % (num + 1)
+    if options.persistent
+      sign = num % 1
+      root = (num - sign) / 2 + 1
+      if sign == 0
+        return "C%04d+" % root
+      else
+        return "C%04d-" % root
+      end
+    else
+      return "C%05d" % (num + 1)
+    end
   end
 
 
