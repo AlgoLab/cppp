@@ -95,7 +95,7 @@ class LabeledMatrix
   end
 
   def c_label(num)
-    if options.persistent
+    if @persistent
       sign = num % 1
       root = (num - sign) / 2 + 1
       if sign == 0
@@ -109,7 +109,8 @@ class LabeledMatrix
   end
 
 
-  def initialize(arr)
+  def initialize(arr, persistent_chars)
+    @persistent = persistent_chars
     m = arr.map { |r| r.chomp }
     @c_labels = Array.new
     if m[0][0] == "\#"
@@ -223,8 +224,8 @@ end
 
 
 
-m = LabeledMatrix.new(File.readlines options.matrix)
+m = LabeledMatrix.new(File.readlines(options.matrix), options.persistent)
 m.remove_null
 m.sort_columns
 #m.pp
-puts "#{build_tree(m, m.c_labels)}"
+puts "#{build_tree(m, m.c_labels)};"
