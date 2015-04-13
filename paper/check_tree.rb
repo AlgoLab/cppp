@@ -57,6 +57,11 @@ class OptparseExample
       opts.separator ""
       opts.separator "Specific options:"
 
+      # Mandatory argument.
+      opts.on("-d", "--debug") do
+        options.debug = true
+      end
+
 
       # Mandatory argument.
       opts.on("-m", "--matrix MATRIX_FILENAME",
@@ -301,6 +306,10 @@ end
 m = LabeledMatrix.new(File.readlines(options.matrix), false)
 m.remove_null
 
+if options.debug
+  puts "Matrix:"
+  m.pp
+end
 
 tree_str = IO.read options.phylogeny
 tree = Newick.parse(tree_str.chomp)
@@ -313,13 +322,20 @@ from_matrix = m.s_num.times.map { |s| m.characters(s).to_set }.to_set
 # Notice that some of those paths might not correspond to a species
 from_tree = visit_tree(tree[:parsed]).to_a.map { |path| path.realized }.to_set
 
+
+if options.debug
+  puts "Tree:"
+  from_tree.to_a.map { |path| puts "#{path.to_a.sort.join(' ')}"  }
+end
+
+
 # Check that all species can be realized in the tree
 unless from_matrix <= from_tree
-  puts "A species could not be realized"
+  puts "The following species cannot be realized"
   not_found = from_matrix - from_tree
   m.s_num.times.map do |s|
     if not_found.include?(m.characters(s).to_set)
-      puts "Species #{m.s_label(s)}, with characters #{m.characters(s).to_s} could not be realized"
+      puts "#{m.s_label(s)}: #{m.characters(s).to_a.sort.join(' ')}"
     end
   end
 end

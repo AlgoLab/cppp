@@ -49,6 +49,12 @@ class OptparseExample
         options.matrix = matrix
       end
 
+      # Mandatory argument.
+      opts.on("-d", "--debug") do
+        options.debug = true
+      end
+
+
       # -p options means to generate the characters names for persistent perfect phylogeny
       # i.e. alternating positive and negative characters
       opts.on("-p", "--persistent") do
@@ -227,5 +233,11 @@ end
 m = LabeledMatrix.new(File.readlines(options.matrix), options.persistent)
 m.remove_null
 m.sort_columns
-#m.pp
+
+if options.debug
+  puts "Sorted Matrix:"
+  m.pp
+end
+
+
 puts "#{build_tree(m, m.c_labels)};"
