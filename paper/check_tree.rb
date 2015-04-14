@@ -275,12 +275,13 @@ module Newick
     rule(:species?)   { species.maybe }
     rule(:character)  { str(':C') >> integer >> sign >> space? }
     rule(:fields)     { species?.as(:parsed_species) >> character.as(:parsed_character) }
-    rule(:label)      { fields }
+    rule(:name)       { fields }
     # Tree structure
-    rule(:subtree)    { lparen >> (leaf | branching ) >> rparen }
-    rule(:leaf)       { label }
-    rule(:branching)  { branch >> (comma >> branch).repeat }
-    rule(:branch)     { subtree.as(:subtree) >> label }
+    rule(:subtree)    { leaf | internal }
+    rule(:internal)   { lparen >> branchset >> rparen >> species? }
+    rule(:leaf)       { name }
+    rule(:branchset)  { branch >> (comma >> branch).repeat }
+    rule(:branch)     { subtree.as(:subtree) >> species? }
 
     root :tree
   end
@@ -303,21 +304,11 @@ module Newick
   end
 end
 
-m = LabeledMatrix.new(File.readlines(options.matrix), false)
-m.remove_null
-
-if options.debug
-  puts "Matrix:"
-  m.pp
-end
-
 tree_str = IO.read options.phylogeny
 tree = Newick.parse(tree_str.chomp)
 
 #binding.pry
 
-# compute the set of characters of each species in the matrix
-from_matrix = m.s_num.times.map { |s| m.characters(s).to_set }.to_set
 # compute the set of paths for the paths from the root to each node of the tree
 # Notice that some of those paths might not correspond to a species
 from_tree = visit_tree(tree[:parsed]).to_a.map { |path| path.realized }.to_set
@@ -326,7 +317,21 @@ from_tree = visit_tree(tree[:parsed]).to_a.map { |path| path.realized }.to_set
 if options.debug
   puts "Tree:"
   from_tree.to_a.map { |path| puts "#{path.to_a.sort.join(' ')}"  }
+  puts "Case: #{tree_str =~ /\+/}"
 end
+
+
+# We are checking a persistent phylogeny if the symbol +
+# appears in tree_str
+m = LabeledMatrix.new(File.readlines(options.matrix), tree_str =~ /\+/)
+m.remove_null
+
+if options.debug
+  puts "Matrix:"
+  m.pp
+end
+# compute the set of characters of each species in the matrix
+from_matrix = m.s_num.times.map { |s| m.characters(s).to_set }.to_set
 
 
 # Check that all species can be realized in the tree
