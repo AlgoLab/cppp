@@ -240,9 +240,9 @@ def visit_tree(newick)
   else
     # Only one child
     subtree_paths = [ PersistentSpecies.new(Set.new, Set.new) ]
-    if newick.key? :subtree
+    if newick.key? :descendant
       # There is a subtree
-      subtree_paths.concat(visit_tree(newick[:subtree]))
+      subtree_paths.concat(visit_tree(newick[:descendant]))
     end
     # Add the current edge label to all paths
     if newick[:sign].nil? or newick[:sign] == '+'
@@ -256,8 +256,6 @@ end
 module Newick
   # Newick format parser
   class Parser < Parslet::Parser
-    rule(:tree) { subtree.as(:parsed) >> str(';') }
-
     # Separators
     rule(:lparen)     { space? >> str('(') >> space? }
     rule(:rparen)     { space? >> str(')') >> space? }
@@ -271,17 +269,19 @@ module Newick
     rule(:sign)       { match('[+-]').maybe.as(:sign)  }
 
     # Labels
-    rule(:species)    { str('S')  >> integer >> space? }
+    rule(:species)    { str('S')  >> integer }
     rule(:species?)   { species.maybe }
-    rule(:character)  { str(':C') >> integer >> sign >> space? }
-    rule(:fields)     { species?.as(:parsed_species) >> character.as(:parsed_character) }
-    rule(:name)       { fields }
+    rule(:character)  { str(':C') >> integer >> sign }
+    rule(:name)       { species?.as(:parsed_species) >> character.as(:parsed_character) }
+
     # Tree structure
-    rule(:subtree)    { leaf | internal }
-    rule(:internal)   { lparen >> branchset >> rparen >> species? }
+    rule(:tree)       { descendant.as(:parsed) >> str(';') }
+    rule(:descendant) { lparen >> subtree >> (comma >> subtree).repeat >> rparen }
+    rule(:subtree)    { leaf | (descendant.as(:descendant) >> name) }
     rule(:leaf)       { name }
-    rule(:branchset)  { branch >> (comma >> branch).repeat }
-    rule(:branch)     { subtree.as(:subtree) >> species? }
+    # rule(:internal)   { lparen >> branchset >> rparen >> species? }
+    # rule(:branchset)  { branch >> (comma >> branch).repeat }
+    # rule(:branch)     { subtree.as(:subtree) >> character }
 
     root :tree
   end
@@ -306,7 +306,6 @@ end
 
 tree_str = IO.read options.phylogeny
 tree = Newick.parse(tree_str.chomp)
-
 #binding.pry
 
 # compute the set of paths for the paths from the root to each node of the tree
