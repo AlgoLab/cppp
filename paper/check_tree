@@ -182,8 +182,10 @@ class LabeledMatrix
   end
 
   def characters(species)
-    # Output the list of characters that the input species possesses
-    return @matrix.keys.select { |k| @matrix[k][species] == '1' }
+    # Find the characters that the input species possesses
+    active = @matrix.keys.select { |k| @matrix[k][species] == '1' }
+    #  Remove all eventual negative characters
+    active.delete_if { |k| k =~ /\-/ }
   end
 
   # Considering only the columns corresponding to the input characters,
@@ -236,20 +238,23 @@ def visit_tree(newick)
   if newick.kind_of?(Array)
     # The current node has at least two children
     # The set of paths is the union over all children
-    newick.map { |subtree| visit_tree(subtree) }.inject(Set.new) { |result, set| result.union(set) }
+    newick.map { |subtree| visit_tree(subtree) }.inject([]) { |result, set| result + set }
   else
     # Only one child
     subtree_paths = [ PersistentSpecies.new(Set.new, Set.new) ]
     if newick.key? :descendant
       # There is a subtree
-      subtree_paths.concat(visit_tree(newick[:descendant]))
+      recurse = visit_tree(newick[:descendant])
+      subtree_paths.concat(recurse)
     end
     # Add the current edge label to all paths
-    if newick[:sign].nil? or newick[:sign] == '+'
+    unless newick[:parsed_character][:sign] == '-'
       subtree_paths.map { |path| PersistentSpecies.new(path.realized.add("C%05d" % newick[:parsed_character][:int].to_i), path.persistent) }
     else
       subtree_paths.map { |path| PersistentSpecies.new(path.realized, path.persistent.add("C%05d" % newick[:parsed_character][:int].to_i)) }
     end
+    # puts "PATHS: #{subtree_paths.class} #{subtree_paths}"
+    subtree_paths
   end
 end
 
@@ -272,7 +277,7 @@ module Newick
     rule(:species)    { str('S')  >> integer }
     rule(:species?)   { species.maybe }
     rule(:character)  { str(':C') >> integer >> sign }
-    rule(:name)       { species?.as(:parsed_species) >> character.as(:parsed_character) }
+    rule(:name)       { species? >> character.as(:parsed_character) }
 
     # Tree structure
     rule(:tree)       { descendant.as(:parsed) >> str(';') }
@@ -306,17 +311,17 @@ end
 
 tree_str = IO.read options.phylogeny
 tree = Newick.parse(tree_str.chomp)
-#binding.pry
 
 # compute the set of paths for the paths from the root to each node of the tree
 # Notice that some of those paths might not correspond to a species
-from_tree = visit_tree(tree[:parsed]).to_a.map { |path| path.realized }.to_set
+from_tree = visit_tree(tree[:parsed]).map { |path| path.realized }.to_set
+#binding.pry
 
 
 if options.debug
   puts "Tree:"
   from_tree.to_a.map { |path| puts "#{path.to_a.sort.join(' ')}"  }
-  puts "Case: #{tree_str =~ /\+/}"
+  puts "Case: #{not (tree_str =~ /\+/).nil?}"
 end
 
 
@@ -330,13 +335,21 @@ if options.debug
   m.pp
 end
 # compute the set of characters of each species in the matrix
-from_matrix = m.s_num.times.map { |s| m.characters(s).to_set }.to_set
+from_matrix = m.s_num.times.map { |s| m.characters(s).map { |c| c.sub(/[\-\+]/,'') }.to_set }.to_set
 
 
 # Check that all species can be realized in the tree
 unless from_matrix <= from_tree
+  puts "Possible species realized"
+  from_tree.to_a.map { |path| puts "#{path.to_a.sort.join(' ')}"  }
+  puts "Species to realize:"
+  from_matrix.to_a.map { |path| puts "#{path.to_a.sort.join(' ')}"  }
+
+  puts "Case Perfect: #{(tree_str =~ /\+/).nil?}"
+
   puts "The following species cannot be realized"
   not_found = from_matrix - from_tree
+  not_found.to_a.map { |path| puts "#{path.to_a.sort.join(' ')}"  }
   m.s_num.times.map do |s|
     if not_found.include?(m.characters(s).to_set)
       puts "#{m.s_label(s)}: #{m.characters(s).to_a.sort.join(' ')}"
