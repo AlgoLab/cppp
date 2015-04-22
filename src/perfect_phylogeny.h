@@ -120,9 +120,6 @@ void
 reset_state(state_s * stp);
 
 void
-destroy_state(state_s *stp);
-
-void
 free_state(state_s *stp);
 
 /**

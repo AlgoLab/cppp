@@ -51,22 +51,6 @@ next_node(state_s *states, uint32_t level, strategy_fn node_init) {
         g_debug("level: %d\n", level);
         if (current->tried_characters == NULL && no_sibling_p(current))
                 current->character_queue = node_init(current);
-        /* printf("============================================\n"); */
-        /* printf("level: %d - tried: %d - queue: %d\n", level, */
-        /*        g_slist_length(current->tried_characters), g_slist_length(current->character_queue)); */
-        /* printf("============================================\n"); */
-        /* printf("=== Tried\n"); */
-        /* for (GSList* x = current->tried_characters; x != NULL; x = x->next) */
-        /*         printf("%d ", GPOINTER_TO_INT(x->data)); */
-        /* printf("\n"); */
-        /* printf("=== Queue\n"); */
-        /* for (GSList* x = current->character_queue; x != NULL; x = x->next) */
-        /*         printf("%d ", GPOINTER_TO_INT(x->data)); */
-        /* printf("\n"); */
-        /* printf("= Realized\n"); */
-        /* for (size_t x = 0; x < level; x++) */
-        /*         printf("%d ", (states + x)->realized_char); */
-        /* printf("\n"); */
         if (no_sibling_p(current))
                 return (level - 1);
         uint32_t to_realize = GPOINTER_TO_INT(g_slist_nth_data(current->character_queue, 0));
@@ -84,6 +68,7 @@ next_node(state_s *states, uint32_t level, strategy_fn node_init) {
                 next->tried_characters = NULL;
                 return (level + 1);
         }
+        free_state(modified);
         return (level);
 }
 

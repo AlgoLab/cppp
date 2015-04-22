@@ -217,22 +217,22 @@ static uint32_t state_cmp(const state_s *stp1, const state_s *stp2) {
         if (stp1->num_species_orig != stp2->num_species_orig) result += 8;
         if (stp1->current == NULL || stp2->current == NULL)  result += 16;
         else for (size_t i = 0; i < stp2->num_characters_orig; i++)
-			 if (stp1->current[i] != stp2->current[i]) {
-				 result += 16;
-				 break;
-			 }
+                     if (stp1->current[i] != stp2->current[i]) {
+                             result += 16;
+                             break;
+                     }
         if (stp1->species == NULL || stp2->species == NULL)  result += 32;
         else for (size_t i = 0; i < stp2->num_species_orig; i++)
-			 if (stp1->species[i] != stp2->species[i]) {
-				 result += 32;
-				 break;
-			 }
+                     if (stp1->species[i] != stp2->species[i]) {
+                             result += 32;
+                             break;
+                     }
         if (stp1->characters == NULL || stp2->characters == NULL)  result += 64;
         else for (size_t i = 0; i < stp2->num_characters_orig; i++)
-			 if (stp1->characters[i] != stp2->characters[i]) {
-				 result += 64;
-				 break;
-			 }
+                     if (stp1->characters[i] != stp2->characters[i]) {
+                             result += 64;
+                             break;
+                     }
         return result;
 }
 
@@ -379,29 +379,29 @@ realize_character(state_s* dst, const state_s* src, const uint32_t character) {
 
 static void str_state(const state_s* stp, char* str) {
         assert(0 <= asprintf(&str,
-				 "Instance: {\n"
-				 "  num_species: %d\n"
-				 "  num_characters: %d\n"
-				 "  num_species_orig: %d\n"
-				 "  num_characters_orig: %d\n"
-				 "  red_black: %p\n"
-				 "  conflict: %p\n"
-				 "  matrix: %p\n"
-				 "  current: %p\n"
-				 "  species: %p\n"
-				 "  characters: %p\n"
-				 "}",
-				 stp->num_species,
-				 stp->num_characters,
-				 stp->num_species_orig,
-				 stp->num_characters_orig,
-				 (void *) stp->red_black,
-				 (void *) stp->conflict,
-				 (void *) stp->matrix,
-				 (void *) stp->current,
-				 (void *) stp->species,
-				 (void *) stp->characters
-			   ));
+                             "Instance: {\n"
+                             "  num_species: %d\n"
+                             "  num_characters: %d\n"
+                             "  num_species_orig: %d\n"
+                             "  num_characters_orig: %d\n"
+                             "  red_black: %p\n"
+                             "  conflict: %p\n"
+                             "  matrix: %p\n"
+                             "  current: %p\n"
+                             "  species: %p\n"
+                             "  characters: %p\n"
+                             "}",
+                             stp->num_species,
+                             stp->num_characters,
+                             stp->num_species_orig,
+                             stp->num_characters_orig,
+                             (void *) stp->red_black,
+                             (void *) stp->conflict,
+                             (void *) stp->matrix,
+                             (void *) stp->current,
+                             (void *) stp->species,
+                             (void *) stp->characters
+                       ));
 }
 
 
@@ -436,7 +436,7 @@ read_instance_from_filename(instances_schema_s* global_props) {
                 assert(!feof(global_props->file));
 
                 assert(fscanf(global_props->file, "%"SCNu32" %"SCNu32, &(global_props->num_species),
-				  &(global_props->num_characters)) != EOF);
+                              &(global_props->num_characters)) != EOF);
         }
 
         state_s* stp = new_state();
@@ -661,9 +661,17 @@ END_TEST
 #endif
 
 
+void
+free_state(state_s *stp) {
+        assert(stp != NULL);
+        reset_state(stp);
+}
+
 state_s*
 new_state(void) {
         state_s *stp = GC_MALLOC(sizeof(state_s));
+        stp->red_black = NULL;
+        stp->conflict = NULL;
         return stp;
 }
 
@@ -671,6 +679,8 @@ void init_state(state_s *stp, uint32_t nspecies, uint32_t nchars) {
         assert(stp != NULL);
         stp->num_characters_orig = nchars;
         stp->num_species_orig = nspecies;
+        stp->red_black = NULL;
+        stp->conflict  = NULL;
         reset_state(stp);
 }
 
@@ -680,7 +690,12 @@ reset_state(state_s *stp) {
         stp->realized_char = 0;
         stp->tried_characters = NULL;
         stp->character_queue = NULL;
+        if (stp->red_black != NULL) {
+                igraph_cattribute_remove_v(stp->red_black, "color");
+                igraph_destroy(stp->red_black);
+        }
         stp->red_black = GC_MALLOC(sizeof(igraph_t));
+        if (stp->conflict != NULL) igraph_destroy(stp->conflict);
         stp->conflict  = GC_MALLOC(sizeof(igraph_t));
         stp->current = GC_MALLOC(stp->num_characters_orig * sizeof(uint32_t));
         stp->species = GC_MALLOC(stp->num_species_orig * sizeof(uint32_t));
