@@ -17,7 +17,7 @@ STD_LIBS = glib-2.0 igraph jansson bdw-gc
 DEBUG_LIBS = check #efence
 
 LIBS 	= $(LIB_DIR)/getopt/cmdline.o
-CFLAGS_EXTRA =  -m64 -std=c11 -Wall -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes
+CFLAGS_EXTRA =  -m64 -std=c11 -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes
 CFLAGS_LIBS = `pkg-config --cflags $(STD_LIBS)`
 CFLAGS_TEST =  -fno-omit-frame-pointer -DTEST_EVERYTHING  `pkg-config --cflags $(DEBUG_LIBS)`
 LDLIBS = `pkg-config --libs $(STD_LIBS)`

@@ -18,19 +18,52 @@
   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 */
-
 #include "logging.h"
 
-void start_logging(struct gengetopt_args_info args_info) {
-        GLogLevelFlags level = G_LOG_LEVEL_CRITICAL | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION;
-        if (args_info.verbose_given) level = G_LOG_LEVEL_INFO    | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION;
-        if (args_info.debug_given)   level = G_LOG_LEVEL_DEBUG   | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION;
-        if (args_info.quiet_given)   level = G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION;
-        g_log_set_handler(G_LOG_DOMAIN, level, g_log_default_handler, NULL);
+static void log_format(const char* tag, int level, const char* message, va_list args) {
+        if (level >= _cppp_log_level_) {
+                time_t now;
+                time(&now);
+                char * date =ctime(&now);
+                date[strlen(date) - 1] = '\0';
+                printf("%s [%s] ", date, tag);
+                vprintf(message, args);
+                printf("\n");
+        }
 }
 
+void log_error(const char* message, ...) {
+        va_list args; va_start(args, message);
+        log_format("error", LOG_ERROR, message, args);
+        va_end(args);
+}
+void log_info(const char* message, ...) {
+        va_list args; va_start(args, message);
+        log_format("info", LOG_INFO, message, args);
+        va_end(args);
+}
+void log_debug(const char* message, ...) {
+        va_list args; va_start(args, message);
+        log_format("debug", LOG_DEBUG, message, args);
+        va_end(args);
+}
+
+void start_logging(struct gengetopt_args_info args_info) {
+        if (args_info.quiet_given)   _cppp_log_level_ = 5;
+        if (args_info.verbose_given) _cppp_log_level_ = 2;
+        if (args_info.debug_given)   _cppp_log_level_ = 1;
+        if (getenv("CPPP_LOG_LEVEL") != NULL)
+                _cppp_log_level_ = atoi(getenv("CPPP_LOG_LEVEL"));
+}
+
+
+/*
+  This file is mainly used as a library.
+
+  The following main is used only for using the testing framework.
+*/
 #ifdef TEST_EVERYTHING
-int main(void) {
-        return 0;
+int main(int argc, char **argv) {
+        return EXIT_SUCCESS;
 }
 #endif

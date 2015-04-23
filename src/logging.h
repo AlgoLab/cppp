@@ -18,15 +18,24 @@
   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 */
-#include <glib.h>
+#include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
+#include <string.h>
 #include "getopt/cmdline.h"
+#include <stdarg.h>
 
-#define G_LOG_DOMAIN    ((gchar*) 0)
+#define LOG_ALL       0
+#define LOG_DEBUG     1
+#define LOG_INFO      2
+#define LOG_WARN      3
+#define LOG_ERROR     4
+#define LOG_FATAL     5
+#define LOG_NEXTFREE  6
 
-/**
-   \brief determine the logging
+static int _cppp_log_level_ = 4;
 
-   \param quiet: true if logging is disabled
-   \param filename: name of the logfile
-*/
+void log_error(const char* message, ...);
+void log_info(const char* message, ...);
+void log_debug(const char* message, ...);
 void start_logging(struct gengetopt_args_info args_info);

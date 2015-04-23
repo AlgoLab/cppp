@@ -53,6 +53,7 @@
 #include <glib.h>
 #include <jansson.h>
 #include <gc.h>
+#include "logging.h"
 
 #define SPECIES 0
 #define BLACK 1
@@ -86,6 +87,11 @@
    0 => failure
    1 => realize an inactive character
    2 => realize an active character
+
+   the \c color of each character encodes if it is active or not.
+   The possible values are:
+   BLACK => the character is inactive
+   RED   => the character is active
 */
 typedef struct state_s {
         uint32_t realized_char;
@@ -99,6 +105,7 @@ typedef struct state_s {
         uint32_t *current;
         uint32_t *species;
         uint32_t *characters;
+        uint8_t  *colors;
         uint32_t operation;
         GSList *tried_characters;
         GSList *character_queue;

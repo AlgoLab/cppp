@@ -20,7 +20,6 @@
 */
 
 #include "decision_tree.h"
-#include "logging.h"
 
 
 static bool

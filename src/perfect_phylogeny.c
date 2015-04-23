@@ -117,7 +117,6 @@ read_state(const char* filename) {
         stp->current = json_get_array(data, "current");
         stp->species = json_get_array(data, "species");
         stp->characters = json_get_array(data, "characters");
-
         // Graphs
         FILE* fp;
         stp->red_black = GC_MALLOC(sizeof(igraph_t));
@@ -254,6 +253,7 @@ void copy_state(state_s* dst, const state_s* src) {
         for (size_t i = 0; i < src->num_characters_orig; i++) {
                 dst->current[i] = src->current[i];
                 dst->characters[i] = src->characters[i];
+                dst->colors[i] = src->colors[i];
         }
         for (size_t i = 0; i < src->num_species_orig; i++) {
                 dst->species[i] = src->species[i];
@@ -325,22 +325,17 @@ realize_character(state_s* dst, const state_s* src, const uint32_t character) {
                         igraph_vector_push_back(&not_adjacent, v);
                 }
         }
-        int color = VAN(dst->red_black, "color", c);
-        assert(color != SPECIES);
+        int color = dst->colors[c];
         igraph_es_t es;
         igraph_es_incident(&es, c, IGRAPH_ALL);
         igraph_delete_edges(dst->red_black, es);
         igraph_es_destroy(&es);
-        /* printf("===CONCOMP===ADJACENT===NOT_ADJ===\n"); */
-        /* igraph_vector_print(&conn_comp); */
-        /* igraph_vector_print(&adjacent); */
-        /* igraph_vector_print(&not_adjacent); */
-        g_debug("CHAR %d\n", character);
+        log_debug("CHAR %d\n", character);
         assert(check_state(dst) == 0);
         if (color == BLACK) {
                 igraph_add_edges(dst->red_black, &new_red, 0);
                 dst->operation = 1;
-                SETVAN(dst->red_black, "color", c, RED);
+                dst->colors[c] = RED;
                 dst->current[character] = 1;
         }
         if (color == RED) {
@@ -349,12 +344,12 @@ realize_character(state_s* dst, const state_s* src, const uint32_t character) {
                         dst->operation = 0;
                 } else {
                         dst->operation = 2;
-                        SETVAN(dst->red_black, "color", c, RED + 1);
+                        dst->colors[c] = RED + 1;
                         delete_character(dst, character);
                 }
         }
         dst->realized_char = character;
-        /* igraph_write_graph_edgelist(dst.red_black, stdout); */
+/* igraph_write_graph_edgelist(dst.red_black, stdout); */
         assert(check_state(dst) == 0);
         cleanup(dst);
         assert(check_state(dst) == 0);
@@ -390,6 +385,7 @@ static void str_state(const state_s* stp, char* str) {
                              "  current: %p\n"
                              "  species: %p\n"
                              "  characters: %p\n"
+                             "  colors: %p\n"
                              "}",
                              stp->num_species,
                              stp->num_characters,
@@ -400,7 +396,7 @@ static void str_state(const state_s* stp, char* str) {
                              (void *) stp->matrix,
                              (void *) stp->current,
                              (void *) stp->species,
-                             (void *) stp->characters
+                             (void *) stp->colors
                        ));
 }
 
@@ -456,14 +452,6 @@ read_instance_from_filename(instances_schema_s* global_props) {
                 }
 
 /* red-black graph */
-        for(uint32_t s=0; s < stp->num_species; s++) {
-                SETVAN(stp->red_black, "id", s, s);
-                SETVAN(stp->red_black, "color", s, SPECIES);
-        }
-        for(uint32_t c=0; c < stp->num_characters; c++) {
-                SETVAN(stp->red_black, "id", c + stp->num_species, c);
-                SETVAN(stp->red_black, "color", c + stp->num_species, BLACK);
-        }
         for (uint32_t s=0; s < stp->num_species; s++)
                 for (uint32_t c=0; c < stp->num_characters; c++)
                         if (matrix_get_value(stp, s, c) == 1)
@@ -482,7 +470,7 @@ read_instance_from_filename(instances_schema_s* global_props) {
         assert(check_state(stp) == 0);
         char* str = NULL;
         str_state(stp, str);
-        g_debug("%s", str);
+        log_debug("%s", str);
         free(str);
         assert(check_state(stp) == 0);
         return stp;
@@ -499,7 +487,7 @@ read_instance_from_filename(instances_schema_s* global_props) {
   We remove null characters and species.
 */
 void cleanup(state_s *stp) {
-        g_debug("Cleanup\n");
+        log_debug("Cleanup\n");
         // Looking for null species
         for (uint32_t s=0; s < stp->num_species_orig; s++)
                 if (stp->species[s]) {
@@ -664,7 +652,8 @@ END_TEST
 void
 free_state(state_s *stp) {
         assert(stp != NULL);
-        reset_state(stp);
+        if (stp->red_black != NULL) igraph_destroy(stp->red_black);
+        if (stp->conflict != NULL)  igraph_destroy(stp->conflict);
 }
 
 state_s*
@@ -679,8 +668,6 @@ void init_state(state_s *stp, uint32_t nspecies, uint32_t nchars) {
         assert(stp != NULL);
         stp->num_characters_orig = nchars;
         stp->num_species_orig = nspecies;
-        stp->red_black = NULL;
-        stp->conflict  = NULL;
         reset_state(stp);
 }
 
@@ -690,19 +677,15 @@ reset_state(state_s *stp) {
         stp->realized_char = 0;
         stp->tried_characters = NULL;
         stp->character_queue = NULL;
-        if (stp->red_black != NULL) {
-                igraph_cattribute_remove_v(stp->red_black, "color");
-                igraph_destroy(stp->red_black);
-        }
         stp->red_black = GC_MALLOC(sizeof(igraph_t));
-        if (stp->conflict != NULL) igraph_destroy(stp->conflict);
         stp->conflict  = GC_MALLOC(sizeof(igraph_t));
         stp->current = GC_MALLOC(stp->num_characters_orig * sizeof(uint32_t));
         stp->species = GC_MALLOC(stp->num_species_orig * sizeof(uint32_t));
         stp->characters = GC_MALLOC(stp->num_characters_orig * sizeof(uint32_t));
+        stp->colors = GC_MALLOC(stp->num_characters_orig * sizeof(uint8_t));
 
-        igraph_empty_attrs(stp->conflict, stp->num_characters_orig, IGRAPH_UNDIRECTED, 0);
-        igraph_empty_attrs(stp->red_black, stp->num_species_orig + stp->num_characters_orig, IGRAPH_UNDIRECTED, 0);
+        igraph_empty(stp->conflict, stp->num_characters_orig, IGRAPH_UNDIRECTED);
+        igraph_empty(stp->red_black, stp->num_species_orig + stp->num_characters_orig, IGRAPH_UNDIRECTED);
         stp->operation = 0;
         for (uint32_t i=0; i < stp->num_species_orig; i++) {
                 stp->species[i] = 1;
@@ -710,6 +693,7 @@ reset_state(state_s *stp) {
         for (uint32_t i=0; i < stp->num_characters_orig; i++) {
                 stp->current[i] = 0;
                 stp->characters[i] = 1;
+                stp->colors[i] = BLACK;
         }
 }
 
@@ -717,11 +701,11 @@ uint32_t check_state(const state_s* stp) {
         uint32_t err = 0;
         if (stp->num_species == -1 || stp->num_species > stp->num_species_orig) {
                 err += 1;
-                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_species, 0);
+                log_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_species, 0);
         }
         if (stp->num_characters == -1 || stp->num_characters > stp->num_characters_orig) {
                 err += 2;
-                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_characters, 0);
+                log_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_characters, 0);
         }
 
         uint32_t count = 0;
@@ -731,7 +715,7 @@ uint32_t check_state(const state_s* stp) {
         }
         if (count != stp->num_species) {
                 err += 4;
-                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_species, count);
+                log_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_species, count);
         }
 
         count = 0;
@@ -741,7 +725,7 @@ uint32_t check_state(const state_s* stp) {
         }
         if (count != stp->num_characters) {
                 err += 8;
-                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_characters, count);
+                log_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_characters, count);
         }
 
         count = 0;
@@ -751,7 +735,7 @@ uint32_t check_state(const state_s* stp) {
         }
         if (count != stp->num_characters) {
                 err += 16;
-                g_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_characters, count);
+                log_debug("__FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_characters, count);
         }
         return err;
 }
@@ -778,7 +762,7 @@ GSList* characters_list(state_s * stp) {
 
 
 void delete_species(state_s *stp, uint32_t s) {
-        g_debug("Deleting species %d\n", s);
+        log_debug("Deleting species %d\n", s);
         assert(s < stp->num_species_orig);
         assert(stp->species[s] > 0);
         stp->species[s] = 0;
@@ -786,7 +770,7 @@ void delete_species(state_s *stp, uint32_t s) {
 }
 
 void delete_character(state_s *stp, uint32_t c) {
-        g_debug("Deleting character %d\n", c);
+        log_debug("Deleting character %d\n", c);
         assert(c < stp->num_characters_orig);
         assert(stp->characters[c] > 0);
         assert(stp->current[c] != -1);
