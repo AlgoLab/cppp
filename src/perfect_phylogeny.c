@@ -29,6 +29,59 @@
 #include <stdlib.h>
 #endif
 
+/**
+   Pretty print a state.
+   Mainly used for debug
+*/
+static void log_state(const state_s* stp) {
+        fprintf(stderr, "=======================================\n");
+        fprintf(stderr, "State=");
+        if (check_state(stp) > 0) fprintf(stderr, "NOT ");
+        fprintf(stderr, "ok\n");
+        fprintf(stderr, "  num_species: %d\n", stp->num_species);
+        fprintf(stderr, "  num_characters: %d\n", stp->num_characters);
+        fprintf(stderr, "  num_species_orig: %d\n", stp->num_species_orig);
+        fprintf(stderr, "  num_characters_orig: %d\n", stp->num_characters_orig);
+
+        fprintf(stderr, "------|-------|----------|------\n");
+        fprintf(stderr, "      |current|          |      \n");
+        fprintf(stderr, "  c   |states |characters|colors\n");
+        fprintf(stderr, "------|-------|----------|------\n");
+        for (size_t i = 0; i < stp->num_characters_orig; i++)
+                fprintf(stderr, "%6d|%7d|%10d|%6d\n", i, stp->current_states[i], stp->characters[i], stp->colors[i]);
+        fprintf(stderr, "------|-------|----------|------\n");
+
+        fprintf(stderr, "------|-------\n");
+        fprintf(stderr, "  s   |species\n");
+        fprintf(stderr, "------|-------\n");
+        for (size_t i = 0; i < stp->num_species_orig; i++) {
+                fprintf(stderr, "%6d|%7d\n", i, stp->species[i]);
+        }
+        fprintf(stderr, "------|-------\n");
+
+        fprintf(stderr, "  operation: %d\n", stp->operation);
+        fprintf(stderr, "  realized_char: %d\n", stp->realized_char);
+
+        fprintf(stderr, "  tried_characters. Address %p Values: ", stp->tried_characters);
+        for(GSList *list=stp->tried_characters; list != NULL; list = g_slist_next(list))
+                fprintf(stderr, "%d ", GPOINTER_TO_INT(list->data));
+        fprintf(stderr, "\n");
+
+        fprintf(stderr, "  character_queue. Address %p Values: ", stp->character_queue);
+        for(GSList *list=stp->character_queue; list != NULL; list = g_slist_next(list))
+                fprintf(stderr, "%d ", GPOINTER_TO_INT(list->data));
+        fprintf(stderr, "\n");
+
+
+        fprintf(stderr, "  Red-black graph. Address\n", stp->red_black);
+        igraph_write_graph_edgelist(stp->red_black, stderr);
+        fprintf(stderr, "\n");
+
+        fprintf(stderr, "  Conflict graph. Address\n", stp->conflict);
+        igraph_write_graph_edgelist(stp->conflict, stderr);
+        fprintf(stderr, "\n");
+
+}
 
 /**
    \brief some functions to abstract the access to the instance matrix
@@ -290,6 +343,8 @@ realize_character(state_s* dst, const state_s* src, const uint32_t character) {
         /* printf("%s\n", pp); */
         assert(state_cmp(src, dst) == 0);
         assert(check_state(src) == 0);
+        if (log_debug("realize_character"))
+                log_state(src);
         /* json_t* p_dst = build_json_state(dst, "", ""); */
         /* pp = json_dumps(p_dst, JSON_SORT_KEYS | JSON_INDENT(2)); */
         /* printf("%s\n", pp); */
@@ -330,16 +385,18 @@ realize_character(state_s* dst, const state_s* src, const uint32_t character) {
         igraph_es_incident(&es, c, IGRAPH_ALL);
         igraph_delete_edges(dst->red_black, es);
         igraph_es_destroy(&es);
-        log_debug("CHAR %d\n", character);
+        log_debug("Trying to realize CHAR %d", character);
         assert(check_state(dst) == 0);
         if (color == BLACK) {
+                log_debug("color %d = BLACK", color);
                 igraph_add_edges(dst->red_black, &new_red, 0);
                 dst->operation = 1;
-                dst->colors[c] = RED;
+                dst->colors[character] = RED;
                 dst->current_states[character] = 1;
         }
         if (color == RED) {
                 /* igraph_vector_print(&adjacent); */
+                log_debug("color %d = RED", color);
                 if (igraph_vector_size(&not_adjacent) > 0) {
                         dst->operation = 0;
                 } else {
@@ -349,6 +406,11 @@ realize_character(state_s* dst, const state_s* src, const uint32_t character) {
                 }
         }
         dst->realized_char = character;
+        if (log_debug("realized")) {
+                log_debug("color %d", color);
+                log_debug("outcome %d", dst->operation);
+                log_state(dst);
+        }
 /* igraph_write_graph_edgelist(dst.red_black, stdout); */
         assert(check_state(dst) == 0);
         cleanup(dst);
@@ -372,33 +434,6 @@ realize_character(state_s* dst, const state_s* src, const uint32_t character) {
 /*     return 0; */
 /* } */
 
-static void str_state(const state_s* stp, char* str) {
-        assert(0 <= asprintf(&str,
-                             "Instance: {\n"
-                             "  num_species: %d\n"
-                             "  num_characters: %d\n"
-                             "  num_species_orig: %d\n"
-                             "  num_characters_orig: %d\n"
-                             "  red_black: %p\n"
-                             "  conflict: %p\n"
-                             "  matrix: %p\n"
-                             "  current: %p\n"
-                             "  species: %p\n"
-                             "  characters: %p\n"
-                             "  colors: %p\n"
-                             "}",
-                             stp->num_species,
-                             stp->num_characters,
-                             stp->num_species_orig,
-                             stp->num_characters_orig,
-                             (void *) stp->red_black,
-                             (void *) stp->conflict,
-                             (void *) stp->matrix,
-                             (void *) stp->current,
-                             (void *) stp->species,
-                             (void *) stp->colors
-                       ));
-}
 
 
 /**
@@ -468,11 +503,8 @@ read_instance_from_filename(instances_schema_s* global_props) {
                 }
 
         assert(check_state(stp) == 0);
-        char* str = NULL;
-        str_state(stp, str);
-        log_debug("%s", str);
-        free(str);
-        assert(check_state(stp) == 0);
+        if (log_debug("STATE"))
+                log_state(stp);
         return stp;
 }
 
@@ -487,7 +519,7 @@ read_instance_from_filename(instances_schema_s* global_props) {
   We remove null characters and species.
 */
 void cleanup(state_s *stp) {
-        log_debug("Cleanup\n");
+        log_debug("Cleanup");
         // Looking for null species
         for (uint32_t s=0; s < stp->num_species_orig; s++)
                 if (stp->species[s]) {
@@ -762,7 +794,7 @@ GSList* characters_list(state_s * stp) {
 
 
 void delete_species(state_s *stp, uint32_t s) {
-        log_debug("Deleting species %d\n", s);
+        log_debug("Deleting species %d", s);
         assert(s < stp->num_species_orig);
         assert(stp->species[s] > 0);
         stp->species[s] = 0;
@@ -770,7 +802,7 @@ void delete_species(state_s *stp, uint32_t s) {
 }
 
 void delete_character(state_s *stp, uint32_t c) {
-        log_debug("Deleting character %d\n", c);
+        log_debug("Deleting character %d", c);
         assert(c < stp->num_characters_orig);
         assert(stp->characters[c] > 0);
         assert(stp->current_states[c] != -1);

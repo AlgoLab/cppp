@@ -47,7 +47,8 @@ no_sibling_p(state_s *stp) {
 static uint32_t
 next_node(state_s *states, uint32_t level, strategy_fn node_init) {
         state_s *current = states + level;
-        g_debug("level: %d\n", level);
+        log_debug("level: %d", level);
+
         if (current->tried_characters == NULL && no_sibling_p(current))
                 current->character_queue = node_init(current);
         if (no_sibling_p(current))
@@ -57,6 +58,7 @@ next_node(state_s *states, uint32_t level, strategy_fn node_init) {
         current->character_queue = g_slist_nth(current->character_queue, 1);
         current->tried_characters = g_slist_prepend(current->tried_characters, GINT_TO_POINTER(to_realize));
         state_s* modified = new_state();
+        log_debug("realizing %d", to_realize);
         realize_character(modified, current, to_realize);
         /* printf("Result %d (%d)\n", modified->operation, level); */
         if (modified->operation > 0) {
