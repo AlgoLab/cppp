@@ -78,9 +78,9 @@
    The \c matrix field can be \c NULL, if we are not interested in the matrix
    any more.
 
-   The \c current gives the current state for each original species.
+   The \c current_states gives the current state for each original species.
 
-   \c species and \c characters are two arrays whose values are 1 for the current species and characters
+   \c species and \c characters are two arrays whose values are 1 for the actual species and characters
    respectively.
 
    \c operation is the code for the most recent operation:
@@ -102,7 +102,7 @@ typedef struct state_s {
         igraph_t *red_black;
         igraph_t *conflict;
         uint32_t *matrix;
-        uint32_t *current;
+        uint32_t *current_states;
         uint32_t *species;
         uint32_t *characters;
         uint8_t  *colors;
