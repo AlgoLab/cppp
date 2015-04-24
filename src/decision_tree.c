@@ -51,8 +51,10 @@ next_node(state_s *states, uint32_t level, strategy_fn node_init) {
 
         if (current->tried_characters == NULL && no_sibling_p(current))
                 current->character_queue = node_init(current);
-        if (no_sibling_p(current))
+        if (no_sibling_p(current)) {
+                free_state(current);
                 return (level - 1);
+        }
         uint32_t to_realize = GPOINTER_TO_INT(g_slist_nth_data(current->character_queue, 0));
         /* printf("Realizing: %d\n", to_realize); */
         current->character_queue = g_slist_nth(current->character_queue, 1);
