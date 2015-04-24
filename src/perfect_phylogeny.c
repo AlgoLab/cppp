@@ -114,7 +114,7 @@ read_state(const char* filename) {
 
         stp->num_species = json_get_integer(data, "num_species");
         stp->num_characters = json_get_integer(data, "num_characters");
-        stp->current = json_get_array(data, "current");
+        stp->current_states = json_get_array(data, "current");
         stp->species = json_get_array(data, "species");
         stp->characters = json_get_array(data, "characters");
         // Graphs
@@ -171,7 +171,7 @@ static json_t* build_json_state(const state_s* stp, const char* redblack_filenam
         assert(!json_object_set(data, "num_characters_orig", json_integer(stp->num_characters_orig)));
         if (stp->matrix != NULL)
                 assert(!json_object_set(data, "matrix", array2json_array(stp->matrix, stp->num_species * stp->num_characters)));
-        assert(!json_object_set(data, "current", array2json_array(stp->current, stp->num_characters_orig)));
+        assert(!json_object_set(data, "current", array2json_array(stp->current_states, stp->num_characters_orig)));
         assert(!json_object_set(data, "species", array2json_array(stp->species, stp->num_species_orig)));
         assert(!json_object_set(data, "characters", array2json_array(stp->characters, stp->num_characters_orig)));
         assert(!json_object_set(data, "red_black_file", json_string(redblack_filename)));
@@ -214,9 +214,9 @@ static uint32_t state_cmp(const state_s *stp1, const state_s *stp2) {
         if (stp1->num_species != stp2->num_species) result += 2;
         if (stp1->num_characters_orig != stp2->num_characters_orig) result += 4;
         if (stp1->num_species_orig != stp2->num_species_orig) result += 8;
-        if (stp1->current == NULL || stp2->current == NULL)  result += 16;
+        if (stp1->current_states == NULL || stp2->current_states == NULL)  result += 16;
         else for (size_t i = 0; i < stp2->num_characters_orig; i++)
-                     if (stp1->current[i] != stp2->current[i]) {
+                     if (stp1->current_states[i] != stp2->current_states[i]) {
                              result += 16;
                              break;
                      }
@@ -251,7 +251,7 @@ void copy_state(state_s* dst, const state_s* src) {
         igraph_copy(dst->conflict, src->conflict);
         dst->matrix = src->matrix;
         for (size_t i = 0; i < src->num_characters_orig; i++) {
-                dst->current[i] = src->current[i];
+                dst->current_states[i] = src->current_states[i];
                 dst->characters[i] = src->characters[i];
                 dst->colors[i] = src->colors[i];
         }
@@ -293,7 +293,7 @@ realize_character(state_s* dst, const state_s* src, const uint32_t character) {
         /* json_t* p_dst = build_json_state(dst, "", ""); */
         /* pp = json_dumps(p_dst, JSON_SORT_KEYS | JSON_INDENT(2)); */
         /* printf("%s\n", pp); */
-        /* assert(dst->current[0] == src->current[0]); */
+        /* assert(dst->current_states[0] == src->current_states[0]); */
         assert(check_state(dst) == 0);
         igraph_integer_t c = (igraph_integer_t) src->num_species_orig + character;
         int ret = 0;
@@ -336,7 +336,7 @@ realize_character(state_s* dst, const state_s* src, const uint32_t character) {
                 igraph_add_edges(dst->red_black, &new_red, 0);
                 dst->operation = 1;
                 dst->colors[c] = RED;
-                dst->current[character] = 1;
+                dst->current_states[character] = 1;
         }
         if (color == RED) {
                 /* igraph_vector_print(&adjacent); */
@@ -679,7 +679,7 @@ reset_state(state_s *stp) {
         stp->character_queue = NULL;
         stp->red_black = GC_MALLOC(sizeof(igraph_t));
         stp->conflict  = GC_MALLOC(sizeof(igraph_t));
-        stp->current = GC_MALLOC(stp->num_characters_orig * sizeof(uint32_t));
+        stp->current_states = GC_MALLOC(stp->num_characters_orig * sizeof(uint32_t));
         stp->species = GC_MALLOC(stp->num_species_orig * sizeof(uint32_t));
         stp->characters = GC_MALLOC(stp->num_characters_orig * sizeof(uint32_t));
         stp->colors = GC_MALLOC(stp->num_characters_orig * sizeof(uint8_t));
@@ -691,7 +691,7 @@ reset_state(state_s *stp) {
                 stp->species[i] = 1;
         }
         for (uint32_t i=0; i < stp->num_characters_orig; i++) {
-                stp->current[i] = 0;
+                stp->current_states[i] = 0;
                 stp->characters[i] = 1;
                 stp->colors[i] = BLACK;
         }
@@ -730,7 +730,7 @@ uint32_t check_state(const state_s* stp) {
 
         count = 0;
         for (uint32_t c = 0; c < stp->num_characters_orig; c++) {
-                if (stp->current[c] != -1)
+                if (stp->current_states[c] != -1)
                         count++;
         }
         if (count != stp->num_characters) {
@@ -773,9 +773,9 @@ void delete_character(state_s *stp, uint32_t c) {
         log_debug("Deleting character %d\n", c);
         assert(c < stp->num_characters_orig);
         assert(stp->characters[c] > 0);
-        assert(stp->current[c] != -1);
+        assert(stp->current_states[c] != -1);
         stp->characters[c] = 0;
-        stp->current[c] = -1;
+        stp->current_states[c] = -1;
         (stp->num_characters)--;
 }
 
