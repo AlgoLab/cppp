@@ -32,7 +32,6 @@ int main(int argc, char **argv) {
 #ifdef TEST_EVERYTHING
         GC_find_leak = 1;
 #endif
-        igraph_i_set_attribute_table(&igraph_cattribute_table);
         static struct gengetopt_args_info args_info;
         assert(cmdline_parser(argc, argv, &args_info) == 0);
         assert(args_info.inputs_num >= 1);
