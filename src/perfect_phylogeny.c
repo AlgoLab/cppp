@@ -351,6 +351,7 @@ realize_character(state_s* dst, const state_s* src, const uint32_t character) {
         /* assert(dst->current_states[0] == src->current_states[0]); */
         assert(check_state(dst) == 0);
         igraph_integer_t c = (igraph_integer_t) src->num_species_orig + character;
+        int color = src->colors[character];
         int ret = 0;
 
         igraph_vector_t conn_comp;
@@ -380,7 +381,6 @@ realize_character(state_s* dst, const state_s* src, const uint32_t character) {
                         igraph_vector_push_back(&not_adjacent, v);
                 }
         }
-        int color = dst->colors[c];
         igraph_es_t es;
         igraph_es_incident(&es, c, IGRAPH_ALL);
         igraph_delete_edges(dst->red_black, es);
@@ -401,7 +401,7 @@ realize_character(state_s* dst, const state_s* src, const uint32_t character) {
                         dst->operation = 0;
                 } else {
                         dst->operation = 2;
-                        dst->colors[c] = RED + 1;
+                        dst->colors[character] = RED + 1;
                         delete_character(dst, character);
                 }
         }
