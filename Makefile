@@ -4,7 +4,7 @@ OBJ_DIR	=obj
 LIB_DIR =lib
 TEST_DIR = tests
 INTERNAL_TEST_DIR = tests/internal
-API_TEST_DIR = tests/public
+API_TEST_DIR = tests/api
 BIN_DIR	=bin
 CC = gcc
 
