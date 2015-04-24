@@ -50,9 +50,11 @@ int main(int argc, char **argv) {
 
    Therefore each partial solution con contain at most 2m+n states.
 */
-                state_s states[temp->num_species + 2 * temp->num_characters];
-                for (uint32_t i = 0; i < temp->num_species + 2 * temp->num_characters; i++)
+                state_s *states = GC_MALLOC((temp->num_species + 2 * temp->num_characters) * sizeof(state_s));
+                assert(states != NULL);
+                for (uint32_t i = 0; i < temp->num_species + 2 * temp->num_characters; i++) {
                         init_state(states + i, temp->num_species, temp->num_characters);
+                }
                 copy_state(states, temp);
                 assert(outf != NULL);
                 if (exhaustive_search(states, alphabetic)) {
