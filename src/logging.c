@@ -20,38 +20,57 @@
 */
 #include "logging.h"
 
-static void log_format(const char* tag, int level, const char* message, va_list args) {
+#define LOG_ALL       0
+#define LOG_DEBUG     1
+#define LOG_INFO      2
+#define LOG_WARN      3
+#define LOG_ERROR     4
+#define LOG_FATAL     5
+#define LOG_NEXTFREE  6
+
+static int _cppp_log_level_ = LOG_ERROR;
+
+/**
+   All logging functions return 1 if something is output to the log
+   file, and 0 otherwise.
+*/
+static unsigned int log_format(const char* tag, int level, const char* message, va_list args) {
         if (level >= _cppp_log_level_) {
                 time_t now;
                 time(&now);
                 char * date =ctime(&now);
                 date[strlen(date) - 1] = '\0';
-                printf("%s [%s] ", date, tag);
+                fprintf(stderr, "%s [%s] ", date, tag);
                 vprintf(message, args);
                 printf("\n");
+                return 1;
         }
+        return 0;
 }
 
-void log_error(const char* message, ...) {
+unsigned int log_error(const char* message, ...) {
         va_list args; va_start(args, message);
-        log_format("error", LOG_ERROR, message, args);
+        unsigned int ret = log_format("error", LOG_ERROR, message, args);
         va_end(args);
+        return ret;
 }
-void log_info(const char* message, ...) {
+unsigned int log_info(const char* message, ...) {
         va_list args; va_start(args, message);
-        log_format("info", LOG_INFO, message, args);
+        unsigned int ret = log_format("info", LOG_INFO, message, args);
         va_end(args);
+        return ret;
 }
-void log_debug(const char* message, ...) {
+unsigned int log_debug(const char* message, ...) {
         va_list args; va_start(args, message);
-        log_format("debug", LOG_DEBUG, message, args);
+        unsigned int ret = log_format("debug", LOG_DEBUG, message, args);
         va_end(args);
+        return ret;
 }
 
 void start_logging(struct gengetopt_args_info args_info) {
-        if (args_info.quiet_given)   _cppp_log_level_ = 5;
-        if (args_info.verbose_given) _cppp_log_level_ = 2;
-        if (args_info.debug_given)   _cppp_log_level_ = 1;
+        if (args_info.quiet_given)   _cppp_log_level_ = LOG_FATAL;
+        if (args_info.verbose_given) _cppp_log_level_ = LOG_INFO;
+        if (args_info.debug_given)   _cppp_log_level_ = LOG_DEBUG;
         if (getenv("CPPP_LOG_LEVEL") != NULL)
                 _cppp_log_level_ = atoi(getenv("CPPP_LOG_LEVEL"));
 }

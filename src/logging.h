@@ -25,17 +25,7 @@
 #include "getopt/cmdline.h"
 #include <stdarg.h>
 
-#define LOG_ALL       0
-#define LOG_DEBUG     1
-#define LOG_INFO      2
-#define LOG_WARN      3
-#define LOG_ERROR     4
-#define LOG_FATAL     5
-#define LOG_NEXTFREE  6
-
-static int _cppp_log_level_ = 4;
-
-void log_error(const char* message, ...);
-void log_info(const char* message, ...);
-void log_debug(const char* message, ...);
+unsigned int log_error(const char* message, ...);
+unsigned int log_info(const char* message, ...);
+unsigned int log_debug(const char* message, ...);
 void start_logging(struct gengetopt_args_info args_info);
