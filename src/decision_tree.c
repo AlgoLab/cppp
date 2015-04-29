@@ -21,7 +21,10 @@
 
 #include "decision_tree.h"
 
-
+/**
+   \c no_sibling_p returns \c true iff there are no other characters
+   to  try at the current level
+*/
 static bool
 no_sibling_p(state_s *stp) {
         return (stp->character_queue == NULL);
@@ -45,33 +48,35 @@ no_sibling_p(state_s *stp) {
    beginning, and if character_queue is \c NULL we are at the end.
 */
 static uint32_t
-next_node(state_s *states, uint32_t level, strategy_fn node_init) {
+next_node(state_s *states, uint32_t level, strategy_fn level_init) {
         state_s *current = states + level;
-        log_debug("level: %d", level);
+        if (log_debug("Called next_node"))
+                log_state(current);
 
+        for (uint32_t i = 0; i <= level; i++)
+                log_debug("malloc stack level %d %p", i, (states+i)->red_black);
         if (current->tried_characters == NULL && no_sibling_p(current))
-                current->character_queue = node_init(current);
+                /* it is the first node of a level */
+                current->character_queue = level_init(current);
         if (no_sibling_p(current)) {
+                log_debug("LEVEL. Backtrack to level: %d", level - 1);
                 free_state(current);
                 return (level - 1);
         }
-        uint32_t to_realize = GPOINTER_TO_INT(g_slist_nth_data(current->character_queue, 0));
-        /* printf("Realizing: %d\n", to_realize); */
+        if (log_debug("Inside next_node"))
+                log_state(current);
+        current->realize = GPOINTER_TO_INT(g_slist_nth_data(current->character_queue, 0));
         current->character_queue = g_slist_nth(current->character_queue, 1);
-        current->tried_characters = g_slist_prepend(current->tried_characters, GINT_TO_POINTER(to_realize));
-        state_s* modified = new_state();
-        log_debug("realizing %d", to_realize);
-        realize_character(modified, current, to_realize);
-        /* printf("Result %d (%d)\n", modified->operation, level); */
-        if (modified->operation > 0) {
-                current->realized_char = to_realize;
-                state_s *next = current + 1;
-                copy_state(next, modified);
-                next->character_queue = NULL;
-                next->tried_characters = NULL;
+        current->tried_characters = g_slist_prepend(current->tried_characters, GINT_TO_POINTER(current->realize));
+        log_debug("realizing %d", current->realize);
+        state_s *next = current + 1;
+        reset_state(next);
+        bool status = realize_character(next, current);
+        if (status) {
+                log_debug("LEVEL. Go to level: %d", level + 1);
                 return (level + 1);
         }
-        free_state(modified);
+        log_debug("LEVEL. Stay at level: %d", level);
         return (level);
 }
 

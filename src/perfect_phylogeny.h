@@ -58,7 +58,7 @@
 #define SPECIES 0
 #define BLACK 1
 #define RED   2
-
+#define MAX_COLOR 2
 /**
    \struct state_s
    \brief an instance and the
@@ -94,7 +94,7 @@
    RED   => the character is active
 */
 typedef struct state_s {
-        uint32_t realized_char;
+        uint32_t realize;
         uint32_t num_species;
         uint32_t num_characters;
         uint32_t num_species_orig;
@@ -113,14 +113,12 @@ typedef struct state_s {
 
 
 /**
-   \brief managing states: \c new_state to allocate the main structure,
-   \c init_state allocates the whole structure when passed the number of species
-   and characters,  \c reset_state allocates the whole structure, taking the
+   \brief managing states:
+   \c init_state is used only at the very beginning and zeroes the
+   entire data structure,
+   \c reset_state allocates the whole structure, taking the
    number of original species and characters from the structure.
 */
-state_s *
-new_state(void);
-
 void init_state(state_s *stp, uint32_t nspecies, uint32_t nchars);
 
 void
@@ -158,9 +156,16 @@ void cleanup(state_s *src);
 /**
    \brief copy a state
 
+   The \c characters_queue and the \c tried_characters are not copied.
+   To copy also those fields, use the \c full_copy_state function.
    The destination must have already been allocated
+
 */
-void copy_state(state_s* dst, const state_s* src);
+void
+copy_state(state_s* dst, const state_s* src);
+
+void
+full_copy_state(state_s* dst, const state_s* src);
 
 
 /**
@@ -215,14 +220,13 @@ typedef struct instances_schema_s {
 state_s* read_instance_from_filename(instances_schema_s* global_props);
 
 /**
-   \param character: the character \b name to be realized
+   \param character: the source state \c src and the outcome \c dst of
+   the realization. The character to realize is \c src->realize
 
-   \return the state after the realization of \c character
+   \return \c true if the realization has been successful
 
-   The memory necessary to store the newly created instance is automatically
-   allocated. It must be freed with \c destroy_instance after it has been used.
 */
-void realize_character(state_s* dst, const state_s* src, const uint32_t character);
+bool realize_character(state_s* dst, const state_s* src);
 
 
 /**
@@ -238,3 +242,9 @@ get_red_black_graph(const state_s *stp);
 */
 igraph_t *
 get_conflict_graph(const state_s *stp);
+
+/**
+   Print a dump of a state
+   \param stp: pointer to state_s
+*/
+void log_state(const state_s* stp);

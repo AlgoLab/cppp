@@ -33,7 +33,7 @@
    Pretty print a state.
    Mainly used for debug
 */
-static void log_state(const state_s* stp) {
+void log_state(const state_s* stp) {
         fprintf(stderr, "=======================================\n");
         fprintf(stderr, "State=");
         if (check_state(stp) > 0) fprintf(stderr, "NOT ");
@@ -60,7 +60,7 @@ static void log_state(const state_s* stp) {
         fprintf(stderr, "------|-------\n");
 
         fprintf(stderr, "  operation: %d\n", stp->operation);
-        fprintf(stderr, "  realized_char: %d\n", stp->realized_char);
+        fprintf(stderr, "  realize: %d\n", stp->realize);
 
         fprintf(stderr, "  tried_characters. Address %p Values: ", stp->tried_characters);
         for(GSList *list=stp->tried_characters; list != NULL; list = g_slist_next(list))
@@ -82,6 +82,18 @@ static void log_state(const state_s* stp) {
         fprintf(stderr, "\n");
 
 }
+
+/*
+  allocate the space necessary to store a state.
+  It should only be used when testing or reading from file
+*/
+static state_s*
+new_state(void) {
+        state_s *stp = GC_MALLOC(sizeof(state_s));
+        assert(stp != NULL);
+        return stp;
+}
+
 
 /**
    \brief some functions to abstract the access to the instance matrix
@@ -161,7 +173,7 @@ read_state(const char* filename) {
         state_s* stp = new_state();
         init_state(stp, json_get_integer(data, "num_species_orig"), json_get_integer(data, "num_characters_orig"));
 
-        stp->realized_char = json_get_integer(data, "realized_char");
+        stp->realize = json_get_integer(data, "realize");
         stp->tried_characters = json_get_list(data, "tried_characters", true);
         stp->character_queue = json_get_list(data, "character_queue", true);
 
@@ -215,7 +227,7 @@ static json_t* build_json_state(const state_s* stp, const char* redblack_filenam
         json_set_alloc_funcs(GC_malloc, GC_free);
         assert(check_state(stp) == 0);
         json_t* data = json_object();
-        assert(!json_object_set(data, "realized_char", json_integer(stp->realized_char)));
+        assert(!json_object_set(data, "realize", json_integer(stp->realize)));
         assert(!json_object_set(data, "tried_characters", gslist2json_array(stp->tried_characters)));
         assert(!json_object_set(data, "character_queue", gslist2json_array(stp->character_queue)));
         assert(!json_object_set(data, "num_species", json_integer(stp->num_species)));
@@ -288,16 +300,24 @@ static uint32_t state_cmp(const state_s *stp1, const state_s *stp2) {
         return result;
 }
 
-void copy_state(state_s* dst, const state_s* src) {
+void
+full_copy_state(state_s* dst, const state_s* src) {
+        copy_state(dst, src);
+        dst->character_queue = g_slist_copy(src->character_queue);
+        dst->tried_characters = g_slist_copy(src->tried_characters);
+}
+
+
+void
+copy_state(state_s* dst, const state_s* src) {
         assert(dst != NULL);
         assert(check_state(src) == 0);
         dst->num_species_orig = src->num_species_orig;
         dst->num_characters_orig = src->num_characters_orig;
         reset_state(dst);
-        dst->realized_char = src->realized_char;
-        dst->tried_characters = g_slist_copy(src->tried_characters);
-        dst->character_queue = g_slist_copy(src->character_queue);
-
+        dst->realize = src->realize;
+        dst->tried_characters = NULL;
+        dst->character_queue = NULL;
         dst->num_species = src->num_species;
         dst->num_characters = src->num_characters;
         igraph_copy(dst->red_black, src->red_black);
@@ -330,10 +350,8 @@ void copy_state(state_s* dst, const state_s* src) {
    other hand, if A is not equal to B, we return that the realization is
    impossible, setting \c error=1.
 
-   The memory to store the new state must be allocated before calling the procedure.
 */
-void
-realize_character(state_s* dst, const state_s* src, const uint32_t character) {
+bool realize_character(state_s* dst, const state_s* src) {
         assert (src != NULL);
         assert (dst != NULL);
         copy_state(dst, src);
@@ -345,6 +363,7 @@ realize_character(state_s* dst, const state_s* src, const uint32_t character) {
         assert(check_state(src) == 0);
         if (log_debug("realize_character"))
                 log_state(src);
+        uint32_t character = src->realize;
         /* json_t* p_dst = build_json_state(dst, "", ""); */
         /* pp = json_dumps(p_dst, JSON_SORT_KEYS | JSON_INDENT(2)); */
         /* printf("%s\n", pp); */
@@ -399,13 +418,19 @@ realize_character(state_s* dst, const state_s* src, const uint32_t character) {
                 log_debug("color %d = RED", color);
                 if (igraph_vector_size(&not_adjacent) > 0) {
                         dst->operation = 0;
+                        igraph_vector_destroy(&new_red);
+                        igraph_vector_destroy(&temp);
+                        igraph_vector_destroy(&not_adjacent);
+                        igraph_vector_destroy(&adjacent);
+                        igraph_vector_destroy(&conn_comp);
+                        return false;
                 } else {
                         dst->operation = 2;
                         dst->colors[character] = RED + 1;
                         delete_character(dst, character);
                 }
         }
-        dst->realized_char = character;
+        dst->realize = character;
         if (log_debug("realized")) {
                 log_debug("color %d", color);
                 log_debug("outcome %d", dst->operation);
@@ -420,6 +445,7 @@ realize_character(state_s* dst, const state_s* src, const uint32_t character) {
         igraph_vector_destroy(&not_adjacent);
         igraph_vector_destroy(&adjacent);
         igraph_vector_destroy(&conn_comp);
+        return true;
 }
 
 /* static int */
@@ -684,33 +710,45 @@ END_TEST
 void
 free_state(state_s *stp) {
         assert(stp != NULL);
-        if (stp->red_black != NULL) igraph_destroy(stp->red_black);
-        if (stp->conflict != NULL)  igraph_destroy(stp->conflict);
-}
 
-state_s*
-new_state(void) {
-        state_s *stp = GC_MALLOC(sizeof(state_s));
+        if (stp->red_black != NULL) {
+                log_debug("malloc delete %p %p", stp->red_black, stp->conflict);
+                igraph_destroy(stp->red_black);
+                igraph_destroy(stp->conflict);
+        }
         stp->red_black = NULL;
         stp->conflict = NULL;
-        return stp;
+        if (stp->tried_characters != NULL)
+                g_slist_free(stp->tried_characters);
+        stp->tried_characters = NULL;
+        if (stp->character_queue != NULL)
+                g_slist_free(stp->character_queue);
+        stp->character_queue = NULL;
 }
+
 
 void init_state(state_s *stp, uint32_t nspecies, uint32_t nchars) {
         assert(stp != NULL);
         stp->num_characters_orig = nchars;
         stp->num_species_orig = nspecies;
+        stp->red_black = NULL;
+        stp->conflict  = NULL;
+        stp->tried_characters = NULL;
+        stp->character_queue = NULL;
         reset_state(stp);
 }
+
+
+
 
 void
 reset_state(state_s *stp) {
         assert(stp != NULL);
-        stp->realized_char = 0;
-        stp->tried_characters = NULL;
-        stp->character_queue = NULL;
+        free_state(stp);
+        stp->realize = 0;
         stp->red_black = GC_MALLOC(sizeof(igraph_t));
         stp->conflict  = GC_MALLOC(sizeof(igraph_t));
+        log_debug("malloc new %p %p", stp->red_black, stp->conflict);
         stp->current_states = GC_MALLOC(stp->num_characters_orig * sizeof(uint32_t));
         stp->species = GC_MALLOC(stp->num_species_orig * sizeof(uint32_t));
         stp->characters = GC_MALLOC(stp->num_characters_orig * sizeof(uint32_t));
@@ -775,21 +813,23 @@ uint32_t check_state(const state_s* stp) {
 #ifdef TEST_EVERYTHING
 /* START_TEST(write_json_1) { */
 /*     state_s *stp = new_state(); */
-/*     stp->realized_char = 1; */
+/*     stp->realize = 1; */
 /*     write_state("tests/api/1.json", stp); */
 
 /*     state_s *stp2 = read_state("tests/api/1.json"); */
-/*     ck_assert_int_eq(stp->realized_char, stp2->realized_char); */
+/*     ck_assert_int_eq(stp->realize, stp2->realize); */
 /* } */
 /* END_TEST */
 #endif
 
 GSList* characters_list(state_s * stp) {
         GSList* list = NULL;
-        for (uint32_t c=0; c < stp->num_characters_orig; c++)
-                if (stp->characters[c])
-                        list = g_slist_prepend(list, GINT_TO_POINTER(c));
-        return g_slist_reverse(list);
+        for (unsigned int color = 1; color <= MAX_COLOR; color++)
+                for (uint32_t c=0; c < stp->num_characters_orig; c++)
+                        if (stp->characters[c] == color)
+                                list = g_slist_prepend(list, GINT_TO_POINTER(c));
+        GSList* res = g_slist_reverse(list);
+        return res;
 }
 
 
@@ -815,7 +855,7 @@ void delete_character(state_s *stp, uint32_t c) {
 #ifdef TEST_EVERYTHING
 /* START_TEST(write_json_2) { */
 /*     state_s *stp = new_state(); */
-/*     stp->realized_char = 1; */
+/*     stp->realize = 1; */
 /*     stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(91)); */
 /*     stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(92)); */
 /*     stp->tried_characters = g_slist_append(stp->tried_characters, GINT_TO_POINTER(93)); */
@@ -826,7 +866,7 @@ void delete_character(state_s *stp, uint32_t c) {
 /*     write_state("tests/api/2.json", stp); */
 
 /*     state_s *stp2 = read_state("tests/api/2.json"); */
-/*     ck_assert_int_eq(stp->realized_char, stp2->realized_char); */
+/*     ck_assert_int_eq(stp->realize, stp2->realize); */
 /*     for (size_t i=0; i<7; i++) */
 /*         ck_assert_int_eq(GPOINTER_TO_INT(g_slist_nth_data(stp->tried_characters, i)), */
 /*             GPOINTER_TO_INT(g_slist_nth_data(stp2->tried_characters, i))); */
@@ -835,9 +875,10 @@ void delete_character(state_s *stp, uint32_t c) {
 START_TEST(realize_3_0) {
         state_s* stp = read_state("tests/api/3.json");
         state_s* stp2 = new_state();
-        realize_character(stp2, stp, 0);
+        stp->realize = 0;
+        realize_character(stp2, stp);
         write_state("tests/api/3-0.json", stp2);
-        ck_assert_int_eq(stp2->realized_char, 0);
+        ck_assert_int_eq(stp2->realize, 0);
 }
 END_TEST
 
@@ -852,7 +893,7 @@ START_TEST(write_json_3) {
         write_state("tests/api/3t.json", stp);
 
         state_s *stp2 = read_state("tests/api/3t.json");
-        ck_assert_int_eq(stp->realized_char, stp2->realized_char);
+        ck_assert_int_eq(stp->realize, stp2->realize);
 }
 END_TEST
 
@@ -957,7 +998,8 @@ int main(int argc, char **argv) {
                 if (json_array_size(listc) > 0)
                         json_array_foreach(listc, index, value) {
                                 state_s* stp2 = new_state();
-                                realize_character(stp2, stp, json_integer_value(value));
+                                stp->realize = json_integer_value(value);
+                                realize_character(stp2, stp);
                                 copy_state(stp, stp2);
                                 assert(check_state(stp) == 0);
                         }

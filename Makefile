@@ -12,7 +12,7 @@ P = $(BIN_DIR)/cppp
 SRCS := $(wildcard $(SRC_DIR)/*.c)
 SOURCES := $(SRCS:$(SRC_DIR)/%=%)
 
-CFLAGS_STD = -g -Wall -DDEBUG -O0 -march=native -Wno-deprecated -Wno-parentheses -Wno-format
+CFLAGS_STD = -g -Wall -DDEBUG -O3 -march=native -Wno-deprecated -Wno-parentheses -Wno-format
 STD_LIBS = glib-2.0 igraph jansson bdw-gc
 DEBUG_LIBS = check #efence
 

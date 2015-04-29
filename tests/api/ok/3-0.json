@@ -19,7 +19,7 @@
         "num_characters_orig": 5,
         "num_species": 4,
         "num_species_orig": 5,
-    "realized_char": 0,
+    "realize": 0,
         "red_black_file": "tests/api/output/3-0.json-redblack.graphml",
         "species": [
             1,

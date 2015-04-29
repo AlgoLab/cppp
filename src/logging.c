@@ -41,8 +41,8 @@ static unsigned int log_format(const char* tag, int level, const char* message, 
                 char * date =ctime(&now);
                 date[strlen(date) - 1] = '\0';
                 fprintf(stderr, "%s [%s] ", date, tag);
-                vprintf(message, args);
-                printf("\n");
+                vfprintf(stderr, message, args);
+                fprintf(stderr, "\n");
                 return 1;
         }
         return 0;
