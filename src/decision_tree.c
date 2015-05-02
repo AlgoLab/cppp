@@ -54,7 +54,7 @@ next_node(state_s *states, uint32_t level, strategy_fn level_init) {
                 log_state(current);
 
         for (uint32_t i = 0; i <= level; i++)
-                log_debug("malloc stack level %d %p", i, (states+i)->red_black);
+                log_debug("malloc stack level %d %p", i, &((states+i)->red_black));
         if (current->tried_characters == NULL && no_sibling_p(current))
                 /* it is the first node of a level */
                 current->character_queue = level_init(current);
@@ -70,12 +70,15 @@ next_node(state_s *states, uint32_t level, strategy_fn level_init) {
         current->tried_characters = g_slist_prepend(current->tried_characters, GINT_TO_POINTER(current->realize));
         log_debug("realizing %d", current->realize);
         state_s *next = current + 1;
-        reset_state(next);
         bool status = realize_character(next, current);
         if (status) {
                 log_debug("LEVEL. Go to level: %d", level + 1);
                 return (level + 1);
         }
+        /***********************************************/
+        /* The \c next solution is not feasible        */
+        /***********************************************/
+        free_state(next);
         log_debug("LEVEL. Stay at level: %d", level);
         return (level);
 }

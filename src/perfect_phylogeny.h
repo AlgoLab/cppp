@@ -99,8 +99,8 @@ typedef struct state_s {
         uint32_t num_characters;
         uint32_t num_species_orig;
         uint32_t num_characters_orig;
-        igraph_t *red_black;
-        igraph_t *conflict;
+        igraph_t red_black;
+        igraph_t conflict;
         uint32_t *matrix;
         uint32_t *current_states;
         uint32_t *species;
@@ -171,8 +171,8 @@ full_copy_state(state_s* dst, const state_s* src);
 /**
    \brief read a state from a file
 */
-state_s*
-read_state(const char* filename);
+void
+read_state(const char* filename, state_s* stp);
 
 /**
    \brief write a state to a file
@@ -214,10 +214,16 @@ typedef struct instances_schema_s {
 /* instances_schema_s open_instance_file(const char *); */
 
 /**
-   \brief read another instance from file, if possible
-   \param the filename
+   \brief read another instance from file, if possible. Returns \c
+   true if the instance has been read correctly.
+
+   \param the filename and a pointer to the state that will contain
+   the data read from the file
+
+
 */
-state_s* read_instance_from_filename(instances_schema_s* global_props);
+bool
+read_instance_from_filename(instances_schema_s* global_props, state_s* stp);
 
 /**
    \param character: the source state \c src and the outcome \c dst of

@@ -43,30 +43,36 @@ int main(int argc, char **argv) {
                 .file = NULL,
                 .filename = args_info.inputs[0]
         };
-        for (state_s* temp = read_instance_from_filename(&props);
-             temp != NULL; temp = read_instance_from_filename(&props)) {
+        state_s temp;
+        for (;read_instance_from_filename(&props, &temp);) {
 /**
    Notice that each character is realized at most twice (once positive and once
    negative) and that each species can be declared null at most once.
 
    Therefore each partial solution con contain at most 2m+n states.
 */
-                state_s states[temp->num_species + 2 * temp->num_characters];
-                for (uint32_t i = 0; i < temp->num_species + 2 * temp->num_characters; i++) {
-                        init_state(states + i, temp->num_species, temp->num_characters);
-                }
-                copy_state(states, temp);
-                free_state(temp);
+                state_s states[temp.num_species + 2 * temp.num_characters];
+                /*
+                  make all num_species equal to zero, so that the
+                  flushing step does not try to free unallocated and
+                  uninitialized memory
+                */
+                for (uint32_t level=0; level<temp.num_species + 2 * temp.num_characters; level++)
+                        (states + level)->num_species = 0;
+
+                copy_state(states, &temp);
+                free_state(&temp);
                 assert(outf != NULL);
                 if (exhaustive_search(states, alphabetic)) {
-                        for (uint32_t level=0; (states + level)->num_species > 0; level++)
+                        for (uint32_t level=0; (states + level)->num_species > 0; level++) {
                                 fprintf(outf, "%d ", (states + level)->realize);
+                        }
                         fprintf(outf, "\n");
                 } else {
                         fprintf(outf, "Not found\n");
                 }
                 for (uint32_t level=0; (states + level)->num_species > 0; level++) {
-                        log_debug("malloc flushing level %d %p", level, (states + level)->red_black);
+                        log_debug("malloc flushing level %d %p", level, &((states + level)->red_black));
                         free_state(states + level);
                 }
         }
