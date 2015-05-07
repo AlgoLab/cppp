@@ -94,9 +94,3 @@ exhaustive_search(state_s *states, strategy_fn strategy) {
         }
         return false;
 }
-
-#ifdef TEST_EVERYTHING
-int main(void) {
-        return 0;
-}
-#endif

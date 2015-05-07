@@ -74,15 +74,3 @@ void start_logging(struct gengetopt_args_info args_info) {
         if (getenv("CPPP_LOG_LEVEL") != NULL)
                 _cppp_log_level_ = atoi(getenv("CPPP_LOG_LEVEL"));
 }
-
-
-/*
-  This file is mainly used as a library.
-
-  The following main is used only for using the testing framework.
-*/
-#ifdef TEST_EVERYTHING
-int main(int argc, char **argv) {
-        return EXIT_SUCCESS;
-}
-#endif

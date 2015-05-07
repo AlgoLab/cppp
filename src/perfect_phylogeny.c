@@ -514,11 +514,6 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp) {
         return true;
 }
 
-#ifdef TEST_EVERYTHING
-#include <check.h>
-
-#endif
-
 /*
   \brief Simplify the instance whenever possible.
 
@@ -566,120 +561,6 @@ get_conflict_graph(const state_s *inst) {
         return NULL;
 }
 
-#ifdef TEST_EVERYTHING
-static void test_matrix_pp(state_s* instp, const uint32_t num_species, const uint32_t num_characters,
-                           const uint32_t data[instp->num_species][instp->num_characters],
-                           const uint32_t conflict[instp->num_characters][instp->num_characters]) {
-        ck_assert_int_eq(instp->num_species, num_species);
-        ck_assert_int_eq(instp->num_characters, num_characters);
-        ck_assert_int_eq(instp->num_species_orig, num_species);
-        ck_assert_int_eq(instp->num_characters_orig, num_characters);
-        for (uint32_t i=0; i<instp->num_species; i++)
-                for (uint32_t j=0; j<instp->num_characters; j++)    {
-                        ck_assert_int_eq(matrix_get_value(instp, i, j), data[i][j]);
-                        igraph_integer_t eid;
-                        igraph_get_eid(&(instp->red_black), &eid, i, j+instp->num_species, 0, 0);
-                        if (data[i][j] == 1)
-                                ck_assert_int_ge(eid, 0);
-                        else
-                                ck_assert_int_lt(eid, 0);
-                }
-        if (conflict != NULL) {
-                for (uint32_t c1=0; c1<instp->num_characters; c1++)
-                        for (uint32_t c2=0; c2<instp->num_characters; c2++) {
-                                igraph_integer_t eid;
-                                igraph_get_eid(&(instp->conflict), &eid, c1, c2, 0, 0);
-                                if (conflict[c1][c2] == 1)
-                                        ck_assert_msg(eid >= 0, "Characters %d %d\n", c1, c2);
-                                else
-                                        ck_assert_msg(eid < 0, "Characters %d %d\n", c1, c2);
-                        }
-        }
-}
-
-
-START_TEST(test_read_instance_from_filename_1) {
-        const uint32_t data[4][4] = {
-                {0, 0, 1, 1},
-                {0, 1, 0, 1},
-                {1, 0, 1, 0},
-                {1, 1, 0, 0}
-        };
-        const uint32_t conflict[4][4] = {
-                {0, 1, 1, 0},
-                {1, 0, 0, 1},
-                {1, 0, 0, 1},
-                {0, 1, 1, 0}
-        };
-        instances_schema_s props = {
-                .file = NULL,
-                .filename = "tests/input/read/1.txt"
-        };
-        state_s* inst = read_instance_from_filename(&props);
-        test_matrix_pp(inst, 4, 4, data, conflict);
-}
-END_TEST
-
-START_TEST(test_read_instance_from_filename_2) {
-        const uint32_t data[6][3] = {
-                {0, 0, 1},
-                {0, 1, 0},
-                {0, 1, 1},
-                {1, 0, 0},
-                {1, 0, 1},
-                {1, 1, 0}
-        };
-        const uint32_t conflict[3][3] = {
-                {0, 1, 1},
-                {1, 0, 1},
-                {1, 1, 0}
-        };
-        instances_schema_s props = {
-                .file = NULL,
-                .filename = "tests/input/read/2.txt"
-        };
-        state_s* instp = read_instance_from_filename(&props);
-        test_matrix_pp(instp, 6, 3, data, conflict);
-        //    igraph_write_graph_gml(inst.red_black, stdout, 0, 0);
-}
-END_TEST
-
-START_TEST(test_read_instance_from_filename_3) {
-        const uint32_t data[5][5] = {
-                {0, 0, 0, 1, 0},
-                {0, 1, 0, 0, 0},
-                {1, 0, 1, 0, 0},
-                {1, 1, 0, 0, 0},
-                {0, 0, 0, 0, 0}
-        };
-        const uint32_t conflict[5][5] = {
-                {0, 1, 0, 0, 0},
-                {1, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0}
-        };
-        instances_schema_s props = {
-                .file = NULL,
-                .filename = "tests/input/read/3.txt"
-        };
-        state_s* instp = read_instance_from_filename(&props);
-        test_matrix_pp(instp, 5, 5, data, conflict);
-        //igraph_write_graph_gml(inst.red_black, stdout, 0, 0);
-}
-END_TEST
-#endif
-
-#ifdef TEST_EVERYTHING
-static void null_state_test(state_s *stp) {
-        ck_assert_msg(stp != NULL, "stp has been freed\n");
-        ck_assert_int_eq(stp->num_species, 0);
-        ck_assert_int_eq(stp->num_characters, 0);
-        ck_assert_int_eq(stp->num_species_orig, 0);
-        ck_assert_int_eq(stp->num_characters_orig, 0);
-}
-
-#endif
 
 
 void
@@ -768,20 +649,10 @@ uint32_t check_state(const state_s* stp) {
         return err;
 }
 
-#ifdef TEST_EVERYTHING
-/* START_TEST(write_json_1) { */
-/*     state_s *stp = new_state(); */
-/*     stp->realize = 1; */
-/*     write_state("tests/api/1.json", stp); */
-
-/*     state_s *stp2 = read_state("tests/api/1.json"); */
-/*     ck_assert_int_eq(stp->realize, stp2->realize); */
-/* } */
-/* END_TEST */
-#endif
-
-GSList* characters_list(state_s * stp) {
-        GSList* list = NULL;
+uint32_t
+characters_list(state_s * stp, uint32_t *array) {
+        assert(array != NULL);
+        uint32_t size = 0;
         for (unsigned int color = 1; color <= MAX_COLOR; color++)
                 for (uint32_t c=0; c < stp->num_characters_orig; c++)
                         if (stp->characters[c] == color)

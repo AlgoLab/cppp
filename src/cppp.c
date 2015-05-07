@@ -30,9 +30,6 @@ alphabetic(state_s *stp) {
 }
 
 int main(int argc, char **argv) {
-#ifdef TEST_EVERYTHING
-        GC_find_leak = 1;
-#endif
         static struct gengetopt_args_info args_info;
         assert(cmdline_parser(argc, argv, &args_info) == 0);
         assert(args_info.inputs_num >= 1);
@@ -78,8 +75,5 @@ int main(int argc, char **argv) {
         }
         fclose(outf);
         cmdline_parser_free(&args_info);
-#ifdef TEST_EVERYTHING
-        CHECK_LEAKS();
-#endif
         return 0;
 }

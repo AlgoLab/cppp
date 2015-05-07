@@ -1,1 +1,1000 @@
-HBEGIN:cipher:AES-256-CFB:HEND--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------lOe+9SmNdlSMWpgqWlwu2rGSGSD6i0XoqPU41iR0Y8deIg0ikw6l1rRDqxCnLD7csOGs/OufCHthIsyFJYlX0rHBFt6xunXHqjKyFCRNgrvyl+NeVyhpb4A+weT/jJwMsqBzOUmD9rwdghM3rw4fD8WEc4VwfY7LPlhF0g/Xj4tQ6YDSM0hH9k+fGj580jUa+g+nxDI4KLMFmR4MYmPWY7RkcBT9XHgMbOPQLovv0yhrOT64xFN7Dd1lbgw2RFKNfLM25wAfCKb7xwjnyvTze1iZzTGCQAISknja5/VzeT0vvPkz8KwodV18A3lufWE6xd8JTkrufYD0E4n5SgXBkKcTXRy5tKsoh43ogZBL4F03LW5XBlbQAr5s2J18tW0BbXUDwb055YVbn+CZ9hEpIAKEs4+JnFW3o1MMmmWRTx/JJ7ASeMTXSsxN3j+x201rp5YTF2IsQKeEc2M7T9qNxgbywx7h3YnsKirGxiRJ/vaC2IvHRHpuNJrm4gsOlBT117JJ8nzxHYMc+yEKsw1kdPSvZ0snPKEuYyaSf0jXgNTgj1vJnRlXKdcQcWo4bDsjDrR6oDQSAG3m5UlHa+E3hf1N36tMRq62SeFTWr26E2bxx+n1vgOn1e9PWi2NrLQMUfmyKh+Nin0j/2mS+aQxmqlmjV3TxPZyz1gTsG6Bgg82QAtIi2vYQhvyvCXibapOz/9s1FRfmVLuEaaiighzIFku2wUHnnz/WsoI890GWm9NtnncRuWOuOIfiCygkRmMemmPW7k3mNDlD08eSVMZhZ8h88xM4xmFC4R5tt0UCnHcjXBtLSjOJBW+SoiKGAUQVaazFHzQpl2oLBsPgSneBUBt2gXLttYMSnp7cVkUgndgmQhR21w4D6fY1nE/8cbpbFDHcTRdGUbXJTznyr8uLSca31gtV8X8UbM9R1gciLwgPeJVaG7aCkjbUT/WUJGNQXHPUQNqexEGHLdXMHOyHgixONevPuTOr+K0/oxofgzp6HQiYTEkiNfOHs2dQMHNjakgrpuhaWI+NRvM7AWkn378K1RAlCVD9hbqyZz5deS336e0j1SEPT/2JAVvbAfEKNPp4vJIPmF9UeQR5UdKEha1PkVjO6gfMwKc5h1C6PIYPoyhYPBudqo67wLl4h5/z5Lp0PhmFxv0DdaZaEipwLZrfB6/9TYgxxdtGQdy7lDykS5q1lEhFgRNAkric4F3zrmVW2LEaRKxmSun7BFXzemscAvE1IV6Y4X3Akk+HxtAK1voBBYX4buTXdxrY7aG03FnFreL1oaHQgSa/wilwbUGCVBgkpGcq3EpKUwdu33HTFkM/tI3fctt7UG8Y7+yR4SehVw/f0JVMhO4jbUuF+A9/Zl5cJO1JDL298xC8Q7eBgslZe7sY5XnIrA2+VSafkhq1GD7aGSEkQfGdJ/YRbQIW0q/phM2Yv2SmOHtkj42DQqCeakdFFTlhm5KbIRF8LFalJdzIcQBICxoi4R7KNhOW/3yyVa7M0mtqZ2zIuqCWK4cPUJGibPbWw8u3aFomBDkvbO5LuMjo/8nPDlyFL/pDNkuYvt5xB+jqWsvNAdb+smf0dESkOytaz+Jrnp6Efhkkl366tujEdc/0MLyRAsrq3e9lEbtM1Vl4Fx/3HnPjPomwTm2cI1ZmIK4Fb02FtHX/BF/CgsDEEgU7wtNSh/BtlDVCRF+zEqCM1bluHpoWbwuvPjqlwwbNfO8Hl+tcyjCfTVoIDT/hD5SBeyCoqtgVnjaCNcdyNgNrU7EbMu6UMkrjbG3XY7ADOuLghglbBi1aJOd3HCqPcmm7CBlaiPEItO2/FDnTvhSIwlAYNJOO8UUmhcixUwyZXzIehwYJt3D7g3lwH+Yw4Ec24+N8aexNxg1fJ/Svlvoxp2ztSi47NRb5wIIoDsW+MNwcn0ur7wAtNylrLNMtrs7b1Z+SPqLUr/n5eo2+028iOeDnKmF/gA+JQlA1Gfr+vQypjMp2ZbP0SIfA22M1XPCKsFD3w1TKMMXKR/nhZ7pG29Neo2Flggfq6oWvSCD9XpR6r+Ge5SvVQINzN5rZABKwrG+9JbS+9lRjhFj25TBaKuoc8UmhGuUnwLc3mzZDgl9UuXQI68fNxrjGLWNhNi1/MoHvJrOgKW7Fdiv9pzcUMeDjPdRquiWwYP8oyL3hs5PfsiciqpT5gdxczVrCOM6HXJO7WdvXX1M9NzkJ8wrNL8Zb2p/sSp51K05t7KzCWMwvp9tNb4YBaw9Reeq35U69oU2Z7tXb3rHaywgW5rxVyVQKQIX5Tm6045sEN7KsOi1paoS634IF6E+optOUKICxZJzm7B8PbQLU1HJU8faKMCDF4cOdrxGQ5zBcNMgUjC34E+xnvdEIXdhUJGCjE6oSH+5nbUfwM4rwRTIguiVL29cJRg9lgF2A3U3Pd0egYkv35fCAPYjBc8ImECfbJA4o8yfpBX0RDqYyB0LGVFMDBO87sGlGzi2OBvTSvw6DCiZefHXhGLmJfpXoYsyCBqsfCW5DKzCWBy2P9LOg6HwCeMfu6QZ/QzYl74wgqg0IHno5A8gMQObMPkk1roDwzE6fsNLytfgtGPmy3omYaGE8fJOm6ZAw2GGdBhuGlnZESD7LUnjlU+bO0aHN+CpNt5dBJi0xgQDAKmOaY0yn+FP6jKr+5emofc8nMbu42UaCd5s34SFLLJgLpti8PqSBRFevoHPOw24swkl32b/YrXgrnKoMacmHHs8oN5bE35GY0kOw7FY6qI2VzdvlViOzvQ4L0v56Nf6nRi2hNQOy2bJN97iEeus2aN4bfyM3n/ZwjskBqVuqreIDb0vGBoZPgomenB3CEHqHpXjqL/lEAPHeXH4pp2izBN2ULX/8O+2eoN4Rlg/XzfcSTcf71cMPZyLA9a1/6sRvtJqgbcAm7MyetaSXd7St3lweqWymef5g7kfOuSKZqJzKKx4rf9Bq8Os3m896jgyGodbDIoU0MosX4mVS4zvOkgMb704E+P+vL1dc2BNU3CmdR9EKWFEZKDiEijqkfOuiVlEYYvDZL31Wm6eQKDERWiKZZ51wVZ2SmEVBVuALQJDwNgQ/wz99gfwRPIopDpNcAc8V+8uPxXYIQpkfkU3B1ZMIdfSkHVXgy+5loIu2C+nf3q++atqHox+dDtLEah5q4yodKSis3pJ7SlbpSDSou6hUq0/XyXoTfsNqrn/E0PVK8vG76vHpnfNcWt1hHKP47FuU8uTf9VtFKwd7y62gCMsUYAiFcbgv5WJIwrnuwiVgSX+XDyiPA0L1B/Si7e2/Gv0cajRcTjXdUiiFIOJCgaUZdWO/CaYelM6h3IKJ1Y2/zWht1g/pzw7PO6bP1RzbQHNgL+fh3qAuQSsIOtBi+1lOyYY9ppTcZm8FYS53ErZCLk+0DrsMth33C5FX58UWcexcj5p39IQZtt917GMJsKsTQthMhhGS3ETpSafmUDzHIhqrbsudV/3jIJ0CxJV6tZjqUwFJHhz+T62cUKiMXjOjnyaHoT4mGQd0pBv1Qr/tSF/jH/YWUFWNBdibO5K+dEJvHLfIp+jbzoZWGZgE5EgkOa3iSJvPnsgjVin7RbfXXtoc9vfqMmxRYb1lYBqTu1bYK/aB3z+VtZCSMmY7+fIQka4/qzoqwofdt2LaTHmsKA8qaawrdRQGjI0ECh/neDGkfcM2OHyuxefG105MAmQU7dQBM4HsAN262wzpE9GtRXfdf72OYN03GcqUjW/Kr6lG9g0JN8EQrdxy9ExZYR0lQsdMh6stgCrw+bXOlOVs01l3kut+ae4wOPkmxJIyed+mN1wa48VMVykzfLfX7echHGVYGdfknhpxKPmvCwq9sZbWthALPU13rUFs5jK6s6vBz3v1EmcEVOMuNZZ17i160pR8kcMUKuSABewZ76Mucix4BJJQdRHfeA6kYzHW9gchLfI87Nq2E58eAxt188qQ9/7eG8gpm+DVQ7JdbskecnH+JC1cLB9q380w7Gltpoi6EoZRNqLED221SGE+yn3k5/T/Wc+ohthHhj9K48oFheTC28Ha5uOAfS41zovrrrscjPz0p2Fqdo/hdKIz3dU72o4/74v743GNYiwiMFmdt2QoxPF6a2VIBimlvDIuB/0o1LWfcKiS+72XT18+5L2wgUydeqaaInCzIAMGLUIgAE0xqRhG973zRtuGgErAfodCuE6TkMGw12SNqWl5CSgfsHDd0TansF7C4GEse8ZSNxZEunfbdmr0hJUNm0mjHTiP4vXA6nkw2brH3cpvLUtymV8fvdbK9L/EKT4+H8/3kSHzhUreLZslsusA8ze11MOSKkmBrijRzszXTozA777GNLojz+i265A0wR1gjTJx/Ai6vpM/2+ccjhiwDJrwbfm8YSpcQJLsrelCvTVQRhq12iyX4l6iRaUyTrhab2lvEZ3GTrqVYa6PomBUZjodKPqPLrYhA5c1udMolvJ0zqk5g09EVitxAWMmXLFGtPxXR+0OsZJfEz67negQG5u8pPHhzPilf7+Mq+iyT4atr3ff8HFq6Xc18CVBYkKXzT/XCkGfhNilE2sC/DCj2jcuafeAlqq+6vd7jBW5GS2/8Psw0EG21rotJQZot25gumeHUXM/ly7hW5yyI3DhlZU2iiBCsyZYho/MZYm5AjwwEF0YlcaKLFj8Vc0SYbkKSL5JotxBVauRCpWTi82jBwxaZoDk1UrxD5SiWtz+3vsKMhRxiEE8+hoVFsnI7uwzHJDYjZItEsyPD84RlKgt85x0SxusDYDo//UmU4oeGvJkkVunWaqDeWO7gsWg96bspev19x8M6Iu7eFX6f07twQIKuy3qp6bt6L2c0B3VhVDwlObRBlkPBe6RdwPxt4vYVypx9sionk+beVLyR6lNqxLVBtqQTExXqkXAUhk8Sq1lyEuH/KM75hdz2d65Eqo3WnPrHrB1OlDsfjp1lqzyuNfJLSGfdKxsdO1RKLTCaau2bdPjVQsOrCTvQ3/PkGwPYKtQRmCMEDmWMIkkFplMjrgEyDnlHotjgmgPpMjw5FAe5c1jv1iqqIuLyqbngu0iakqnBNaKQT9CKdnTic2YFWIanezIDc/2YuVb+5gqNbO/pcIkfxswZSejKTaTbLaO9TKTqQfdC1JCrPCd5rpHyQr7boiGNvGs4SHgTVMo6wBfEKA60xU0i+Ns6A2ohVvLprMTEGdGQKUPGdgQ/5Q5fm/htp4DplcXlnX//RnyL7REniBqTH3ODPuIS8/yBcFHQUIpcx7elW48tIxGuCAfXqqxM19BD3lEY9m4x+9PIRWVs2LrHS/1WstAvZh80jEIh0XNUGlyrFlARGi+ao+9eir+adF6KKV9yqouc8mRKfrqhxaMkOfHLDF0mslLHHEY0uv+RjK2UDQ94FP68LQvX9HIKZjymTbUNa6V5LSMppJa/DlbaP8iV+mrJQqrKhlYMWCt1hlynCFcAQtWZfyuh4PeNoBOu5KNtapt70ellA19kYYTmsUHYxs9BevNScMp7dlVbJ5mywzkzYyzcP12CFqBwhGM5axf0uIlr6Th7T2SaYGTAcWZtyPDz22n0Xglthk2cLxZ9wcYyMu6Qk7Fc5v04P2EOYt4bFjw2nhxay4NlbR6+P1MqqaMTtIj+EnjHRVLLlDghv90RrgtTP8mA+vqih3iqiiHKM9g5PoA6SEya8cqwElmwA/qSz4G3p30V5J5ZgQpaa+IEuI0HHZYjBJqwbznUz/B3XsRytGQsBM7jtXJ48zHb9Wgsr6NixOF+cqdwE3RK83ojiW7ZflWCzP+0XEfgd/yhpvBBqWtVuCWTzqr0MX0bD/Gbu64EZFYI+RYmXDiwICHXuU75kc7BvYvUSA/KQ9f0A/+b6PX5Sf49hdelW6ObBPEKdeaX6k1oH5MC5UkLpA+FbJfU5j1t5TTRzlhV1zk9IE6sk6Yxw8fz3Trx73WrqtVk9ImBVdfaF8p7FcsbFCMEFoO9S7ogYl57bTv7FBQDs7hOkfqHRaFYVlC9bmVJvsQzJ4tw/4bLI09HH43rmSPy1L0o1c0eJYE2bdooPtdHrYK8go++v0nyQS5d50y+dW/yy5s9989q6CK+4fvXhvW7udKiYEe3EQr8LPS8j8b5rAeEh5VN8LoZdIjh+X+40q1Be7nqyspRlbmMFgsF8gUNjhcO2eBtgLaqjPA6K0+KvK540cEe4CnQ6dV/QHWj7cXyyafFkP7meXR65tw3QYN2dNYYX+kNh+svs6hL6Eo1QWnTIrbjzpXbYxxn/C2bI4T3wIH972innsJGSlq8Qq6gq6sXZ3ZfH/Wl7wQo8AbKXo83fey0cHcjFUzNhXIMCdP2u0f9tl17he+QC6P28ojshnI+cCDMb+GQW79Mw31i3FMCsOst+8RxltzOgEt9jSUY5VZJzUT32SEtxfsyQHWfppy+d4l55CwpRVaZidJ3wCoN5l+W3C1QX96ZtXn5BH77Yzb0jNkMBA0gEqT0QpmB+R2ZTftWRhoB3uDze2JZLSwQdTbeTuu8wBFwnR1xOiAo5+jRbmfxdPzo5inMHGCm2qrO+Euiqserx6K72aCSeKwCB/eE6877The+eKyvVwYi0pwFUCvphm8e2D6GVdU71CAtKiqok4cBotr/ONSwUXvxbBGCqqdg1PIXL5w6D68cDGHjdXDx2rnNa9E9uEc+st4BV9iMIVNlGKPBUKTstHUFyv/4KDkzxrypmfMAfusEv2vN5/Oinz6hztvlPmosc5t7MmdfPd6wkUao1ooIuW5bD7sbQ0h0tmoI0N6blxEIy+iYR9+wgaX2eLSR2mL//oXEeFWY++kVg+C57RmEus6dNuxyJ48p/cIcjT3fAuI0VRPWB+ta2XaNZZWvC/EamK1A0eE9BvnxVfJ1KhWmxOa1f11nyywtIC+sOckOjMygqBitte8Ba7Lf53rwIbqRe7aJmTt6vqqFeSDghDjBJKduoWHBgtjRXLaRrGWHjvGdoVbGv+SgwJvJSezvajK8+Ym9LsqWxjt5HsF8CEIogWqcZWmWOCn8+zJvRGN9z8UBRoUhLdCU18I07OtzJJExkZ1LwNA5x5rGwj6jiGGBVoYod2+23oKNIGWi47ozP7663LUjTeRL13XOuSdNK6MFw02LxXT6j8cF26asg348ThJ9AEt3pugTvKCiuzkkTRIv0hm2kryZ7bgQEpRxscgOrfB0DJniEPyuJeUnbOee2qgOWAFxYTlDavti2/uOWzBdx1wcLXzpjW/Hs22PKT8z5Q3xm3/QliJRLujlC1oQWMn9C/puKuTAo0s4Jaq+8S7rqieH6pyyM8Xy0if/kijsfawxJmQC3DguGWTIn8c0hvUVDxWNvpBBLT37EJXbDw5cGh/K35fxB4rJq3g6drIop5fGOpUKZsxyaDbV/130L54+NXxSpoHd/85qeYNWa65cCohM0BtyKGJqpAMUFdka5Y72BJZuVX8kM5p2fZ65ARGRKFy/aSXE7K2zYcj1hB1LUscGNNAL/nmGiwOoXsCKGJiTPI39eXvOPP2t1mdunkgFNJzfj6emOoEq76tTkdZiRK3g6pzKrvrfkBXXlAsBCswv246FZGxaq865e+0yGMUsIyRccWb7DDova/S3AIIZ0fae/HVKb4dmxFifanUXy+55W0h1haX3x3+vbEY6mYm3SUtnxzS0YNA47c42V2/O0TNsovNmNb5ml7es58PI64PLztMKLRk6x43Fdad4/thbYvKEXZOwggPRmCCfcELrGkEfDCDkB3BVzMeOdloVJyPHCltGGxUlCZDa9qGdKEnIhHwN8gAg4su0nekiLGEf9E0PzpLFrghyfrMChyTgLESJIirlOSYMq0Easc0FC/b/whYsZhIbgPcDrsGf6sBpVKJK5lEALRXQh0FCW4R+Vy2haY/bdkU31Ai+93TyNYdS7W4eCmd8Bq9jlJqoaB47watTxMT875o1R8/fd2C4ZHgTDyQAbtP9Q1HbRyfUytXbk0jt9nD2dixN5B35LypTAxK/lmmTILCS7n4S9kIKxLeyYhGDlE2tmSReIWk+sakYVGa9NGXPYD0XTM+yHBpDhnas3t96QrN2BZWlVGCPAxoXVI1VH3SyUV4hzw3aizlgtCdGa2yw7zxqtrOrBefJLu4GFVIRhwu29LF7209y+ZpRasEVd9WDdngCgXekK8H+lH00iv00a64MJOQxpwbzEQzhxxNNuqUJhBDW0ANEXlZUnCavbfazZU8+QzuVYor5uvtL72S0YPHFHwC+mMLfsLFCVZe/eWrdEQkUc/hQnmUaWDpLA8Xk+4CfukrmBOETTE9UjdLuZ04NfDs9YRxcgCZOfAx7xvTnGgcaKyNJi1GM5+Jkhon8QlWMQAaGkRJibI3ZORMQBNkWcUXmgr7J7RrcoCqLmHhw0QJfqyRV4gaBTEuUM6GFN9dBl2bYuTBVdukdrytGAZr/JCKNerfLqyl6/Xgj1GQz+MQoxhbn0dR0Ai26do+9uy53tm+WQkSz2NvNW/lhCZFFUxYDcIksf5Qu22JhICtavKT1DbNFiqvp2dp4/pG10GIHfHGSvp/57ZRGESAfZViZEhgA5h9mIFM6bgF3VJaM5IULljrMe7SKkzV4LnlD0qbjaES92OV+PNJPwjZM2ikh4tB7l+EVmPGCG/Y8BqmUgAZ0zAgd0w80dsFhqTUi16EcVtFRGzZZfvRV+yrpBiU8j5GdEh03tmvmg2ytBHebOzkpfe4M4fhDG+C5n5vqbQ5MkMxWb7GTnDS63JcFk93zH7ZlryeGU1GxHxtSzYwtMeDujPBq7WF6Ca0RCOLywUGMDXtyXTI9b17A4wDCGceTYfBu7CnmJrF72XaR8JxsTYw0UIynJ0K8vbe2P7VvvLokYSORQxS8BP3bmLE+3xKFeCNT7XJoi8Qu0S0WQMxAjwN4RgX8ILXY2BH9wP8WT72/BrlndlLcPijSK4Lsl+6gF6kbpqo/08VF4hQZAQl0tO1Pq+ETxton7ryQteh8CNjWXz+7PhRlWNdn/iYR0+A7urQj0RuVzOQf9qht5OZloPdhWDFnSoY9flcRHpiY0x7Iq2nenSXGBa5iys16TKe33b/RgEpFXiJmRyQHZqDmVllDNcYLALYyw102wcUoxn2nHfWM/EdtaLIDYjul/0rdxm0nmVeF0QG86maZnXJF6u6Ekv6LpOgCCKjb2qf+Qj2lH8FV2Kh2ouNORpo3O/0V9q8N3CB0YQ/1S+96U5KizjuoYXiTPSqawLgpFbt9e5ittnsWwdvK3SjV7U5VqjrY8DrkNquGCPwC9MUypvLnHc/WIka+vLmKGlWzcFprm+8xcEXkdNrP+NzxZQs82VXqxJHsBzxFNi1a6PVuu4Ts1bkTs8SjsRFr4lYp5NDqKMeKHo6xNc/cyOQZ/40tdRP1WbrFMCFtCillFRpnh6ey5CiJquSI6nQZb6MYkzX+fCw153Pvvrp0aXva4fkiuEGcuZX+ZdYQru/gqq1ID3meIN4W4NSsDAOe5tLNmf0WajPWjXCBfYRJrfX3SmLFj8yH6ULiKt7tR7XgqBaW0rApWkoV1DP1CCQtxn8f5vWqOcu5G7DoFBsrNmLHP3UfeuYv0Kv2Wiezg3TtmRnNDTIoMmqKf+MqmqQyAosmpedZTzhoR4WqdBlSJW54XSV/W2xVMeTKvYTEIASFyO00UbUbkaLmj5hIE31vkLlkKDuZGev2HkzTTXJ78JMnqoIwUsfmTyhOjKPdXJ0nBeBB6IZlMukoWLwHOLDb58IBJGZ2K3Lk6sYNHCt13yMXyZ4oVuZYIhDAsUpyo3bdOTOvFA6NFgmoPxaWhtbzGk3nobhXf2SRlrQiugXp95CvpsYDKyT0htIMOzQqonZ2s1dUze4yRE4i1AZZiW4+aONdKJIyD1UdCRAaBf3lWNsUoe+2zrGxe4232M6b6kS+TCECJ3F2wOddKGlKKwsvvy6/PFXgssUfzzHE+72Yrq9SKvmJIhFfMrwpAP4EOwg6YvsWrF8WNH3utqAZVDVOYr34t91ddPuuKUtk6+ilL4v1DvlAcIAQZ4VJeoVvfybfgquTz9rIVuZhVgGYnhBkj2pfHgomMsH1XyhFeEppWGhpNcpTtk7keC62Eg22qbqCGSIIsmYUY0M3uPuHYaYC/VJrSym4coK71F8cbJ5i3klQnQcsuW/RCpun4uX26HjGG7i8YXqiGUj6e8XMkzz8YJ4z4tRm89DQJbo7kSL0jknJHM+QZ0HjMDEVoxNpYW3KqWmU0OnaLRBs0haDyjxYDLh2BSOT+7WL7TVjZEOlVuEyou2SU+YUiL2PQ7A1PoxUQYNukhiuTckj9R+CcuxPB2Sv0h9vXZJRd84kjdw+DCq7gAMmbPMfQHxNUDWuQc8eGRtN3LurHQHvAa4pMg8aMiP6OidG3pL1Jg0Gzlvox4bbWSvg1W6q5Kf/JGj7fBUZkzTl8uu/tEFz7nn0umSFMmPpyeSJ2VxI234Si31cLbKCQ+n1/62Tzm2rE63oLCFyyHMkwvYzV+rm6/2XbfpQPn6pFmXLJHWUXbxXZPxYEK/IHkcuyGZON+7uPZJrQTJ6Wvn/jGzuO88Yq+Z/sfEBU8F2uoSO1DvYM9/+1DtNFvDPXzkgPggVr58NMIPfzUDtwLkusZwVY1rvkfX14TNpTR6KaL2UKXbzhvNcE7n+8cnbnButfn+dSK9wIcbVTTAfJCd2Lm+BP93w2lYARkhjQAUVsiBf1Dpst9IyTZPDi4PxKuYpHNnhn8y9QzuCa+6fcFqyAcQyKOgLmycGjB5stQpCP88N0FwgsQ5Nj84q2qVEiFIZq7nKJ8mqAhsaqBTYEXJOlAycjNM/25/7aU6CncHQ0Zy87I159dEunYR0FuYKF2m2JaNOR2PTpX6pbp2jiw0+r7dB5wd5+tdYLuacvOd3K8S0YDePbo7jXStS7GViyXr1APd60vUa18RYvvYgeysRhbrDRcCXUA3CQGwD6/HU99iMkIsiZPMHarOMIXRkYfwDRFy2trj6LMUERQAL00+mkkH3vFlOf3S818lDxwBq44cUNBrsoj4Vr5eBDXuwAEAOPOk2/2wfrwVISW7nYIHn/XiVj+MS2rqmw2A0XkT0RLhNE1rc3smyp1FhZmZUxguYnvWythXAWYetPvFrZXz2M6tubE4MpK3FOCIW04ymw3HPtsthhkBYtaKfkNYK7oIX78cbkSqktnNL4/xYDbHmS/rrgnVX09i0CDPgrEQJjCrzqbUPn8uo3wqkcq+301JMQlLo9aKNbpRrF/6bk/pY8c8FpSO3fvq1Tr+aGIZfvLbdEOVUCGmXofKzSRn9sRGB4BM4dEdkrCFVX3y2sSkADBWgZ8TEw8jT+8tOUBbmKJDRyZOOEbU2UoqPw+pogn2TkzhJZ6Wka1k9yt6m6/i8jonVdB0HuqAuOdmxU97ZCG3gUmn0WRnzAG/Xzfor5Nkq7esKNeoxD0Krqcfnn0ffdimzTvzO/LihzaFXVL5dYjW6uKkN5cbJcgDdVZBSr4sNWzNueAkawONisaDemDT/bknMFHGEK9S6dJqeQKbRktN/bT3ec18ad4FXoiFlWowB3HfYwoNna4/Y/cay11iZmD3dfsZipbgy+1lXI2RTimmuHFy5Ztk9ezfsp+LnC7+DT+592YGhmqxPWBUmvilc6Ox0LZh6lDsMPh9H06X1uv6Lsan7EXM+AkOt5mFCGdBUwXLJeZ2xfQ0RQkjPx/xt2WlflvNmqxO6ljn1W1S3e0ht65epPBFxTF2ppBRMOiHMXjdudAxKZpU+p/fz6D+RzDRPSiQKhYiqGB7usFMIXGBR4zAhY/fteFXcNF/gcNdae15D21UWV56WTpzWqR0L3bTUi8tsijny8jZvEBQoB6NoeTOFNfSfub91KakG6lXzskt6TNoWYJ2iCc9At2vVLBwY/v3N3sI/Y13MK8tee8Kv8RtRng7MwINLvpu+h+S6hClTCgaKV34tpJNZ+wl9LKCfEUB/0rbAie1VUrj7264X9fx3jpxr7tN3P48mcREhojuQbbqlX1fKt2zrpp5V0bmleGahcrrrGC/+Q109+PPomVYe3Yd1319enR4XWsvbbPNBlhjxX3Xz0QONXHWtwNEUT97vOa555ADYMgCyerQXBu8L43/AqoNiArNoi6rB+SWfu2gwuyuZqLJ+aWVaseed3OZpDIUhH2ntWrfkNNQMliac++NSiUqnu/XBpuqrVKk/wAoM/+UeHudQ8cID0/e2WfmwhWURwQqaFPV8BszSgeBisekQIjw9N3XftFtVYV2B/sJZ/0ddAdwb9HrfHbvT7HWLNAWcERlI5pP5pZZd7pIi6ATxWOkY9lSjU9Rq/Bdxc3ZIqxnNWq6mneEkUXGKzCwnWrX7KehAXg0gC8JrQNPOuFrCJ+pEFIoIFXiIS5ogwG+ATOeCOR4dsthjHJg9DyrY2HSsTAa+zxouzly+Daw7vyY9p93GskNiNQXQnXyXS3mZt8cWNXo4psPKdWvUZjadiU53WdTSS6IUKGrfvfL2gZqbTcfKClfCKb6uGdINuiv87ousHCDVmEJyR2tEupMm4dHQXwD8ZlkSGbqkkrPThtXODdAgKPnmfq4ssKY4p6lVmyDB0t++PQbXWN6GkzGrIN+vXrSRpp1lMFHbWVW+9fn9gcd7UYStKJDbKzdvdbVIxRnYDvXQ9K8GdGu26UJoPZZLzSzoxnrX/wfz36RxPAB5eOiWlysls2SnGfgHFcrGDp1UVfiK18ewOT0SkmQTisla57AWfOgeUf5NNA7tlMwvxVy+VM/H+F7egR+DN1yaqBjdMO1ubRdp31lO4CQDg081/etnIwqceUeONJoo5QF5O2nDSVTTT7DOQnmjeX/CA+i1ylCNy7MF0DZwwZtoXj0SueAwV/f/gNE48opwrWOagFGODIS+1wBHh+k/Y/Xcd8qLEsMm8qN+31eHNV0oEdlJ7HDdn8AWMY+wF4MtSRWj2rLWvGPgsaFDvPk7PurpMlqTl2/XkBjxiPJQSXZ6vHAzj186/nJyd4xZxS/XJTtgSdXhOH9dKdVmN5m9kIXEntZX0u0S0Z6OROYjbR4g8PqvRmTgYUm8kqzH/r4eKf5YZsOiHgkRyu6jsAcegFVyk6qvCVUy8w7JJIiBlBqRvAeJzGyhDejhRu6wsKAyyI6GbUxqZmuMq2WVq/YQTCSDW3zXgY3EKm07f+9wQQP7qudBNdW1LJkRRwOd8NdBCladXZcQGTLSgVn/hJa/s8oqSetNhLqalweVUTiHj1NbwaKFhZMjCAbuX+eyZVAhE+cHxE0rn09pvX7jgGg50EdBsUzZAxtZROnB7gwg6oRDQ21C3n9DfAzz0PCqevCAwpkPg3AsG3Bi8j4nkt6fmBQH0x+1aqb/66fYJ+SOl3upl44WZchqr9UVxoxUtE4GW3OvW1PAIDD0QQH94X1btDPXz5JHiKbCgMlEl+XXNc3IchkgaBoOIUiv8OirJD+2epJln0bVMDobv3loWf45kIRCefqpsceKFozSk4pU5NPYs5vhg+s0tBssgaK0dczHa6GuReS41wwZ9azh2v1O6wClJMfju3SIP1GiyjKgCPpnnOpnXCAsGw2aJ7nWqnF4GIRoArRc+iaiRczn/fXphzHLeukjlLFp/LKKPGOHS+7v7T3ZJrxYl4irYlF3teu300X+mFqGQzHkZ6C5iOCw8fjKsPhT8eQYHnWikUKXNEMnJZwb+W7KiI7okW9OnXOJH2LZW9RLYKSxs/WN/d1IM5T6RUqvWJ67Dbe/0lDag64fpkyRHFBYTuNXtdXG7Ji06RYiuu/fv2Hdwu0a+jx8FQx3CnjiqFZoxAw/TQU4an3unrE1ozIzTw5S/yr/bHodXBvHck0UCnDAXV4r/C2u28Wz79vMJDnOVDYmbK7wvkWA0i8R439kFO2suj9jGTx46bgrMM5fL8tGweeJ/BXS88H8KfTsuk4WPLEeQjkI4qP1zPkkbX/2was2rGQXRwfE1gNmLXL80MiUGVcwDn8EX/e86w63osvBHODO+cRcmCrijr9EOYkxNcnaYMWFR4rdQ/owG7QNlQIsneOwkbfdhqlV8OnDuAIiidUc1hR/lJ7FESKaX1hEp95oaAjv6X/zPd6mEl1ShXbqmFlL3iQsgSJitGhjns3R1gjix8Kx1KAO4ax+dl5YMASxgthQOLNIFoJArSxJ3aaqE4LOaOdDXt/G0VScoFHa5fi8/NW6iRVag12HSTvxTT5C24xbS2WVBBLBt4HJsKVTZTYvfeqhTzsWjV2bP51xADg/pYQvls9sozA+D/KqYwObgnkgntPn51H2iQiOA68YEMwFRYM4zzYHhxzecLXBN0RApA3Isc2B3QApzB+CundqzdD+RunqtCn0/9vR4VYmjril2r6nHhOuddRDmLXcvvY8YCp4UEtXQ2Sz/lm8hOCS2HIX5dLoq59kADvrYvlxwNeH6QFkTPpbPqUzPUrb3GOG+A+cDHIsc3wa9YJ9SPColToKD2DhlcYzdgsBXVagilAwxvFJgwqGaW4i6WKUd5sc14UKZFhq0Bg98inIvAVz1peQo7/gk0wGaediyoUNDvespFtC0I/zeMKlUs6xbjFYMTYAxwMCSHI59mv76uFju9YL9mTTflm+kdfxTVB9pCV70z5Uc3zqWpcm/ryp2m5CiUZdZEmuRIpF1KQxC8RWjbmjRI5I+3PHf5kmgjLtkkNASXTEt3FV4KNLw/drslkT61rp0gPtEphLiWBdFrY7o/P+Oa16RyA7Dab37iJKM0pF4la/LSbP3H1YX2tKc+MG10FEYExa8Ah0B6f1JxYZmmqHrnY8CiXQJVps6yvRuhKN+w6c5J+KgR+tYtbYk5aVmP8KdnNianwqLzGMvngXQSkdxx4YCD596Nofc4qRQdopjEJunXn5A7FuAHRFSyi7jB9/HEE73UW7EXzRVE+QUwEP2uR//LhxkSdsqA+IKJ6NPB8EZVs2Y8Ou2mzPWfknoU8RJeuShlVUorr5r/uAvZL4s5D2gqHnd6YR7xBCNyFxvkx3TSB6X8awV/qA520biMKHpUr4OErCGegNVYKL8sPnbCRdE7l4UT+S4CDUEaNgb+YTNmKKUeBJpNdsZZKSuMZWTeW2Az6LwpgkhDlXytYTz69fmRc5A8baAegS/glZfT0IkZKKWvKiQwu8ScdAmeQIQnLB7dM7D6fHPFxCyfhiMWziu0APtRURQLwri2Wg4t9E0tZA9d28f8WWCwjD8ZlAFC8IW7/uaGPRnOwj1vRTkgnF46qSlzKCGBvOG3OJpmy1SfBl7yh71IdnG9LUXyWlb9PYPJhVhYsGXpROOfpskQ90m0WBFTtwaZGfz4sBRFzYEMgDB3RhTP7mO31/MGkIJCjXeOz+7XMd7zTYYDWNAkJdCrixaRsoufT08+ZIzJADegR/JcX8b+ic9vbcxaIAzEkBC1jkfqzxjXesMjjZO+uaoGy5ag0KWWjEOrNzbKDwuBGJHPN3AwhV5tfYPHuaf5zmRnYEOu1z1Dj6VEkPijyypaVAnN/0YZ8tT4HlM/eWtu2EtVdxaHSE5ODIUcAxErY82J/X1Za/TgZeo3Su/u+t1P+zSHVTD5WbiRABRZAl9ctKBDwDhY5/dsT3g5P5/P6GPkulf2FpItdJ4Q78waUHpzFKkbpNUdyEKSdNKzc44ZT0587uD3zAjl4zKZpV0ebsvUYY7rwNwCqlaN9PoW9EIQ3HvVEopu5F+GZNPt//elk7guP9NXF9AEpRvIH4eEKRiOQXNstyum1CbBINEjuun4K8lia6Q6DZwiJPo0hjssQhhKG7O8xXbR+d/tb0DBooGCiTxuv5UpYIGGlX9+VCDQ6vQbf3Eweo+tB5E2VDN9jTe/isOHyFh+8BFMCfqT3Cwpzj+9GPszi7fLbIzsdgfU57jU8VUvOf+wtIqZWLqFOzoDEP4ykv3ngP34ItB2siyNxHQWH2Mben/yBNRGAaCIgmEKQHQ0ZGWsm9IVUdSo03hmbmer18cKYc9EmbI9q6BBm/ajwB36h/ybSXr7lX7D0kfmhmCx9ykC9+3P5Pr9cmAJ+kvCrbmH4QLhSXwAZZjDc9ldLOrq4L7OAhd7blaGu2H+ahni15veicDbJLxvOHJWo15HskmfpOUhWrs+KaPjGW29lk6Pyn+2IQyZb3TlYFeuh9hKO0flcJ6LMTB72nbux2DycpnNcizZNDMIRt1Ct5J9fMWmz9wsUDIfI6rPwMcjzLxfDor1c5paMT+MEOulmlb/MZiC74hmMHDtEOcS+pQqb1sF8vPHXq6VV2WiytzSovI+EbiCI2lvf/aTQrVl9gsuVIweVKHmJ2RPyu+QJPop3Xxe/7aW1bQe3GUo/2u31Qf200iv00ofVOXWY1TeN5WnnUxxwqzBZSQ8nNePm32E71GenCk0bBmk/byOlR6nlolNG7KCqLMurv0d5o/dzJuRWLcxJjE72btBdYpSKYty8MEuJa3omMdzUnXU/9u7s8M/O5odu5+Mg61b9OoO03CzjI3hUJMP/ADIB6ROIUMq1Ta2lHh2t5rN0VeuAtRcG/YGEZmQ2zeNXddjye5etSAioMLgtrQ4yJFekZN6D1s8mceeSn1Qnt2QhadmXClBUXue8tB9QFggAISbqRoM4r7uJ9YaeyJSKaxE549x5QTvtX8C4HQh42F2zR0z3RUIAhdyciV9eHGeYSqFPAt6m01v9AumAFkPrZ/xFLFN8Un0e9CIhNMFzz5f5Qqe80Cq55jdE8J2curHjNp9M2lnXlyyDmDFjyjJyrHyN4zFYpfuwYCM+pwiBiFMCb1WLKIHo+IjJ6VtecEUosdWQjZG1be2BTcD+gGk7OxpMSKFwwW1vA09QShLT0ecTAdbFHPSDsRMfV3bGw/HXWCrbA/rj2FfYkXYV8V3V368eG/W5LBOSKyustVXaSK4QQtLiLcNjWw7hwFuN4eI9IQhDYiouUkgiyNGeoxUd6/UP4rchDzmwEnABR0pAbyY6bxJsJN3RSXK+MOIoVc99ADi0Bc1oTFuw+8wQxF8KrhThDtKH+r/80X1ZGVU9Yau+lywBSN8qwOwO78RmxIA7j9HGQ9TDFCSwuVs21yMEFfdR5Z5iHhnlGUjPrnCj4AxBKmFpzCR7QlQi4edbhGwXHQLA/g3miAuwPf4azX3M7nq7jTKGVZBdtCmZXOGfRtLOrQe6N3ey+ZTWtGzTfIAy8BQqtlQtY/W9v4xIBw6QLBVg831vEDPXBljZ/xYoYE3Kcnc3dGfnCRDzURuOf7tWWihpD/781xBig8RVCsH/2mOPUDX0ueC/0lRDjoH863l3Vt4qNhQfVeKS5u/o4CsghjM8FWzkf+HGHOYJlJn09ZmnvKqkfsQTeHpTcv1yzk2FPAl3O1wZIKqOiijr2PJlNwtqW+ZhBni9PUJUujBlXSvOLgX91a3ikyDq+aqGKi8Dc+jZJORspppNqLtPGqIYunnbnX+d0cMC93WCPcPYHsyiTuJ8UpXBH8Y2qEVlvzNjzMsctMORlxbpWye1z/gXX/F+6rTze88c+Jw+1tWO0c0iTrGWc7x0unxtFfHu2dxuAMOHBqAmDqp+1E55LXoSO50gRrNuoMFeDsLFB+5as2JJJnLVK1n9Juit1kZ5XtID3F8ca19cTthp2sez1lbQG9MbdnRbntAF+G5j8cLE9Z/bQ7M0UJUTkLA3YdWnzIV8humYjxLQIUmiYQiSBhOfWg/0lFiJ8tPrlGvGU6FYqLrGRWoYpxKLTdRSN9yyczJXvjoR/i1zVTOQR4uqkehFsxofVIAJJ4/+Y3Yu0YXDlSc5sxYWszj6mrEZMZ6l8Px2SWwrzdh7OQTT64HEkICjKoFxFHmRxFwZSgZS1p/S0l4dpIqig2hXQEDj4f5B26e+1Ece7/7fzHiURUWJbYQUXSWEsbKwbhHMuo48BVnYPSTH2v0U4g/6BoO/JKSDrA2PEkdr+T0HPcqowC2C4+9nWjXygSEw1AwskW08xLV9+Sw62qduwxz/5nqtNH+7oWuiDrkDkfy5kZknPDSajHe8VKMq1QO2hdszWWqCZtit7F0yQDzuYOD7KF2Hb2QgIIefXmyliRnpkwyPx8i/TZFQ/RjFaIXJfFFq3LbIqB752nrBXAXSIkyNj9Ko+7kT2gVvwlOuhybOsNgTRx+SObWHGEswht37u1zMGT4rUV4GYCDCJMrC6t/nYewjV3fbGyJNvnn9p0OIdIMuimedhhZoUbXWfPmxupu/87P4nn2nVFgbB0ROILrdGeJTLH9WNj2DcRYdSNvt3Piwg4mgROk5+P2kcCIkxaLZV3hzez1NN4JfMGfqiCvQzo3foFjMs1/VBdL0bj0weISwNYnEUwS/kMSoo2oLA6vHjB87VunLibAtq4EiGiwkr+qI2XZHkq6R3XggBIcRgCmm5iTA54ygNMlM4qVzkgIDJUy8FYrwVkgXUtOQnM2niqptBS873d8SVSJQpdcLxR49soIHnm+LSPSQgERtu75Y/L8WEEaN9jUCaM6dS+hEqSxrqncWodsQ0dTHh4Ytl6rHFWOP149ozwZuuqQi5bhHM+M/9qY8ZqK9IFadHjLv4J+z5iHktwnYxDOKg/3lwIDkXeppiZGJvjeddggEC5RFymYUZNZD0gzIkstkE4lSSNfw5JCcHeA73BvKsOyZfO8sMLvkOG/KDQNAOSpBd9O5S/tkdXCb7iOZze8TRMb3tZ1Cg6tSBHxTxrN+hFmYw3FpUycoWLptKXO6FwY+zS2yii617nF/2N1p47tNziemnlZJrY/QvHsThccJLv9Cu+t7nZ0rkyCaVmyCbqepMxR6fZl+oAWmc0Rync/3FMFpp3xS1VIpgMDFUdlASEkc93Carl6kPv2nR7YnZHNj/rFk/v+Wg86kQEU36mLAedEjetvWHPkI5lF0R0Dt3pbDlb5NHr/Rj0RBNkABXycsYh1GMEu5N2RdfJRHwmRisXXV+ITEgLEOqBsX+JtlonitVBr8ylD9mmDZLT75A+/jgkQp6R+wE+PPhpdLZZBF9V4zoe1QT6MrEKLBdygEsETc2Tf3qFbkBtUxC7obN0HVv/8O8JGbqUtzhR4w1FCsGHzeBjJb+3xOeBCouSXVoDKftJoKOAfTZXVncxhQ19PfY6836dQDRPJ1UVr1fQOLWh8+eM+m4iGRZNYB6MgSvt6RTkoHUuvMjoN0TzWMlgokXrCOLZhIK8vISP4y1/ONRzM8Q3xTLNbGYxXgNNe7XR5NZL8frC/QigVXwOpx2QUoAgZX/NdkLPclWfcVl/BV2M+N78fh9RtLCT64NEqaFcWCicoZ6YKoeU2WcWvtpNcgs4Njhu4lEh8woDIUNMXA4nhU8ruhW0zyLQnpxTcHlcQcTM/ek0x0NAYcV4P9tRhDTpeyUkCuFI96jQHbEQDmuGevCtl+i6QTCrpfX6+A6uHK9vUzyPd+9RHYyZ7r5HfOaIzdp572YRPH9Hm4drmWztMBItqdSTPX7t/V/jorDgPSyoPfwAAIhi6GdVQWqV7TH/57bw15WBCBHPB6+PjsOXNPfprcDDJQ+FvL7t4EhqvoMgurRGAZFC/BFp/JL9TR0cBbAHYJ324aXLN0m2nc8VkZ1Wgd9+p5ht3PgLNf8ipS4tR7VwsrDO+UYQ++AhZgxMciFqAFd63pNKetNEys2AlB/zA3VOirfjihWG9l9MFyTsoWuAs4zkThgJDNdQ+TV12XLrkoubHfjoXS20ytQJbDGyQaEByAk2CVKW57+k6jtXMwQF13l2sg1iMZyv8YOmvTVWFk+3mVdCvTZLyUTiMWGtaqHdP+1w4QWclcejfKnodIFMGnv34hJKZhOChVZMC+tQ3JwN5m9Z8KgvvUSochGbOygWqaXeMDeoQQzgbMb7QIqiiJSa8GePMjUCEYKcrsdHblcV30J6OEHXN2solk6axiIkNi7eD5Bs6NdIex0D6QmSloub+gRR4HqTNrXApHEsOSA1EJABuGSxoIU6bRtUbA+Lib5YOIUXobi4WwP3dD897QiwOXYKA5DTe5XHv6RymvgBDVJQiUbRout//zYJwTK3eoxjoiMdwwYmHvVOYPEh1g3DsksqDIX1r2hcmR+TpdIAmw3k9xKvthaQvUZpzse5E/E/TtHoVK//UL7d2Ext40dDIBNvGxmOWXo7RnjO29ruolSYCrnDMiIHv2ZEJRwhmvOeLl5FNq8izqSfiq1YDcZV/AUFAzGJUYZm1Sngfy1sSNnhrP/pLH1CLej6dfXmvARf3Aaoaav7P47mPh6Bmd9VfJSrsOfCbHvtgrFKXCnQfwLQz6vi9Tcu07iALvWd78HnQp7qZTYelohSctqxgHkCEI9tuSTC3YG7WjW5HhKQwftIF9M7h5ADCndovHSxeIC79IoFI0+9MwAZZKUyF1eo/uuI4I0qryHGpaDZJqjIoyeX5LP+NvvjzBHbGbrwu30JZ2rbx3TrIhzZFwIGHNa8QhK27p88EJ5l1XSTHdoom5a2GXRNCWvgLm9mXQSK9vZIcgPloIXfRYAc+SXIo1L1IPrtnqji0MQDtsIrzMT3EG4bw8iF8H4b5SZ5OY+4WVsOCKKz02am3b14AcaCWA4gBfLrFcbz8PGxxDt1c+rlXSHrsCefwuhm5f+47G2Zd+DntPC6fIgZsBJfjg7bP5DNLVNzy7Bl2/3yUHEv0PBXyhIebybp38cBmfY7m5cH/vzFy7GupRPF4WCbH7GzqaQt+/+bCMMaKF/xlEYW/QuvdtnsfomaoMo3G2ZJTHSMac/Tz8rWPYPN92I9dRVywDYiZQxxc5S1pp/0P+IYsJI0uFM6pyHlYp+k6K6JzsChPiTmrgMjYNj6sxhBTYarmngkUsmF3KY4S4Fa4aeSKncuoLdHZtGbK5OP+lDyXlyuhLYV8QuutuXj9R3y02zg/lmaUci1Cf856XnfMOCZwY9NYIqhIpzj62fP08eD5xqg687uVIGj2PlVPD+Kw/e5k13VNYBb36lpyrmIit+GeZ8oj9pfusSUDVlD2jb/m/IrUIAm0PiJU8TMBiQ/htmwKY6RHnLSU94YwXVMXMasv49Ty8gvQesVvLeQXqsv2qLrRXLbAbRPgeIMyn6CMHd4BxMVNYL9tjeboDtfKglauExg8mop8NUJxxlHp8tf9OoYN25X7QkVzVf565Ap2lvizJ+FtPGPRabmuE/5yEDHTWnAXZa6EibGV3NQ9TdEzgcKclQV1WUT9MpurFm58HNMImhMUGSW3s2PT+ncUfyEQ/LyD/NLEXAStxAXrsc3cUqUkEdv/uYt1KKS0hXLmjkev3MD06Vr9t0SiJsw798PrdIThG8DD9TS16uq6V2bruEOQ7QEJFhvBRncuVDzbuOo4TfRud14CZq2kU2mPOi322a9aRch0rotXbqZ0+LBuEWBQwQnl6+jb9bD2uC45SxLXgbl4/kQLLw/Ql2YvYI9rDqOVnsL4lZL6ri87rzl7hawGyFVmkP/RjRlBt6yfXBvcf+f+NTvFz4SL9kvJW00mg3RyPX9uEugutZZQ+cgE7xA6IMv5hfn8tgFoQIlcWpw3MSckLShr+nNcBpxCr380ERMVhvsA59ITU9itHirBNWT34F2zsS/qZIy5XA7weDdP5lz0C3Z2AccmTF3rS4PksG3K/fdCmMA5+P3bNfW6SWhXcDt3IIYp/E9Qqaap7chrS/tiYLJeYCQq9oQRmw/RogStngF8NtNYskR72GWAAaZ+hzyi7m4/yguuXPmeEkTrxlDoIz3kbI6Ai6S+unaRLzRU5RT8ct4cfTLtqV6QG4PE7WYWYJUimB+gQ1jNtl2yeT2vBNS/tA1RJC9vFPWsa6BmaVTpsR2f9bzc2zFqq7qA11XDDKFXBWbbrzRqFFdAa0Ly+W9LHzVsd2EQOXBIGQHm58EEu4jgwZYLc7Ybbs9sqiLJza5coisfNsgPCxxs7n4nCs9okLqd/xPxC3Cl4DmQzRI92haQSxpvswGkou7bBbwlG9Lsg13x97vB4eBjZT6VuY45vg7lAiKfukeqOZeSvM02A5UPihqtFiuGLNPlX70nz3VslHGzIEhe6hWO1dfhDd43xC9Dx2OYOjftzeFyDe19X01FAM7iZGmp8WHWcfRDGbP6fz6qVL6+/xCgIMrfm/QSUmbMeuWkp/Chs4pqFGe6e+Qw21VwqvDlLAAZmSNiihejOsuSAtmHefspQ6yvtWAe2bsLg+iAZkoMj9sVyYfWb8GOdD3fafIvJ6BtiBwjd9nqiWDg0BrPh+4mUM779P9vHahLExnnb7OCXABHUE04a/Cd6FXoOZpkuLk01YON7eoYtcr8ZlWJ7xpluf5k0MQcYEeqYSDZ9FNDQBZD39cE7+rRDXUlk7ZsNVV/xYSTCHI27LfQxmc7n4LLrJWWaDAWunDqRhZRu2IsStWQxkBryKywawoTIW0ZD5dn17CyshozvE1dx7hXIANFrsZSZlq8gD2oLir7D2KWldoHxumkCiz5OlzBWJwpc99eO+XxktOaf3kyJH7+NhI5gXMcyIBHLlt76Stq4kk9RGFcJLM0bJfYEWGyyFMKOkgsaK6Os1sxqDEK3d5Smszrih6KVRiA608nUlu6B0Q3efPnbPgmWLpyvUQ80tBJOciofzXLJihoezL6zm+KpWEck9h/UbEvGvCu2LyUAHOB1SmIM/SiqvS9ZaOP44PHO80yi6+JvHcYdFXMNQhpa5DJBH8Szc5Zqi10uikZZx7SnInr2rklThjNS8s8eWvWS55fJ0YYtMsz+luGMWL1TZwU7SL5MHNNrPcbst9WQxr/+GK8Z8LL+0ZiBwyighcPTnGxeT3QqLLAbecxRw5iiffQ20fQosZl4hiLhQiolZF7ygC0padweSOWBoBMngN9ObP3uI3ezVbDa0LvZjdIR2tOYPsyZVgl7X72SprrkHRhdZSV668c9N5otg39Nu7cvu0h8wCDsXEv8K2sZaePLq4KHtdNUy/yUkGVDgB/ljWR1ByPHoAi34EEbrzdkkmyRHysZ9VB+7sh6VBv4sWkocQBXAACjzjSn1ovYcG5WbbrOgmHdzetIfVpWarGp5z8yXMN1IjnwMtZJC2RWcLoPgOMm1Wfab3AmeglWTm+QB9KeGHTNHkqxrAfQiN/9zsW4bgeseRRTakT7nB9eyQneVRzlSawap2B1vJQdWriJ4EpU/QQUoTFafERF7qHFS4fsfLGJtSk5kFlRQptLdpJs//golCYlS1woDvj4IZAvymnwB11Vi3wEsobZlBNLjo/v9yKfTbC9y744JePdGe4ObXUA+6eGnDAzIV6pBGnS3xtYCZri2GUvwcrSTc65RyGk7qpP5PDqBGBWNWxsGbPl0bodweNquYW8luu03foZ39VcCFPdGogYoQFjXcwi7tmVDaFpedOzxPHkgJOjWKl0O8yDYBbrYC8fjI59MCCiVw08o8if6fDoB7xKOQV5qB8MpStZSClADi8CLD9nnXMRlJN2B0d/7lovdv24bKzh/ByoxUh66uhj6sDr6gV+/gfl5SCAApnaSZPUJmQhROAzID1x6L4A38vKMFtxNe2FzdoL3bzXp6YaYgCEYVMlYIVtczRnYwb+RZN6/hpm8FDcR1qQCPhXy/Bh8oLtTBvcirt6DpUsEJjOtTRZsb1wSjsuivqasZ5r+aL3e5OqTuLG9z5oi+fQB62FpNpFbRztPd8wuuAoUdaQfJbJv5lSgiL5nh+jAuqLmLgq3UXaUQaGFuXYjJMGbDLX7vNl83DmQLT8Gj0JYPtmz4uWiiPPVkEnaDziLpvze/IL/aOsW13eOTH+9GbLkw6gWPTtQGrF9rk45rcwJhElyuyNXLTLtOEgRdJwxLWNUz1IhICCqVWweU0AJPc0N4iKE200JcPM+m++6nZUTpJUpzOPf5LT4b7mS5mHDyBrHN5G4bAe7zsgPvOYZt6R9+ay2vKau06LckgpFwnmHwSGoJvypKg7jDURhgFdKel+gh6NTbF7nmaEXRFw5eizN5+f4XPfGdwGaGYLlZ/CnMH0DLwiTUfvuvQpY+faYV8BawUAH3lRpvi5mo4Cy+lU4RDt+TEjx51L7Y87v+EdZR99cIkuKJIBD0w2oxv+iw7XSN2ql+6eOnh7uLIWXdVc+iygoJGZf9Ab/3/mxrn8f7PgZu+kMR3EDVFfzJMUuKdF/4AAR4YY8kDvVlpjBErOR7vjh73gkp8xk8R11n4/L47CQvUMM3SlSBiRdaY1WpfcIfbHuuMjcObquQ1mn9Z+vBXPG6KsCXdmdLJLpeOGPo4Wtup9AfpVq3h3U3Urr0DwIPbjkUY1TKadts8hQ9IEIpWRtyA3RMr4brIXQEP97rEU7u2dBS6ZCRiPsrezAJqECneyejPij1rBtE3lmk6ImNLrRCqNQQ+g46svnyQP+HXvqOZp+HQLroayEHAjpPsiX5T57s3Sq1IoeP97GnxlmksPNJ2lCsfenrkteBvZW1DpOZ4ofA+aCKfC5lKSjar3neD3wJZtmabJg0WBKqmYRCb8aazu38tXXvNz4Yyxi8ULEx1WrM0SEtcpAOt/phUwbdD70SbexGy00iv00regsmfX8byauPkt7xx7osfQnxU6Iy03pxWexjYSzlqZAOw7KGSQCCqpsQI3cyT/VimDPUZb5FHRqXYpjNPNbTCFJ6F3FSo8rri3ScTdItT+Kq3IwvfGsr1i1LxHnwFHDjX0rxW07Obpf8gvjK3IFP//6VokhuNWRKaoNm9YShrWCb+mVCRowYoaMJeq0J/roDJ00IMFDrEf1/cKjlFvArg2hh6GRJgFmjLwiSoBPdDep/yTnMSOzgOOCCi/d7131YoGRDzXlYtLVgFLu0ekL5mNPPDa0fDkCfkCUwk716a8YzTV4/1otPIFNOxTENnYXpEL3BtTrHsHpV7rjYHV9kNY3A03kUCwnYcUODDClPqATnJVjP4U1b6Ce43OjiTzmt+zLYXij188GLIRsH0Barn24CEqdoyVaoEx9kLoMwcvxqSYGQACGtzWH8xRYQfjMK0gcc+ciQvYkl5BoVICLTZPtBEVRuqJ4FF450EJs5N02rv+Vjk6pXoAtE2qsQ6bHN/3QO0oGtmTV8LbcumR5t5jvX8nvHCc0jxh9KbKv/lwXzS3Q8VlW5rijYUQ0zcCfsq9OoUDGue3GDksNwwJnN97MuiD9F6L7PS0LaHTRVpxzLsIPokkwrrTMn0iTnY45VxyDHUN6ILNemSlyJww5r8OPd2yWjqgZfhqKcVJwnVBhbbpq+b5RyuA1vW4qnB/oHAvoSNL91qs4a3eovojxVrTlwekN2gV2Zfk8T+v/YUZkEcSCHevxhe2act4KxDd94QVFkfFzTraJ91x3RDxF7vg+X6Xg6/1xvxceENARXXhU8Laf76GUE=00iv00rEDTG15fyxmmDmnMxx
+0 4 0 1 2 3 1 
+0 3 0 1 4 1 2 3 2 
+0 3 4 0 1 2 3 2 
+0 2 0 4 1 2 3 1 3 
+0 2 4 0 1 2 3 1 3 
+1 3 4 1 0 2 0 3 2 4 
+1 3 4 1 0 2 0 3 2 
+0 1 0 3 4 1 2 3 2 
+0 1 4 0 3 1 2 3 2 
+0 1 3 0 4 1 2 3 2 
+0 1 3 4 0 1 2 3 2 
+2 4 0 1 0 2 3 1 3 4 
+2 4 0 1 0 2 3 1 3 
+2 4 0 1 3 0 2 1 3 4 
+2 4 0 1 3 0 2 1 3 
+0 1 2 1 4 2 3 
+0 4 0 1 2 1 3 4 
+0 3 0 4 1 2 3 1 2 4 
+0 3 4 0 1 2 3 1 2 4 
+0 2 0 1 4 2 3 
+0 2 4 0 1 2 3 4 
+1 2 1 4 0 3 0 2 3 4 
+1 2 1 4 0 3 0 2 3 
+0 1 0 2 1 4 2 3 
+0 1 4 0 2 1 2 3 4 
+2 4 1 0 2 3 0 1 3 4 
+0 1 2 0 1 4 2 3 
+0 1 2 4 0 1 2 3 4 
+4 2 1 3 0 1 2 4 0 3 
+2 4 1 0 3 0 1 2 3 4 
+0 1 2 4 1 2 3 
+0 4 0 1 2 1 3 
+0 3 0 4 1 2 3 1 2 
+0 3 4 0 1 2 3 1 2 
+0 2 0 1 4 1 2 3 
+0 2 4 0 1 2 3 
+1 2 4 1 0 3 0 2 3 4 
+1 2 4 1 0 3 0 2 3 
+0 1 0 2 4 1 2 3 
+0 1 4 0 2 1 2 3 
+2 4 1 0 2 3 0 1 3 4 
+2 4 1 0 2 3 0 1 3 
+0 1 2 0 4 1 2 3 
+0 1 2 4 0 1 2 3 
+2 4 1 0 3 0 1 2 3 4 
+2 4 1 0 3 0 1 2 3 
+0 2 4 1 3 1 2 3 4 
+0 4 0 1 2 3 1 2 3 4 
+0 3 0 4 1 2 1 3 2 4 
+0 3 4 0 1 2 1 3 2 4 
+0 2 0 4 1 3 1 2 3 4 
+0 2 4 0 1 3 1 2 3 4 
+2 4 3 0 1 2 3 4 0 1 
+2 4 0 3 0 1 2 3 4 
+4 0 1 0 2 3 1 2 3 4 
+4 3 1 2 0 1 3 4 0 2 
+2 4 1 3 0 2 0 1 3 4 
+4 2 1 3 0 1 2 4 0 3 
+2 4 0 1 0 3 1 2 3 4 
+2 4 1 3 0 1 2 3 4 0 
+2 4 0 1 3 0 1 2 3 4 
+0 2 4 1 3 1 2 3 
+0 4 0 1 2 3 1 2 3 
+0 3 0 4 1 2 1 3 2 
+0 3 4 0 1 2 1 3 2 
+0 2 0 4 1 3 1 2 3 
+0 2 4 0 1 3 1 2 3 
+2 4 0 3 0 1 2 3 4 
+2 4 0 3 0 1 2 3 
+4 0 1 0 2 3 1 2 3 4 
+4 0 1 0 2 3 1 2 3 
+2 4 1 3 0 2 0 1 3 4 
+2 4 1 3 0 2 0 1 3 
+2 4 0 1 0 3 1 2 3 4 
+2 4 0 1 0 3 1 2 3 
+2 4 0 1 3 0 1 2 3 4 
+2 4 0 1 3 0 1 2 3 
+0 1 2 4 2 3 
+0 1 4 0 1 2 3 
+0 1 3 0 1 4 2 3 2 
+0 1 3 4 0 1 2 3 2 
+0 1 2 0 1 4 2 3 
+0 1 2 4 0 1 2 3 
+4 0 1 2 3 0 1 2 3 4 
+0 1 4 0 2 3 
+0 1 4 1 0 2 3 
+0 4 1 3 0 1 2 3 2 4 
+0 4 1 3 0 1 2 3 2 
+0 4 1 2 0 1 2 3 4 
+0 4 1 2 0 1 2 3 
+4 0 1 2 3 0 1 2 3 4 
+4 0 1 2 3 0 1 2 3 
+0 1 3 0 4 2 3 2 
+0 1 4 1 3 0 2 3 2 4 
+0 1 3 1 0 4 2 3 2 
+0 1 3 4 1 0 2 3 2 4 
+2 4 0 1 2 3 0 3 4 
+4 3 0 2 0 1 3 4 1 2 
+2 4 0 1 3 1 2 0 3 4 
+0 1 3 4 0 2 3 2 
+0 1 4 1 3 0 2 3 2 
+0 1 3 1 4 0 2 3 2 
+0 1 3 4 1 0 2 3 2 
+2 4 0 1 2 3 0 3 4 
+2 4 0 1 2 3 0 3 
+2 4 0 1 3 1 2 0 3 4 
+2 4 0 1 3 1 2 0 3 
+0 1 2 0 4 2 3 
+0 1 4 1 2 0 2 3 4 
+2 4 0 1 2 3 0 1 3 4 
+0 1 2 1 0 4 2 3 
+0 1 2 4 1 0 2 3 4 
+4 2 0 3 0 1 2 4 1 3 
+2 4 0 1 3 0 1 2 3 4 
+0 1 2 4 0 2 3 
+0 1 4 1 2 0 2 3 
+2 4 0 1 2 3 0 1 3 4 
+2 4 0 1 2 3 0 1 3 
+0 1 2 1 4 0 2 3 
+0 1 2 4 1 0 2 3 
+2 4 0 1 3 0 1 2 3 4 
+2 4 0 1 3 0 1 2 3 
+4 0 1 2 3 0 2 3 4 
+4 3 0 2 0 1 3 4 1 2 
+2 4 0 3 1 2 0 1 3 4 
+4 2 0 3 0 1 2 4 1 3 
+2 4 0 1 3 0 2 3 4 
+2 4 0 3 0 1 2 3 4 1 
+2 4 0 1 3 1 0 2 3 4 
+4 0 1 2 3 0 2 3 4 
+4 0 1 2 3 0 2 3 
+2 4 0 3 1 2 0 1 3 4 
+2 4 0 3 1 2 0 1 3 
+2 4 0 1 3 0 2 3 4 
+2 4 0 1 3 0 2 3 
+2 4 0 1 3 1 0 2 3 4 
+2 4 0 1 3 1 0 2 3 
+0 1 4 0 1 2 3 
+0 1 3 0 1 4 2 3 2 
+0 1 3 4 0 1 2 3 2 
+0 1 2 0 1 4 2 3 
+0 1 2 4 0 1 2 3 
+4 0 1 2 3 0 1 2 3 4 
+0 1 4 3 0 1 2 3 2 4 
+0 1 4 3 0 1 2 3 2 
+0 1 4 2 0 1 2 3 4 
+0 1 4 2 0 1 2 3 
+4 0 1 2 3 0 1 2 3 4 
+4 0 1 2 3 0 1 2 3 
+0 1 3 4 0 1 2 3 2 
+2 4 0 1 2 3 0 1 3 4 
+4 3 0 1 2 0 1 3 4 2 
+2 4 0 1 3 2 0 1 3 4 
+2 4 0 1 2 3 0 1 3 4 
+2 4 0 1 2 3 0 1 3 
+2 4 0 1 3 2 0 1 3 4 
+2 4 0 1 3 2 0 1 3 
+0 1 2 4 0 1 2 3 
+4 2 0 1 3 0 1 2 4 3 
+2 4 0 1 3 0 1 2 3 4 
+2 4 0 1 3 0 1 2 3 4 
+2 4 0 1 3 0 1 2 3 
+2 4 0 1 3 0 1 2 3 4 
+0 1 2 3 4 2 3 
+0 1 4 0 1 2 3 2 4 
+0 1 3 0 1 2 4 2 3 
+0 1 3 4 0 1 2 3 4 
+0 1 2 0 1 3 4 2 3 
+0 1 2 4 0 1 3 2 3 4 
+0 1 2 3 0 1 4 2 3 
+0 1 2 3 4 0 1 2 3 4 
+0 1 2 3 2 4 3 
+0 1 4 0 2 3 2 4 
+0 1 3 0 2 4 3 
+0 1 3 4 0 2 3 4 
+0 1 2 0 3 2 4 3 
+0 1 2 4 0 3 2 3 4 
+0 1 2 3 0 2 4 3 
+0 1 2 3 4 0 2 3 4 
+0 1 0 2 3 2 4 3 
+1 0 4 0 1 2 3 2 4 
+1 0 3 0 1 2 4 3 
+1 0 3 4 0 1 2 3 4 
+1 0 2 0 1 3 2 4 3 
+1 0 2 4 0 1 3 2 3 4 
+1 0 2 3 0 1 2 4 3 
+1 0 2 3 4 0 1 2 3 4 
+0 1 4 1 2 3 2 4 
+0 4 0 1 2 3 2 4 
+0 3 0 2 4 1 3 1 
+0 3 4 0 1 2 3 1 4 
+0 2 0 3 2 4 1 3 1 
+0 2 4 0 3 2 1 3 1 4 
+0 2 3 0 2 4 1 3 1 
+0 2 3 4 0 2 1 3 1 4 
+0 1 0 4 1 2 3 2 4 
+0 1 4 0 1 2 3 2 4 
+2 3 2 4 0 1 0 3 1 4 
+1 4 0 3 0 1 2 3 4 
+1 4 0 2 0 1 3 2 3 4 
+4 3 1 0 2 3 4 0 1 
+1 4 0 2 3 0 1 2 3 4 
+0 1 3 1 2 4 3 
+0 4 0 3 1 2 4 1 2 
+0 3 0 1 2 4 3 
+0 3 4 0 1 2 3 4 1 2 
+0 2 0 3 1 2 1 4 3 
+1 3 1 4 2 0 3 0 2 4 
+0 2 3 0 1 2 1 4 3 
+1 3 0 1 2 4 0 2 3 4 
+0 1 0 3 1 2 4 3 
+2 3 2 4 1 0 3 0 1 4 
+0 1 3 0 1 2 4 3 
+1 3 0 4 0 1 2 3 4 
+4 3 0 1 2 4 0 1 2 3 
+4 3 0 1 2 0 3 4 1 2 
+1 3 0 2 0 1 2 4 3 
+1 3 0 2 4 0 1 2 3 4 
+0 1 3 4 1 2 3 4 
+0 4 0 1 3 1 2 4 
+0 3 0 1 2 4 1 3 
+0 3 4 0 1 2 3 4 
+0 2 0 3 1 2 4 1 3 
+0 2 4 0 3 1 2 1 3 4 
+0 2 3 0 1 2 4 1 3 
+0 2 3 4 0 1 2 1 3 4 
+0 1 0 3 4 1 2 3 4 
+0 1 4 0 3 1 2 3 4 
+0 1 3 0 4 1 2 3 4 
+0 1 3 4 0 1 2 3 4 
+4 3 1 0 2 4 0 1 3 
+4 1 3 0 2 0 1 2 3 4 
+2 3 0 1 0 2 4 1 3 
+1 3 4 0 2 0 1 2 3 4 
+0 1 2 1 3 2 4 3 
+0 4 0 2 3 1 2 4 1 3 
+1 2 1 3 0 2 0 4 3 
+1 2 1 3 0 2 4 0 3 
+0 2 0 1 3 2 4 3 
+1 2 0 1 4 0 3 2 3 4 
+1 2 0 1 3 0 2 4 3 
+1 2 0 1 3 4 0 2 3 4 
+0 1 0 2 1 3 2 4 3 
+4 3 0 1 2 4 0 1 2 3 
+4 3 0 1 0 2 4 1 3 
+0 1 2 0 1 3 2 4 3 
+1 2 0 4 0 1 3 2 3 4 
+1 2 0 3 0 1 2 4 3 
+1 2 0 3 4 0 1 2 3 4 
+0 1 2 4 1 3 2 3 4 
+0 4 0 1 2 1 3 2 4 
+0 3 0 4 2 1 3 1 2 4 
+0 3 4 0 2 1 3 1 2 4 
+0 2 0 1 4 1 3 2 3 4 
+0 2 4 0 1 3 2 3 4 
+1 2 4 1 3 0 2 3 4 0 
+1 2 4 0 1 3 0 2 3 4 
+0 1 0 2 4 1 3 2 3 4 
+0 1 4 0 2 1 3 2 3 4 
+4 3 1 2 0 3 4 0 1 2 
+4 0 1 3 0 2 1 2 3 4 
+0 1 2 0 4 1 3 2 3 4 
+0 1 2 4 0 1 3 2 3 4 
+4 2 3 1 0 2 3 4 0 1 
+1 2 4 0 3 0 1 2 3 4 
+0 1 2 3 1 2 4 3 
+0 4 0 2 3 1 2 4 1 
+0 3 0 1 2 1 4 3 
+0 3 4 0 1 2 3 4 1 
+0 2 0 1 3 1 2 4 3 
+0 2 4 0 3 1 2 3 4 1 
+0 2 3 0 1 2 4 3 
+0 2 3 4 0 1 2 3 4 1 
+0 1 0 2 3 1 2 4 3 
+4 3 0 1 0 2 3 4 1 
+0 1 3 0 2 1 2 4 3 
+2 3 1 0 2 4 0 1 3 
+0 1 2 0 3 1 2 4 3 
+4 2 3 0 1 0 2 3 4 1 
+0 1 2 3 0 1 2 4 3 
+1 2 3 0 4 0 1 2 3 4 
+0 1 2 3 4 1 2 3 4 
+0 4 0 1 2 3 1 2 4 
+0 3 0 1 2 4 1 2 3 4 
+0 3 4 0 1 2 1 3 4 
+0 2 0 1 3 4 1 2 3 4 
+0 2 4 0 1 3 1 2 3 4 
+0 2 3 0 1 4 1 2 3 
+0 2 3 4 0 1 2 3 4 
+0 1 0 2 3 4 1 2 3 4 
+0 1 4 0 2 3 1 2 3 4 
+0 1 3 0 2 4 1 2 3 4 
+0 1 3 4 0 2 1 2 3 4 
+0 1 2 0 3 4 1 2 3 4 
+0 1 2 4 0 3 1 2 3 4 
+0 1 2 3 0 4 1 2 3 4 
+0 1 2 3 4 0 1 2 3 4 
+0 1 2 3 2 4 3 
+0 1 4 0 1 2 3 2 4 
+0 1 3 0 1 2 4 3 
+0 1 3 4 0 1 2 3 4 
+0 1 2 0 1 3 2 4 3 
+0 1 2 4 0 1 3 2 3 4 
+0 1 2 3 0 1 2 4 3 
+0 1 2 3 4 0 1 2 3 4 
+0 1 4 0 2 3 2 4 
+0 1 4 1 0 2 3 2 4 
+2 3 2 4 0 1 3 0 4 
+0 4 1 3 0 1 2 3 4 
+0 4 1 2 0 1 3 2 3 4 
+4 3 0 1 2 3 4 0 1 
+0 4 1 2 3 0 1 2 3 4 
+0 1 3 0 2 4 3 
+2 3 2 4 0 1 3 0 1 4 
+0 1 3 1 0 2 4 3 
+0 3 1 4 0 1 2 3 4 
+4 3 0 1 2 4 1 0 2 3 
+4 3 0 1 2 1 3 4 0 2 
+0 3 1 2 0 1 2 4 3 
+0 3 1 2 4 0 1 2 3 4 
+0 1 3 4 0 2 3 4 
+0 1 4 1 3 0 2 3 4 
+0 1 3 1 4 0 2 3 4 
+0 1 3 4 1 0 2 3 4 
+4 3 0 1 2 4 0 1 3 
+4 0 3 1 2 0 1 2 3 4 
+2 3 0 1 2 4 0 3 
+0 3 4 1 2 0 1 2 3 4 
+0 1 2 0 3 2 4 3 
+4 3 0 1 2 4 1 0 2 3 
+4 3 0 1 2 4 0 3 
+0 1 2 1 0 3 2 4 3 
+0 2 1 4 0 1 3 2 3 4 
+0 2 1 3 0 1 2 4 3 
+0 2 1 3 4 0 1 2 3 4 
+0 1 2 4 0 3 2 3 4 
+0 1 4 1 2 0 3 2 3 4 
+4 3 0 2 1 3 4 0 1 2 
+4 0 1 3 1 2 0 2 3 4 
+0 1 2 1 4 0 3 2 3 4 
+0 1 2 4 1 0 3 2 3 4 
+4 2 3 0 1 2 3 4 0 1 
+0 2 4 1 3 0 1 2 3 4 
+0 1 2 3 0 2 4 3 
+4 3 0 1 2 3 4 0 
+0 1 3 1 2 0 2 4 3 
+2 3 0 1 2 4 0 1 3 
+0 1 2 1 3 0 2 4 3 
+4 2 3 0 1 2 3 4 0 
+0 1 2 3 1 0 2 4 3 
+0 2 3 1 4 0 1 2 3 4 
+0 1 2 3 4 0 2 3 4 
+0 1 4 1 2 3 0 2 3 4 
+0 1 3 1 2 4 0 2 3 4 
+0 1 3 4 1 2 0 2 3 4 
+0 1 2 1 3 4 0 2 3 4 
+0 1 2 4 1 3 0 2 3 4 
+0 1 2 3 1 4 0 2 3 4 
+0 1 2 3 4 1 0 2 3 4 
+0 1 4 0 1 2 3 2 4 
+0 1 3 0 1 2 4 3 
+0 1 3 4 0 1 2 3 4 
+0 1 2 0 1 3 2 4 3 
+0 1 2 4 0 1 3 2 3 4 
+0 1 2 3 0 1 2 4 3 
+0 1 2 3 4 0 1 2 3 4 
+2 3 2 4 0 1 3 0 1 4 
+0 1 4 3 0 1 2 3 4 
+0 1 4 2 0 1 3 2 3 4 
+4 3 0 1 2 3 4 0 1 
+0 1 4 2 3 0 1 2 3 4 
+0 1 3 4 0 1 2 3 4 
+4 3 0 1 2 4 0 1 2 3 
+4 3 0 1 2 3 4 0 1 2 
+0 1 3 2 0 1 2 4 3 
+0 1 3 2 4 0 1 2 3 4 
+4 3 0 1 2 4 0 1 3 
+4 0 1 3 2 0 1 2 3 4 
+2 3 0 1 2 4 0 1 3 
+0 1 3 4 2 0 1 2 3 4 
+0 1 2 4 0 1 3 2 3 4 
+0 1 2 3 0 1 2 4 3 
+0 1 2 3 4 0 1 2 3 4 
+4 2 3 0 1 2 3 4 0 1 
+0 1 2 4 3 0 1 2 3 4 
+0 1 2 3 4 0 1 2 3 4 
+0 1 2 3 4 2 3 
+0 1 4 0 2 3 2 
+0 1 3 0 2 4 2 3 
+0 1 3 4 0 2 3 
+0 1 2 0 3 4 2 3 
+0 1 2 4 0 3 2 3 
+0 1 2 3 0 4 2 3 
+0 1 2 3 4 0 2 3 
+0 1 0 2 3 4 2 3 
+0 1 4 0 1 2 3 2 4 
+1 0 3 0 1 2 4 2 3 
+1 0 3 4 0 1 2 3 
+1 0 2 0 1 3 4 2 3 
+1 0 2 4 0 1 3 2 3 
+1 0 2 3 0 1 4 2 3 
+1 0 2 3 4 0 1 2 3 
+0 1 4 1 2 3 2 
+0 4 0 1 2 3 2 
+0 3 0 2 4 2 1 3 1 
+0 3 4 0 1 2 3 1 
+0 2 0 3 4 2 1 3 1 
+0 2 4 0 3 2 1 3 1 
+0 2 3 0 4 2 1 3 1 
+0 2 3 4 0 2 1 3 1 
+0 1 0 4 1 2 3 2 
+0 1 4 0 1 2 3 2 
+1 4 0 3 0 1 2 3 4 
+1 4 0 3 0 1 2 3 
+1 4 0 2 0 1 3 2 3 4 
+1 4 0 2 0 1 3 2 3 
+1 4 0 2 3 0 1 2 3 4 
+1 4 0 2 3 0 1 2 3 
+0 1 3 1 2 4 2 3 
+0 4 0 1 3 1 2 4 
+0 3 0 1 2 4 2 3 
+0 3 4 0 1 2 3 4 
+0 2 0 3 4 1 2 1 3 4 
+0 2 4 0 3 1 2 1 3 4 
+0 2 3 0 4 1 2 1 3 4 
+0 2 3 4 0 1 2 1 3 4 
+0 1 0 3 1 2 4 2 3 
+0 1 4 0 3 1 2 3 4 
+0 1 3 0 1 2 4 2 3 
+0 1 3 4 0 1 2 3 4 
+4 3 1 2 0 1 4 0 2 3 
+4 1 3 0 2 0 1 2 3 4 
+1 3 0 2 0 1 4 2 3 
+1 3 0 2 4 0 1 2 3 
+0 1 3 4 1 2 3 
+0 4 0 1 3 1 2 
+0 3 0 1 4 1 2 3 
+0 3 4 0 1 2 3 
+0 2 0 3 4 1 2 1 3 
+0 2 4 0 3 1 2 1 3 
+0 2 3 0 4 1 2 1 3 
+0 2 3 4 0 1 2 1 3 
+0 1 0 3 4 1 2 3 
+0 1 4 0 3 1 2 3 
+0 1 3 0 4 1 2 3 
+0 1 3 4 0 1 2 3 
+4 1 3 0 2 0 1 2 3 4 
+4 1 3 0 2 0 1 2 3 
+1 3 4 0 2 0 1 2 3 4 
+1 3 4 0 2 0 1 2 3 
+0 1 2 1 3 4 2 3 
+0 4 0 1 2 1 3 2 4 
+0 3 0 4 2 1 3 1 2 4 
+0 3 4 0 2 1 3 1 2 4 
+0 2 0 1 3 4 2 3 
+0 2 4 0 1 3 2 3 4 
+1 2 0 1 3 0 4 2 3 
+1 2 0 1 3 4 0 2 3 
+0 1 0 2 1 3 4 2 3 
+0 1 4 0 2 1 3 2 3 4 
+4 3 1 2 0 1 4 0 2 3 
+4 0 1 3 0 2 1 2 3 4 
+0 1 2 0 1 3 4 2 3 
+0 1 2 4 0 1 3 2 3 4 
+1 2 0 3 0 1 4 2 3 
+1 2 0 3 4 0 1 2 3 
+0 1 2 4 1 3 2 3 
+0 4 0 1 2 1 3 2 
+0 3 0 4 2 1 3 1 2 
+0 3 4 0 2 1 3 1 2 
+0 2 0 1 4 1 3 2 3 
+0 2 4 0 1 3 2 3 
+1 2 4 0 1 3 0 2 3 4 
+1 2 4 0 1 3 0 2 3 
+0 1 0 2 4 1 3 2 3 
+0 1 4 0 2 1 3 2 3 
+4 0 1 3 0 2 1 2 3 4 
+4 0 1 3 0 2 1 2 3 
+0 1 2 0 4 1 3 2 3 
+0 1 2 4 0 1 3 2 3 
+1 2 4 0 3 0 1 2 3 4 
+1 2 4 0 3 0 1 2 3 
+0 1 2 3 1 4 2 3 
+0 4 0 1 2 3 1 2 4 
+0 3 0 1 2 1 4 2 3 
+0 3 4 0 1 2 1 3 4 
+0 2 0 1 3 1 4 2 3 
+0 2 4 0 1 3 1 2 3 4 
+0 2 3 0 1 4 2 3 
+0 2 3 4 0 1 2 3 4 
+0 1 0 2 3 1 4 2 3 
+0 1 4 0 2 3 1 2 3 4 
+0 1 3 0 2 1 4 2 3 
+0 1 3 4 0 2 1 2 3 4 
+0 1 2 0 3 1 4 2 3 
+0 1 2 4 0 3 1 2 3 4 
+0 1 2 3 0 1 4 2 3 
+0 1 2 3 4 0 1 2 3 4 
+0 1 2 3 4 1 2 3 
+0 4 0 1 2 3 1 2 
+0 3 0 1 2 4 1 2 3 
+0 3 4 0 1 2 1 3 
+0 2 0 1 3 4 1 2 3 
+0 2 4 0 1 3 1 2 3 
+0 2 3 0 1 4 1 2 3 
+0 2 3 4 0 1 2 3 
+0 1 0 2 3 4 1 2 3 
+0 1 4 0 2 3 1 2 3 
+0 1 3 0 2 4 1 2 3 
+0 1 3 4 0 2 1 2 3 
+0 1 2 0 3 4 1 2 3 
+0 1 2 4 0 3 1 2 3 
+0 1 2 3 0 4 1 2 3 
+0 1 2 3 4 0 1 2 3 
+0 1 2 3 4 2 3 
+0 1 4 0 1 2 3 2 
+0 1 3 0 1 2 4 2 3 
+0 1 3 4 0 1 2 3 
+0 1 2 0 1 3 4 2 3 
+0 1 2 4 0 1 3 2 3 
+0 1 2 3 0 1 4 2 3 
+0 1 2 3 4 0 1 2 3 
+0 1 4 0 2 3 2 
+0 1 4 1 0 2 3 2 
+0 4 1 3 0 1 2 3 4 
+0 4 1 3 0 1 2 3 
+0 4 1 2 0 1 3 2 3 4 
+0 4 1 2 0 1 3 2 3 
+0 4 1 2 3 0 1 2 3 4 
+0 4 1 2 3 0 1 2 3 
+0 1 3 0 2 4 2 3 
+0 1 4 1 3 0 2 3 4 
+0 1 3 1 0 2 4 2 3 
+0 1 3 4 1 0 2 3 4 
+4 3 0 2 0 1 4 1 2 3 
+4 0 3 1 2 0 1 2 3 4 
+0 3 1 2 0 1 4 2 3 
+0 3 1 2 4 0 1 2 3 
+0 1 3 4 0 2 3 
+0 1 4 1 3 0 2 3 
+0 1 3 1 4 0 2 3 
+0 1 3 4 1 0 2 3 
+4 0 3 1 2 0 1 2 3 4 
+4 0 3 1 2 0 1 2 3 
+0 3 4 1 2 0 1 2 3 4 
+0 3 4 1 2 0 1 2 3 
+0 1 2 0 3 4 2 3 
+0 1 4 1 2 0 3 2 3 4 
+4 3 0 2 0 1 4 1 2 3 
+4 0 1 3 1 2 0 2 3 4 
+0 1 2 1 0 3 4 2 3 
+0 1 2 4 1 0 3 2 3 4 
+0 2 1 3 0 1 4 2 3 
+0 2 1 3 4 0 1 2 3 
+0 1 2 4 0 3 2 3 
+0 1 4 1 2 0 3 2 3 
+4 0 1 3 1 2 0 2 3 4 
+4 0 1 3 1 2 0 2 3 
+0 1 2 1 4 0 3 2 3 
+0 1 2 4 1 0 3 2 3 
+0 2 4 1 3 0 1 2 3 4 
+0 2 4 1 3 0 1 2 3 
+0 1 2 3 0 4 2 3 
+0 1 4 1 2 3 0 2 3 4 
+0 1 3 1 2 0 4 2 3 
+0 1 3 4 1 2 0 2 3 4 
+0 1 2 1 3 0 4 2 3 
+0 1 2 4 1 3 0 2 3 4 
+0 1 2 3 1 0 4 2 3 
+0 1 2 3 4 1 0 2 3 4 
+0 1 2 3 4 0 2 3 
+0 1 4 1 2 3 0 2 3 
+0 1 3 1 2 4 0 2 3 
+0 1 3 4 1 2 0 2 3 
+0 1 2 1 3 4 0 2 3 
+0 1 2 4 1 3 0 2 3 
+0 1 2 3 1 4 0 2 3 
+0 1 2 3 4 1 0 2 3 
+0 1 4 0 1 2 3 2 
+0 1 3 0 1 2 4 2 3 
+0 1 3 4 0 1 2 3 
+0 1 2 0 1 3 4 2 3 
+0 1 2 4 0 1 3 2 3 
+0 1 2 3 0 1 4 2 3 
+0 1 2 3 4 0 1 2 3 
+0 1 4 3 0 1 2 3 4 
+0 1 4 3 0 1 2 3 
+0 1 4 2 0 1 3 2 3 4 
+0 1 4 2 0 1 3 2 3 
+0 1 4 2 3 0 1 2 3 4 
+0 1 4 2 3 0 1 2 3 
+0 1 3 4 0 1 2 3 
+4 3 0 1 2 0 1 4 2 3 
+4 0 1 3 2 0 1 2 3 4 
+0 1 3 2 0 1 4 2 3 
+0 1 3 2 4 0 1 2 3 
+4 0 1 3 2 0 1 2 3 4 
+4 0 1 3 2 0 1 2 3 
+0 1 3 4 2 0 1 2 3 4 
+0 1 3 4 2 0 1 2 3 
+0 1 2 4 0 1 3 2 3 
+0 1 2 3 0 1 4 2 3 
+0 1 2 3 4 0 1 2 3 
+0 1 2 4 3 0 1 2 3 4 
+0 1 2 4 3 0 1 2 3 
+0 1 2 3 4 0 1 2 3 
+0 1 2 4 1 3 
+0 2 4 0 1 2 1 3 4 
+0 2 3 0 2 4 1 3 1 4 
+0 2 3 4 0 2 1 3 1 4 
+0 1 0 2 4 1 3 
+0 1 2 4 0 2 1 3 4 
+1 4 0 2 3 0 1 2 3 4 
+1 4 0 2 3 0 1 2 3 
+0 1 2 3 1 4 3 
+0 2 4 0 2 1 3 1 4 3 
+1 3 0 1 0 2 4 3 
+1 3 0 1 2 4 0 2 3 
+0 1 0 2 3 1 4 3 
+1 0 2 4 0 2 3 1 3 4 
+1 0 2 3 0 2 1 4 3 
+1 0 2 3 4 0 2 1 3 4 
+0 1 2 3 4 1 3 
+0 2 4 0 1 2 3 1 3 4 
+0 2 3 0 2 4 1 3 1 4 
+0 2 3 4 0 2 1 3 1 4 
+0 1 0 2 3 4 1 3 
+0 1 2 4 0 2 3 1 3 4 
+1 0 2 3 0 2 4 1 3 
+1 0 2 3 4 0 2 1 3 
+0 1 2 3 4 3 
+0 1 2 4 0 3 
+0 1 2 3 0 4 3 
+0 1 2 3 4 0 3 
+0 1 2 0 1 2 3 4 3 
+1 2 0 1 4 0 2 3 
+1 2 0 1 3 0 2 4 3 
+1 2 0 1 3 4 0 2 3 
+0 1 0 2 3 4 3 
+0 1 4 0 1 2 3 4 2 
+1 0 2 3 0 1 4 3 
+1 0 2 3 4 0 1 3 
+0 1 2 0 2 3 4 3 
+1 0 2 4 0 1 2 3 4 
+1 2 0 3 0 1 2 4 3 
+1 2 0 3 4 0 1 2 3 
+0 1 2 4 1 2 3 
+0 4 0 1 2 3 4 
+0 3 0 4 1 2 3 2 1 4 
+0 3 4 0 1 2 3 2 1 4 
+0 2 0 1 4 2 1 3 4 
+0 2 4 0 1 2 1 3 4 
+1 2 4 0 1 3 0 2 3 4 
+1 2 4 0 1 3 0 2 3 
+0 1 0 2 4 1 2 3 
+0 1 4 0 1 2 3 4 
+1 2 4 0 2 3 0 1 3 4 
+1 2 4 0 2 3 0 1 3 
+0 1 2 0 4 2 1 3 4 
+0 1 2 4 0 2 1 3 4 
+1 2 4 0 3 0 1 2 3 4 
+1 2 4 0 3 0 1 2 3 
+0 1 2 3 1 2 4 3 
+0 4 0 1 3 1 2 4 2 3 
+1 2 3 0 1 2 0 4 3 
+1 2 3 0 1 2 4 0 3 
+1 2 3 0 1 0 2 4 3 
+1 2 3 0 1 4 0 2 3 
+0 1 0 2 3 1 2 4 3 
+1 0 4 0 2 3 1 2 3 4 
+1 0 3 0 1 2 4 3 
+1 0 3 4 0 1 2 3 4 
+1 0 2 0 3 1 2 4 3 
+1 0 2 4 0 3 1 2 3 4 
+1 0 2 3 0 1 2 4 3 
+1 0 2 3 4 0 1 2 3 4 
+0 1 2 3 4 1 2 3 
+0 4 0 1 2 3 1 2 4 
+0 3 0 4 1 2 3 1 4 
+0 3 4 0 1 2 3 1 4 
+4 3 1 2 0 3 4 0 1 2 
+4 0 2 0 1 3 2 1 3 4 
+1 2 3 4 0 1 0 2 3 4 
+1 2 3 4 0 1 0 2 3 
+0 1 0 2 3 4 1 2 3 
+0 1 4 0 2 3 1 2 3 4 
+1 0 3 0 2 4 1 2 3 
+1 0 3 4 0 1 2 3 
+1 0 2 0 3 4 1 2 3 
+1 0 2 4 0 3 1 2 3 
+1 0 2 3 0 4 1 2 3 
+1 0 2 3 4 0 1 2 3 
+0 1 2 3 4 3 
+0 1 2 4 0 2 3 
+0 1 2 3 0 2 4 3 
+0 1 2 3 4 0 2 3 
+0 1 0 2 3 4 3 
+0 1 2 4 0 2 1 3 4 
+4 3 0 1 2 4 2 3 0 1 
+4 3 0 1 2 3 4 0 1 
+0 1 2 4 0 3 
+0 1 2 4 2 0 3 
+0 1 4 2 3 0 2 3 4 
+0 1 4 2 3 0 2 3 
+1 0 1 2 4 0 3 
+0 4 1 0 1 2 3 4 
+4 0 1 2 3 0 2 1 3 4 
+0 1 2 3 0 4 3 
+0 1 2 4 2 3 0 3 4 
+0 1 2 3 2 0 4 3 
+0 1 2 3 4 2 0 3 4 
+1 0 1 2 3 0 4 3 
+1 0 2 4 1 2 3 0 3 4 
+1 0 2 3 1 2 0 4 3 
+1 0 2 3 4 1 2 0 3 4 
+0 1 2 3 4 0 3 
+0 1 2 4 2 3 0 3 
+0 1 2 3 2 4 0 3 
+0 1 2 3 4 2 0 3 
+1 0 1 2 3 4 0 3 
+1 0 2 4 1 2 3 0 3 
+1 0 2 3 1 2 4 0 3 
+1 0 2 3 4 1 2 0 3 
+0 1 2 4 0 2 3 
+0 1 2 3 0 2 4 3 
+0 1 2 3 4 0 2 3 
+0 1 0 2 3 4 3 
+0 1 2 4 0 1 3 4 
+4 3 0 1 2 3 4 0 1 2 
+0 1 0 2 1 3 4 3 
+0 2 1 4 0 2 1 3 4 
+4 3 0 1 2 4 3 0 1 2 
+4 3 0 1 2 3 4 0 1 2 
+0 1 2 4 3 0 2 3 4 
+0 1 2 4 3 0 2 3 
+1 0 1 2 4 0 2 3 
+0 2 4 1 2 0 1 3 4 
+4 0 1 2 3 0 1 3 4 
+1 0 2 1 4 0 2 3 
+0 2 4 1 0 2 1 3 4 
+4 0 2 1 3 0 2 1 3 4 
+0 1 2 3 4 0 2 3 
+1 0 1 2 3 0 2 4 3 
+1 0 4 1 2 3 0 2 3 4 
+1 0 3 1 0 2 4 3 
+1 0 3 4 1 0 2 3 4 
+1 0 2 1 3 0 2 4 3 
+1 0 2 4 1 3 0 2 3 4 
+1 0 2 3 1 0 2 4 3 
+1 0 2 3 4 1 0 2 3 4 
+1 0 1 2 3 4 0 2 3 
+1 0 4 1 2 3 0 2 3 
+1 0 3 1 2 4 0 2 3 
+1 0 3 4 1 0 2 3 
+1 0 2 1 3 4 0 2 3 
+1 0 2 4 1 3 0 2 3 
+1 0 2 3 1 4 0 2 3 
+1 0 2 3 4 1 0 2 3 
+0 1 0 2 3 4 3 
+0 1 2 4 0 2 1 3 4 
+1 0 2 3 0 1 2 4 3 
+1 0 2 3 4 0 1 2 3 
+0 1 2 4 0 1 3 4 
+0 1 2 4 2 0 1 3 4 
+1 0 4 2 3 0 1 2 3 4 
+1 0 4 2 3 0 1 2 3 
+1 0 2 3 0 1 4 3 
+1 0 2 4 2 3 0 1 3 4 
+1 0 2 3 2 0 1 4 3 
+1 0 2 3 4 2 0 1 3 4 
+1 0 2 3 4 0 1 3 
+1 0 2 4 2 3 0 1 3 
+1 0 2 3 2 4 0 1 3 
+1 0 2 3 4 2 0 1 3 
+0 1 2 4 0 2 1 3 4 
+1 0 2 3 0 1 2 4 3 
+1 0 2 3 4 0 1 2 3 
+1 0 2 4 3 0 1 2 3 4 
+1 0 2 4 3 0 1 2 3 
+1 0 2 3 4 0 1 2 3 
+0 1 2 4 3 1 3 4 
+0 2 4 0 1 2 3 1 3 4 
+0 2 3 0 2 4 1 3 1 4 
+0 2 3 4 0 2 1 3 1 4 
+0 1 0 2 4 3 1 3 4 
+0 1 2 4 0 2 3 1 3 4 
+1 4 3 0 1 2 3 4 0 2 
+1 4 0 2 3 0 2 1 3 4 
+0 1 2 4 3 1 3 
+0 2 4 0 1 2 3 1 3 
+0 2 3 0 2 4 1 3 1 
+0 2 3 4 0 2 1 3 1 
+0 1 0 2 4 3 1 3 
+0 1 2 4 0 2 3 1 3 
+1 4 0 2 3 0 2 1 3 4 
+1 4 0 2 3 0 2 1 3 
+0 1 2 4 1 3 
+0 4 0 1 2 3 4 
+0 3 0 4 1 2 3 2 1 4 
+0 3 4 0 1 2 3 2 1 4 
+0 2 0 1 2 4 1 3 
+0 2 4 0 1 2 1 3 4 
+1 4 2 0 1 3 0 2 3 4 
+0 1 0 2 4 1 3 
+0 1 4 0 1 2 3 4 
+1 2 4 0 3 0 1 3 4 
+1 2 4 0 3 0 1 3 
+0 1 2 0 2 4 1 3 
+0 1 2 4 0 2 1 3 4 
+4 1 2 3 0 1 2 4 0 3 
+1 4 2 0 3 0 1 2 3 4 
+0 1 2 4 2 1 3 
+0 4 0 1 2 3 
+0 3 0 4 1 2 3 2 1 
+0 3 4 0 1 2 3 2 1 
+0 2 0 1 4 2 1 3 
+0 2 4 0 1 2 1 3 
+1 4 2 0 1 3 0 2 3 4 
+1 4 2 0 1 3 0 2 3 
+0 1 0 2 4 2 1 3 
+0 1 4 0 1 2 3 
+1 2 4 2 0 3 0 1 3 4 
+1 2 4 2 0 3 0 1 3 
+0 1 2 0 4 2 1 3 
+0 1 2 4 0 2 1 3 
+1 4 2 0 3 0 1 2 3 4 
+1 4 2 0 3 0 1 2 3 
+0 1 4 2 3 1 2 3 4 
+0 4 0 1 2 3 1 2 4 
+0 3 0 4 1 2 3 1 4 
+0 3 4 0 1 2 3 1 4 
+4 0 2 0 1 3 2 1 3 4 
+4 3 1 0 2 3 4 0 1 
+1 4 2 3 0 1 0 2 3 4 
+0 1 0 4 2 3 1 2 3 4 
+0 1 4 0 2 3 1 2 3 4 
+1 4 3 0 1 2 3 4 0 2 
+1 4 0 3 0 1 2 3 4 
+4 1 2 3 0 1 2 4 0 3 
+1 4 0 2 0 3 1 2 3 4 
+1 4 2 3 0 1 2 3 4 0 
+1 4 0 2 3 0 1 2 3 4 
+0 1 4 2 3 1 2 3 
+0 4 0 1 2 3 1 2 
+0 3 0 4 1 2 3 1 
+0 3 4 0 1 2 3 1 
+4 0 2 0 1 3 2 1 3 4 
+4 0 2 0 1 3 2 1 3 
+1 4 2 3 0 1 0 2 3 4 
+1 4 2 3 0 1 0 2 3 
+0 1 0 4 2 3 1 2 3 
+0 1 4 0 2 3 1 2 3 
+1 4 0 3 0 1 2 3 4 
+1 4 0 3 0 1 2 3 
+1 4 0 2 0 3 1 2 3 4 
+1 4 0 2 0 3 1 2 3 
+1 4 0 2 3 0 1 2 3 4 
+1 4 0 2 3 0 1 2 3 
+0 1 2 4 1 3 
+0 2 4 0 1 2 1 3 
+0 2 3 0 2 4 1 3 1 
+0 2 3 4 0 2 1 3 1 
+0 1 0 2 4 1 3 
+0 1 2 4 0 2 1 3 
+4 0 1 2 3 0 2 1 3 4 
+0 2 4 0 1 3 
+0 2 4 2 0 1 3 
+0 4 2 3 0 2 1 3 1 4 
+0 4 2 3 0 2 1 3 1 
+0 4 1 0 1 2 3 4 
+0 4 1 0 1 2 3 
+4 0 1 2 3 0 2 1 3 4 
+4 0 1 2 3 0 2 1 3 
+0 2 3 0 4 1 3 1 
+0 2 4 2 3 0 1 3 1 4 
+0 2 3 2 0 4 1 3 1 
+0 2 3 4 2 0 1 3 1 4 
+1 4 0 1 2 3 0 3 4 
+4 3 0 1 0 2 3 4 1 2 
+1 4 0 2 3 1 2 0 3 4 
+0 2 3 4 0 1 3 1 
+0 2 4 2 3 0 1 3 1 
+0 2 3 2 4 0 1 3 1 
+0 2 3 4 2 0 1 3 1 
+1 4 0 1 2 3 0 3 4 
+1 4 0 1 2 3 0 3 
+1 4 0 2 3 1 2 0 3 4 
+1 4 0 2 3 1 2 0 3 
+0 2 4 0 1 2 1 3 
+0 2 3 0 2 4 1 3 1 
+0 2 3 4 0 2 1 3 1 
+0 1 0 2 4 1 3 
+0 1 2 4 0 1 3 
+4 0 1 2 3 0 1 3 4 
+0 2 1 0 2 4 1 3 
+0 2 1 4 0 2 1 3 
+4 0 2 1 3 0 2 1 3 4 
+0 2 4 3 0 2 1 3 1 4 
+0 2 4 3 0 2 1 3 1 
+0 2 4 1 2 0 1 3 4 
+0 2 4 1 2 0 1 3 
+4 0 1 2 3 0 1 3 4 
+4 0 1 2 3 0 1 3 
+0 2 4 1 0 2 1 3 4 
+0 2 4 1 0 2 1 3 
+4 0 2 1 3 0 2 1 3 4 
+4 0 2 1 3 0 2 1 3 
+0 2 3 4 0 2 1 3 1 
+1 4 0 1 2 3 0 2 3 4 
+4 3 0 1 0 2 3 4 1 2 
+1 4 0 3 1 0 2 3 4 
+1 4 0 2 1 3 0 2 3 4 
+4 3 0 1 0 2 3 4 1 
+1 4 0 2 3 1 0 2 3 4 
+1 4 0 1 2 3 0 2 3 4 
+1 4 0 1 2 3 0 2 3 
+1 4 0 3 1 0 2 3 4 
+1 4 0 3 1 0 2 3 
+1 4 0 2 1 3 0 2 3 4 
+1 4 0 2 1 3 0 2 3 
+1 4 0 2 3 1 0 2 3 4 
+1 4 0 2 3 1 0 2 3 
+0 1 0 2 4 1 3 
+0 1 2 4 0 2 1 3 
+4 1 0 3 0 1 2 4 2 3 
+1 4 0 2 3 0 1 2 3 4 
+0 1 2 4 0 1 3 
+0 1 2 4 2 0 1 3 
+1 4 0 2 3 0 1 2 3 4 
+1 4 0 2 3 0 1 2 3 
+4 1 0 3 0 1 2 4 2 3 
+1 4 0 2 3 0 1 3 4 
+1 4 0 3 0 1 2 3 4 2 
+1 4 0 2 3 2 0 1 3 4 
+1 4 0 2 3 0 1 3 4 
+1 4 0 2 3 0 1 3 
+1 4 0 2 3 2 0 1 3 4 
+1 4 0 2 3 2 0 1 3 
+0 1 2 4 0 2 1 3 
+4 1 0 2 3 0 1 2 4 3 
+1 4 0 2 3 0 1 2 3 4 
+1 4 0 2 3 0 1 2 3 4 
+1 4 0 2 3 0 1 2 3 
+1 4 0 2 3 0 1 2 3 4 
+0 1 2 3 4 1 3 
+0 2 4 0 1 2 3 1 3 4 
+0 2 3 0 1 2 4 1 3 
+0 2 3 4 0 1 2 1 3 4 
+0 1 0 2 3 4 1 3 
+0 1 2 4 0 2 3 1 3 4 
+0 1 2 3 0 2 4 1 3 
+0 1 2 3 4 0 2 1 3 4 
+0 1 2 3 1 4 3 
+0 4 0 1 3 1 2 4 2 3 
+1 2 3 0 1 0 4 3 
+1 2 3 0 1 4 0 3 
+0 2 0 1 2 3 1 4 3 
+4 3 0 1 2 4 0 1 2 3 
+4 3 0 1 2 0 1 4 2 3 
+0 1 0 2 3 1 4 3 
+1 0 2 4 0 3 1 3 4 
+1 0 2 3 0 1 4 3 
+1 0 2 3 4 0 1 3 4 
+0 1 2 0 2 3 1 4 3 
+1 2 0 4 0 2 3 1 3 4 
+1 2 0 3 0 2 1 4 3 
+1 2 0 3 4 0 2 1 3 4 
+0 1 2 4 2 3 1 3 4 
+0 4 0 1 2 3 1 4 
+0 3 0 4 1 2 3 1 2 4 
+0 3 4 0 1 2 3 1 2 4 
+0 2 0 1 4 2 3 1 3 4 
+0 2 4 0 1 2 3 1 3 4 
+4 3 1 2 0 3 4 0 1 2 
+4 0 2 3 0 1 2 1 3 4 
+0 1 0 2 4 2 3 1 3 4 
+0 1 4 0 2 3 1 3 4 
+1 2 4 2 3 0 1 3 4 0 
+1 2 4 0 2 3 0 1 3 4 
+0 1 2 0 4 2 3 1 3 4 
+0 1 2 4 0 2 3 1 3 4 
+4 1 3 1 2 0 3 4 0 2 
+1 2 4 0 3 0 2 1 3 4 
+0 1 2 3 2 1 4 3 
+0 4 0 1 3 1 2 4 2 
+0 3 0 1 2 4 3 
+0 3 4 0 1 2 3 4 2 
+0 2 0 1 3 2 1 4 3 
+4 3 0 1 2 0 1 3 4 2 
+0 2 3 0 1 2 1 4 3 
+1 3 2 0 1 4 0 2 3 
+0 1 0 2 3 2 1 4 3 
+0 1 4 0 3 1 2 3 4 2 
+0 1 3 0 1 2 4 3 
+0 1 3 4 0 1 2 3 4 2 
+0 1 2 0 3 2 1 4 3 
+4 1 3 0 1 2 0 3 4 2 
+0 1 2 3 0 2 1 4 3 
+1 2 3 0 4 0 2 1 3 4 
+0 1 2 3 4 2 1 3 4 
