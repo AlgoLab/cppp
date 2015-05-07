@@ -51,7 +51,6 @@
 #include "graph.h"
 #include <inttypes.h>
 #include <glib.h>
-#define GC_DEBUG
 #include <gc.h>
 #include "logging.h"
 
