@@ -36,11 +36,7 @@ static int _cppp_log_level_ = LOG_ERROR;
 */
 static unsigned int log_format(const char* tag, int level, const char* message, va_list args) {
         if (level >= _cppp_log_level_) {
-                time_t now;
-                time(&now);
-                char * date =ctime(&now);
-                date[strlen(date) - 1] = '\0';
-                fprintf(stderr, "%s [%s] ", date, tag);
+                fprintf(stderr, "[%s] ", tag);
                 vfprintf(stderr, message, args);
                 fprintf(stderr, "\n");
                 return 1;

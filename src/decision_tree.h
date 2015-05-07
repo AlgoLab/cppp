@@ -21,14 +21,14 @@
 #include "perfect_phylogeny.h"
 
 /**
-   The strategy is a function that take as a parameter a pointer to the last
-   valid state (or \c NULL at the very first step), analyzes such state to
-   determine the order of realization of the characters.
+   The strategy is a function that take as a parameter a pointer to a new
+   state, analyzes such state to which characters can be realized and
+   their order.
 
    In other words, it computes in which order we try to realize the characters
    at the current node of the decision tree
 */
-typedef GSList* (*strategy_fn)(state_s *stp);
+typedef uint32_t (*strategy_fn)(state_s *stp, uint32_t *chars);
 
 /**
    \brief visits the entire tree of the possible completions
@@ -37,9 +37,10 @@ typedef GSList* (*strategy_fn)(state_s *stp);
    instance
    \param strategy: the callback function that determines the order according to
    which all characters are tried
+   \param max_depth: maximum depth of the search tree
 
    returns \c true iff a solution is found
 */
 
 bool
-exhaustive_search(state_s *states, strategy_fn strategy);
+exhaustive_search(state_s *states, strategy_fn strategy, uint32_t max_depth);

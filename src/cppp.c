@@ -24,9 +24,9 @@
 #include "decision_tree.h"
 #include "gc/leak_detector.h"
 
-static GSList*
-alphabetic(state_s *stp) {
-        return (characters_list(stp));
+static uint32_t
+alphabetic(state_s *stp, uint32_t *arr) {
+        return (characters_list(stp, arr));
 }
 
 int main(int argc, char **argv) {
@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
                 copy_state(states, &temp);
                 free_state(&temp);
                 assert(outf != NULL);
-                if (exhaustive_search(states, alphabetic)) {
+                if (exhaustive_search(states, alphabetic, states[0].num_species + 2 * states[0].num_characters)) {
                         for (uint32_t level=0; (states + level)->num_species > 0; level++) {
                                 fprintf(outf, "%d ", (states + level)->realize);
                         }

@@ -48,10 +48,10 @@
 #include <assert.h>
 #include <string.h>
 #include <err.h>
-#include <igraph.h>
+#include "graph.h"
 #include <inttypes.h>
 #include <glib.h>
-#include <jansson.h>
+#define GC_DEBUG
 #include <gc.h>
 #include "logging.h"
 
@@ -99,18 +99,28 @@ typedef struct state_s {
         uint32_t num_characters;
         uint32_t num_species_orig;
         uint32_t num_characters_orig;
-        igraph_t red_black;
-        igraph_t conflict;
+        graph_s *red_black;
+        graph_s *conflict;
         uint32_t *matrix;
         uint32_t *current_states;
         uint32_t *species;
         uint32_t *characters;
         uint8_t  *colors;
         uint32_t operation;
-        GSList *tried_characters;
-        GSList *character_queue;
+        uint32_t  *tried_characters;
+        uint32_t  *character_queue;
+        uint32_t tried_characters_size;
+        uint32_t character_queue_size;
 } state_s;
 
+/**
+   \struct array_s
+   \brief a simple struct consisting of an array and its length
+*/
+typedef struct array_s {
+        uint32_t *array;
+        uint32_t size;
+} array_s;
 
 /**
    \brief managing states:
@@ -130,9 +140,9 @@ free_state(state_s *stp);
 /**
    \brief check if a state is internally consistent
 
-   \return 0 if all check have been passed, otherwise an error code larger than 0.
+   \return \c true if all check have been passed
 */
-uint32_t check_state(const state_s* stp);
+bool check_state(const state_s* stp);
 
 /**
    \brief simplify the current instance, if possible
@@ -185,7 +195,8 @@ write_state(const char* filename, state_s* stp);
 
    \param pointer to the state
 */
-GSList* characters_list(state_s * stp);
+uint32_t
+characters_list(state_s * stp, uint32_t *array);
 
 /**
    \brief delete a species from the set of current species
@@ -239,14 +250,14 @@ bool realize_character(state_s* dst, const state_s* src);
    \param inst: state_s
    \return the red-black graph associated to the input instance
 */
-igraph_t *
+graph_s *
 get_red_black_graph(const state_s *stp);
 
 /**
    \param inst: state_s
    \return the conflict graph associated to the input instance
 */
-igraph_t *
+graph_s *
 get_conflict_graph(const state_s *stp);
 
 /**
@@ -254,3 +265,5 @@ get_conflict_graph(const state_s *stp);
    \param stp: pointer to state_s
 */
 void log_state(const state_s* stp);
+void log_state_lists(const state_s* stp);
+void log_state_graphs(const state_s* stp);

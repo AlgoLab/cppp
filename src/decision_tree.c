@@ -26,8 +26,48 @@
    to  try at the current level
 */
 static bool
-no_sibling_p(state_s *stp) {
-        return (stp->character_queue == NULL);
+level_completed(const state_s * stp) {
+        return (stp->character_queue_size == 0);
+}
+
+/**
+   modifies the current state \c stp so that the next available
+   character is computed and the list \c tried_characters and \c
+   character_queue are updated
+*/
+static uint32_t
+next_character(state_s *stp) {
+        if (log_debug("next_character: pre"))
+                log_state_lists(stp);
+        if (stp->character_queue_size > 0 ) {
+                /* we have found a character to try */
+                uint32_t c = stp->character_queue[0];
+                stp->tried_characters[stp->tried_characters_size] = c;
+                stp->tried_characters_size += 1;
+                stp->character_queue_size -= 1;
+                for (uint32_t i = 0; i < stp->character_queue_size; i++)
+                        stp->character_queue[i] = stp->character_queue[i+1];
+                log_debug("next_character: %d", c);
+                if (log_debug("next_character: post"))
+                        log_state_lists(stp);
+                return c;
+        }
+        return -1;
+}
+
+/**
+   \brief set up the new node of the decision tree
+*/
+static void
+init_node(state_s *stp, strategy_fn get_characters_to_realize) {
+        log_debug("init_node");
+        stp->tried_characters = GC_MALLOC_ATOMIC(stp->num_characters_orig * sizeof(uint32_t));
+        assert(stp->tried_characters != NULL);
+        stp->character_queue = GC_MALLOC_ATOMIC(stp->num_characters_orig * sizeof(uint32_t));
+        assert(stp->character_queue != NULL);
+        stp->tried_characters_size = 0;
+        stp->character_queue_size = get_characters_to_realize(stp, stp->character_queue);
+        log_state(stp);
 }
 
 /**
@@ -48,35 +88,31 @@ no_sibling_p(state_s *stp) {
    beginning, and if character_queue is \c NULL we are at the end.
 */
 static uint32_t
-next_node(state_s *states, uint32_t level, strategy_fn level_init) {
+next_node(state_s *states, uint32_t level, strategy_fn get_characters_to_realize) {
         state_s *current = states + level;
         if (log_debug("Called next_node"))
                 log_state(current);
 
         for (uint32_t i = 0; i <= level; i++)
                 log_debug("malloc stack level %d %p", i, &((states+i)->red_black));
-        if (current->tried_characters == NULL && no_sibling_p(current))
-                /* it is the first node of a level */
-                current->character_queue = level_init(current);
-        if (no_sibling_p(current)) {
+        if (level_completed(current)) {
                 log_debug("LEVEL. Backtrack to level: %d", level - 1);
                 free_state(current);
                 return (level - 1);
         }
         if (log_debug("Inside next_node"))
                 log_state(current);
-        current->realize = GPOINTER_TO_INT(g_slist_nth_data(current->character_queue, 0));
-        current->character_queue = g_slist_nth(current->character_queue, 1);
-        current->tried_characters = g_slist_prepend(current->tried_characters, GINT_TO_POINTER(current->realize));
-        log_debug("realizing %d", current->realize);
-        state_s *next = current + 1;
+        current->realize = next_character(current);
+        state_s *next = states + (level + 1);
+        log_debug("realizing %d %p %p", level, next, current);
         bool status = realize_character(next, current);
         if (status) {
                 log_debug("LEVEL. Go to level: %d", level + 1);
+                init_node(next, get_characters_to_realize);
                 return (level + 1);
         }
         /***********************************************/
-        /* The \c next solution is not feasible        */
+        /* The next solution is not feasible        */
         /***********************************************/
         free_state(next);
         log_debug("LEVEL. Stay at level: %d", level);
@@ -84,13 +120,14 @@ next_node(state_s *states, uint32_t level, strategy_fn level_init) {
 }
 
 bool
-exhaustive_search(state_s *states, strategy_fn strategy) {
-        uint32_t level = next_node(states, 0, strategy);
-        for(;level != -1; level = next_node(states, level, strategy)) {
+exhaustive_search(state_s *states, strategy_fn strategy, uint32_t max_depth) {
+        init_node(states, strategy);
+        for(uint32_t level = 0; level != -1; level = next_node(states, level, strategy)) {
                 cleanup(states + level);
                 if ((states + level)->num_species == 0) {
                         return true;
                 }
+                assert(level <= max_depth);
         }
         return false;
 }
