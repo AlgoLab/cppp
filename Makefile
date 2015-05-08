@@ -71,7 +71,7 @@ REG_TESTS_DIR := tests/regression
 REG_TESTS_OK   := $(wildcard $(REG_TESTS_DIR)/ok/*)
 REG_TESTS_DIFF := $(REG_TESTS_OK:$(REG_TESTS_DIR)/ok/%=$(REG_TESTS_DIR)/output/%.diff)
 
-test: tests
+tests: test
 test: dist $(REG_TESTS_OK)
 	tests/bin/run-tests.sh
 
