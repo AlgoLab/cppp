@@ -22,19 +22,17 @@ CFLAGS = $(CFLAGS_STD) $(CFLAGS_EXTRA) $(CFLAGS_LIB)
 OBJECTS = $(SOURCES:%.c=$(OBJ_DIR)/%.o) $(LIBS)
 CC_FULL = $(CC) $(CFLAGS) -I$(SRC_DIR) -I$(LIB_DIR) $(CFLAGS_LIBS)
 
-dist: CFLAGS += -DNDEBUG -O3
-dist: bin
+dist: CFLAGS +=  -O3
+dist: clean bin
 bin: $(P)
 
 debug: CFLAGS += -DDEBUG -O0
 
 debug: bin
 
-profile: CFLAGS += -DDEBUG -O3 -pg
+profile: CFLAGS += -O3 -pg
 
 profile: bin
-
-dist: CFLAGS += -DDEBUG -O0
 
 $(P): $(OBJECTS)
 	@echo 'Linking $@'
@@ -59,7 +57,7 @@ ${LIB_DIR}/%.o: $(LIB_DIR)/%.c
 
 clean: clean-test
 	@echo "Cleaning..."
-	rm -rf  ${OBJ_DIR} ${BIN_DIR} $(SRC_DIR)/*.d $(LIB_DIR)/getopt
+	rm -rf  ${OBJ_DIR} ${BIN_DIR} $(SRC_DIR)/*.d $(LIB_DIR)/getopt cmdline.[ch]
 
 clean-test:
 	@echo "Cleaning tests..."
@@ -73,6 +71,7 @@ REG_TESTS_DIR := tests/regression
 REG_TESTS_OK   := $(wildcard $(REG_TESTS_DIR)/ok/*)
 REG_TESTS_DIFF := $(REG_TESTS_OK:$(REG_TESTS_DIR)/ok/%=$(REG_TESTS_DIR)/output/%.diff)
 
+test: tests
 test: dist $(REG_TESTS_OK)
 	tests/bin/run-tests.sh
 
