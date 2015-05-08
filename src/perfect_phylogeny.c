@@ -139,7 +139,8 @@ full_copy_state(state_s* dst, const state_s* src) {
 void
 copy_state(state_s* dst, const state_s* src) {
         assert(dst != NULL);
-        assert(check_state(src));
+        if (debugp)
+                log_debug("Checking state src: %d", check_state(src));
         dst->realize = src->realize;
         dst->num_species = src->num_species;
         dst->num_characters = src->num_characters;
@@ -153,8 +154,10 @@ copy_state(state_s* dst, const state_s* src) {
         dst->operation = src->operation;
         dst->character_queue = NULL;
         dst->tried_characters = NULL;
-        assert(check_state(dst));
-        log_debug("Checking copy_state: %d", state_cmp(dst, src));
+        if (debugp) {
+                log_debug("Checking state dst: %d", check_state(dst));
+                log_debug("Checking copy_state: %d", state_cmp(dst, src));
+        }
 }
 
 /**
@@ -178,19 +181,23 @@ realize_character(state_s* dst, const state_s* src) {
         assert (dst != NULL);
         assert (src != dst);
         copy_state(dst, src);
-        assert(state_cmp(src, dst) == 0);
-        assert(check_state(src));
+        if (debugp) {
+                assert(state_cmp(src, dst) == 0);
+                assert(check_state(src));
+        }
         uint32_t character = src->realize;
         uint32_t n = src->num_species_orig;
 
         log_debug("Trying to realize CHAR %d", character);
-        assert(check_state(dst));
+        if (debugp)
+                assert(check_state(dst));
         uint32_t c = src->num_species_orig + character;
         int color = src->colors[character];
         bool conn_comp[src->num_species_orig + src->num_characters_orig];
         graph_reachable(dst->red_black, c, conn_comp);
 
-        assert(check_state(dst));
+        if (debugp)
+                assert(check_state(dst));
         if (color == BLACK) {
                 log_debug("color %d = BLACK", color);
                 /*
@@ -236,9 +243,11 @@ realize_character(state_s* dst, const state_s* src) {
                 log_debug("outcome %d", dst->operation);
                 log_state(dst);
         }
-        assert(check_state(dst));
+        if (debugp)
+                assert(check_state(dst));
         cleanup(dst);
-        assert(check_state(dst));
+        if (debugp)
+                assert(check_state(dst));
         return true;
 }
 
@@ -308,10 +317,11 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp) {
                                 graph_add_edge(stp->red_black, s, c + stp->num_species);
 
         /* check the red-black graph */
-        for(uint32_t s=0; s < stp->num_species; s++)
-                for(uint32_t c=0; c < stp->num_characters; c++)
-                        assert(matrix_get_value(stp, s, c) == 0 && !graph_edge_p(stp->red_black, s, c + stp->num_species) ||
-                               matrix_get_value(stp, s, c) == 1 && graph_edge_p(stp->red_black, s, c + stp->num_species));
+        if (debugp)
+                for(uint32_t s=0; s < stp->num_species; s++)
+                        for(uint32_t c=0; c < stp->num_characters; c++)
+                                assert(matrix_get_value(stp, s, c) == 0 && !graph_edge_p(stp->red_black, s, c + stp->num_species) ||
+                                       matrix_get_value(stp, s, c) == 1 && graph_edge_p(stp->red_black, s, c + stp->num_species));
 
         /* conflict graph */
         for(uint32_t c1 = 0; c1 < stp->num_characters; c1++)
@@ -323,8 +333,9 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp) {
                                 graph_add_edge(stp->conflict, c1, c2);
                 }
 
-        assert(check_state(stp));
-        if (log_debug("STATE"))
+        if (debugp)
+                assert(check_state(stp));
+        if (debugp)
                 log_state(stp);
         return true;
 }

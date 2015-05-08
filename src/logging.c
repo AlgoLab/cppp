@@ -78,3 +78,8 @@ void log_array(const char* name, const uint32_t* arr, const uint32_t size) {
                 fprintf(stderr, "NULL");
         fprintf(stderr, "\n");
 }
+
+bool
+debugp_func(void) {
+return (_cppp_log_level_ <= LOG_DEBUG);
+}

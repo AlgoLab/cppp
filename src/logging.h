@@ -25,6 +25,7 @@
 #include "getopt/cmdline.h"
 #include <stdarg.h>
 #include <inttypes.h>
+#include <stdbool.h>
 
 unsigned int log_error(const char* message, ...);
 unsigned int log_info(const char* message, ...);
@@ -33,3 +34,7 @@ void start_logging(struct gengetopt_args_info args_info);
 
 
 void log_array(const char* name, const uint32_t* arr, const uint32_t size);
+
+bool debugp_func(void);
+
+#define debugp debugp_func()
