@@ -49,29 +49,19 @@ int main(int argc, char **argv) {
    Therefore each partial solution con contain at most 2m+n states.
 */
                 state_s states[temp.num_species + 2 * temp.num_characters];
-                /*
-                  make all num_species equal to zero, so that the
-                  flushing step does not try to free unallocated and
-                  uninitialized memory
-                */
                 for (uint32_t level=0; level<temp.num_species + 2 * temp.num_characters; level++)
                         (states + level)->num_species = 0;
 
                 copy_state(states, &temp);
-                free_state(&temp);
                 assert(outf != NULL);
                 if (exhaustive_search(states, alphabetic, states[0].num_species + 2 * states[0].num_characters)) {
-                        for (uint32_t level=0; (states + level)->num_species > 0; level++) {
+                        for (uint32_t level=0; (states + level)->num_species > 0; level++)
                                 fprintf(outf, "%d ", (states + level)->realize);
-                        }
                         fprintf(outf, "\n");
-                } else {
+                } else
                         fprintf(outf, "Not found\n");
-                }
-                for (uint32_t level=0; (states + level)->num_species > 0; level++) {
+                for (uint32_t level=0; (states + level)->num_species > 0; level++)
                         log_debug("malloc flushing level %d %p", level, &((states + level)->red_black));
-                        free_state(states + level);
-                }
         }
         fclose(outf);
         cmdline_parser_free(&args_info);

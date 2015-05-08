@@ -97,7 +97,6 @@ next_node(state_s *states, uint32_t level, strategy_fn get_characters_to_realize
                 log_debug("malloc stack level %d %p", i, &((states+i)->red_black));
         if (level_completed(current)) {
                 log_debug("LEVEL. Backtrack to level: %d", level - 1);
-                free_state(current);
                 return (level - 1);
         }
         if (log_debug("Inside next_node"))
@@ -114,7 +113,6 @@ next_node(state_s *states, uint32_t level, strategy_fn get_characters_to_realize
         /***********************************************/
         /* The next solution is not feasible        */
         /***********************************************/
-        free_state(next);
         log_debug("LEVEL. Stay at level: %d", level);
         return (level);
 }

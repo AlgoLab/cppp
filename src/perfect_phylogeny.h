@@ -124,18 +124,16 @@ typedef struct array_s {
 
 /**
    \brief managing states:
-   \c init_state is used only at the very beginning and zeroes the
-   entire data structure,
-   \c reset_state allocates the whole structure, taking the
-   number of original species and characters from the structure.
+   \c init_state is used only at the very beginning and allocates the
+   memory that is required and gives the correct values to
+   \c num_species_orig and \c num_characters_orig
+
+   \c resize_state sets the values of \c num_species and \c num_characters
 */
 void init_state(state_s *stp, uint32_t nspecies, uint32_t nchars);
 
 void
-reset_state(state_s * stp);
-
-void
-free_state(state_s *stp);
+resize_state(state_s *stp, uint32_t nspecies, uint32_t nchars);
 
 /**
    \brief check if a state is internally consistent

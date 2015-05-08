@@ -383,15 +383,6 @@ get_conflict_graph(const state_s *inst) {
 }
 
 
-
-void
-free_state(state_s *stp) {
-        assert(stp != NULL);
-        graph_free(stp->red_black);
-        graph_free(stp->conflict);
-}
-
-
 void init_state(state_s *stp, uint32_t nspecies, uint32_t nchars) {
         assert(stp != NULL);
         stp->num_characters_orig = nchars;
