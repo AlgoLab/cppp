@@ -10,15 +10,16 @@ P = $(BIN_DIR)/cppp
 SRCS := $(wildcard $(SRC_DIR)/*.c)
 SOURCES := $(SRCS:$(SRC_DIR)/%=%)
 
-CFLAGS_STD = -g -Wall -DDEBUG -O3 -march=native -Wno-deprecated -Wno-parentheses -Wno-format
+CFLAGS_STD = -g -Wall -O3 -march=native -Wno-deprecated -Wno-parentheses -Wno-format
 STD_LIBS = glib-2.0 bdw-gc
 DEBUG_LIBS = #efence
 
 LIBS 	= $(LIB_DIR)/getopt/cmdline.o
 CFLAGS_EXTRA =  -m64 -std=c11 -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes
+CFLAGS_DEBUG = # -pg  -DDEBUG
 CFLAGS_LIBS = `pkg-config --cflags $(STD_LIBS)`
 LDLIBS = `pkg-config --libs $(STD_LIBS)`
-CFLAGS = $(CFLAGS_STD) $(CFLAGS_EXTRA) $(CFLAGS_LIB)
+CFLAGS = $(CFLAGS_STD) $(CFLAGS_EXTRA) $(CFLAGS_DEBUG) $(CFLAGS_LIB)
 OBJECTS = $(SOURCES:%.c=$(OBJ_DIR)/%.o) $(LIBS)
 CC_FULL = $(CC) $(CFLAGS) -I$(SRC_DIR) -I$(LIB_DIR) $(CFLAGS_LIBS)
 

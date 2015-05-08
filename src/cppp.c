@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
 */
                 state_s states[temp.num_species + 2 * temp.num_characters];
                 for (uint32_t level=0; level<temp.num_species + 2 * temp.num_characters; level++)
-                        (states + level)->num_species = 0;
+                        init_state(states + level, temp.num_species, temp.num_characters);
 
                 copy_state(states, &temp);
                 assert(outf != NULL);

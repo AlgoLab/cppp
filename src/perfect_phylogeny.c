@@ -150,7 +150,6 @@ void
 copy_state(state_s* dst, const state_s* src) {
         assert(dst != NULL);
         assert(check_state(src));
-        init_state(dst, src->num_species_orig, src->num_characters_orig);
         dst->realize = src->realize;
         dst->num_species = src->num_species;
         dst->num_characters = src->num_characters;
@@ -387,8 +386,8 @@ void init_state(state_s *stp, uint32_t nspecies, uint32_t nchars) {
         assert(stp != NULL);
         stp->num_characters_orig = nchars;
         stp->num_species_orig = nspecies;
-        stp->num_characters = nchars;
-        stp->num_species = nspecies;
+        stp->num_characters = 0;
+        stp->num_species = 0;
         stp->realize = 0;
         log_debug("malloc new %p %p", stp->red_black, stp->conflict);
         stp->current_states = GC_MALLOC_ATOMIC(nchars * sizeof(uint32_t));
