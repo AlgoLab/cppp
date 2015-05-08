@@ -139,10 +139,8 @@ static uint32_t state_cmp(const state_s *stp1, const state_s *stp2) {
 void
 full_copy_state(state_s* dst, const state_s* src) {
         copy_state(dst, src);
-        for (uint32_t i = 0; i < src->num_characters_orig; i++) {
-                dst->character_queue[i] = src->character_queue[i];
-                dst->tried_characters[i] = src->tried_characters[i];
-        }
+        memcpy(dst->character_queue, src->character_queue, src->num_characters_orig * sizeof(src->character_queue[0]));
+        memcpy(dst->tried_characters, src->tried_characters, src->num_characters_orig * sizeof(src->tried_characters[0]));
 }
 
 
@@ -156,14 +154,10 @@ copy_state(state_s* dst, const state_s* src) {
         graph_copy(dst->red_black, src->red_black);
         graph_copy(dst->conflict, src->conflict);
         dst->matrix = src->matrix;
-        for (size_t i = 0; i < src->num_characters_orig; i++) {
-                dst->current_states[i] = src->current_states[i];
-                dst->characters[i] = src->characters[i];
-                dst->colors[i] = src->colors[i];
-        }
-        for (size_t i = 0; i < src->num_species_orig; i++) {
-                dst->species[i] = src->species[i];
-        }
+        memcpy(dst->current_states, src->current_states, src->num_characters_orig * sizeof(src->current_states[0]));
+        memcpy(dst->characters, src->characters, src->num_characters_orig * sizeof(src->characters[0]));
+        memcpy(dst->colors, src->colors, src->num_characters_orig * sizeof(src->colors[0]));
+        memcpy(dst->species, src->species, src->num_species_orig * sizeof(src->species[0]));
         dst->operation = src->operation;
         dst->character_queue = NULL;
         dst->tried_characters = NULL;
