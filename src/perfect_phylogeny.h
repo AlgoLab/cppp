@@ -70,7 +70,8 @@
    It consists of \c instance, \c realized_char, \c
    tried_chars, and \c character_queue which are respectively the current
    instance, the character to realize and the list of characters
-   that we have previously tried to realize and the candidate characters left.
+   that we have previously tried to realize and the candidate
+   characters left.
 
    Notice that the last character in \c tried_characters is equal to \c realized_char
 
@@ -266,3 +267,11 @@ get_conflict_graph(const state_s *stp);
 void log_state(const state_s* stp);
 void log_state_lists(const state_s* stp);
 void log_state_graphs(const state_s* stp);
+
+/**
+   \brief find the connected component in a red-black graph that
+   contains at least a species (i.e. contains at least an edge) and has
+   the fewest characters.
+*/
+void
+fewest_characters(state_s* stp);

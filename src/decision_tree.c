@@ -66,7 +66,7 @@ init_node(state_s *stp, strategy_fn get_characters_to_realize) {
         stp->character_queue = GC_MALLOC_ATOMIC(stp->num_characters_orig * sizeof(uint32_t));
         assert(stp->character_queue != NULL);
         stp->tried_characters_size = 0;
-        stp->character_queue_size = get_characters_to_realize(stp, stp->character_queue);
+        fewest_characters(stp);
         log_state(stp);
 }
 

@@ -508,3 +508,40 @@ void delete_character(state_s *stp, uint32_t c) {
         stp->current_states[c] = -1;
         (stp->num_characters)--;
 }
+
+void
+fewest_characters(state_s* stp) {
+        bool** components = connected_components(stp->red_black);
+        stp->character_queue_size = stp->red_black->num_vertices + 1;
+        /* Since we need only the connected components that
+           contain at least a species, it suffices to explore
+           only the connected components associated to a
+           species.
+
+           We only have to count the number of characters
+           contained in the component.
+        */
+        for (uint32_t v = 0; v < stp->num_species_orig; v++) {
+                uint32_t card = 0;
+                for (uint32_t w = stp->num_species_orig; w < stp->num_species_orig + stp->num_characters_orig; w++)
+                        if (components[v][w])
+                                card += 1;
+                if (log_debug("component: %d %d", v, card)) {
+                        for (uint32_t w = 0; w < stp->num_species_orig + stp->num_characters_orig; w++)
+                                fprintf(stderr, "%d ", components[v][w]);
+                        fprintf(stderr, "\n");
+                }
+                if (card > 0 && card < stp->character_queue_size) {
+                        stp->character_queue_size = card;
+                        uint32_t p = 0;
+                        for (uint32_t w = stp->num_species_orig; w < stp->num_species_orig + stp->num_characters_orig; w++)
+                                if (components[v][w])
+                                        stp->character_queue[p++] = w - stp->num_species_orig;
+                }
+        }
+        if (log_debug("fewest_characters: %d", stp->character_queue_size)) {
+                for (uint32_t p = 0; p < stp->character_queue_size; p++)
+                        fprintf(stderr, "%d ", stp->character_queue[p]);
+                fprintf(stderr, "\n");
+        }
+}
