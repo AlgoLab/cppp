@@ -495,15 +495,23 @@ void delete_character(state_s *stp, uint32_t c) {
 
 void
 fewest_characters(state_s* stp) {
+        assert(stp != NULL);
         bool** components = connected_components(stp->red_black);
         stp->character_queue_size = stp->red_black->num_vertices + 1;
-        /* Since we need only the connected components that
+        /**
+           Since we need only the connected components that
            contain at least a species, it suffices to explore
            only the connected components associated to a
            species.
 
            We only have to count the number of characters
            contained in the component.
+
+           The first character in \c character_queue is the one with
+           the largest degree in the red-black graph, since it is the
+           most likely to be realized first.
+           Moreover, when the instance has no conflict, we simulate
+           the standard algorithm to compute the perfect phylogeny
         */
         for (uint32_t v = 0; v < stp->num_species_orig; v++) {
                 uint32_t card = 0;
@@ -517,10 +525,20 @@ fewest_characters(state_s* stp) {
                 }
                 if (card > 0 && card < stp->character_queue_size) {
                         stp->character_queue_size = card;
+                        uint32_t maximal_char = 0;
+                        uint32_t max_degree = 0;
                         uint32_t p = 0;
                         for (uint32_t w = stp->num_species_orig; w < stp->num_species_orig + stp->num_characters_orig; w++)
-                                if (components[v][w])
+                                if (components[v][w]) {
+                                        if (stp->red_black->vertices[w]->degree > max_degree) {
+                                                max_degree = stp->red_black->vertices[w]->degree;
+                                                maximal_char = p;
+                                        }
                                         stp->character_queue[p++] = w - stp->num_species_orig;
+                                }
+                        uint32_t temp = stp->character_queue[0];
+                        stp->character_queue[0] = stp->character_queue[maximal_char];
+                        stp->character_queue[maximal_char] = temp;
                 }
         }
         if (log_debug("fewest_characters: %d", stp->character_queue_size)) {
