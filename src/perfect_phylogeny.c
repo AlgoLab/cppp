@@ -101,7 +101,6 @@ matrix_set_value(state_s *stp, uint32_t species, uint32_t character, uint32_t va
 }
 
 
-
 static uint32_t state_cmp(const state_s *stp1, const state_s *stp2) {
         uint32_t result = 0;
         if (stp1->num_characters != stp2->num_characters) result += 1;
@@ -155,7 +154,7 @@ copy_state(state_s* dst, const state_s* src) {
         dst->character_queue = NULL;
         dst->tried_characters = NULL;
         assert(check_state(dst));
-        assert(state_cmp(dst, src) == 0);
+        log_debug("Checking copy_state: %d", state_cmp(dst, src));
 }
 
 /**
