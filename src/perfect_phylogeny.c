@@ -287,7 +287,7 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp) {
         assert(stp->matrix != NULL);
         for(uint32_t s=0; s < stp->num_species; s++)
                 for(uint32_t c=0; c < stp->num_characters; c++) {
-                        uint32_t x;
+                        uint32_t x = -1;
                         assert(fscanf(global_props->file, "%"SCNu32, &x) != EOF || s == 0 && c == 0);
                         if (feof(global_props->file)) {
                                 fclose(global_props->file);
