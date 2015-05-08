@@ -50,7 +50,6 @@
 #include <err.h>
 #include "graph.h"
 #include <inttypes.h>
-#include <glib.h>
 #include <gc.h>
 #include "logging.h"
 

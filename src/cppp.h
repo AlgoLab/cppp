@@ -4,4 +4,3 @@
 #include <assert.h>
 #include <string.h>
 #include <err.h>
-#include <glib.h>
