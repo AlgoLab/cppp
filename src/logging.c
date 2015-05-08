@@ -67,8 +67,6 @@ void start_logging(struct gengetopt_args_info args_info) {
         if (args_info.quiet_given)   _cppp_log_level_ = LOG_FATAL;
         if (args_info.verbose_given) _cppp_log_level_ = LOG_INFO;
         if (args_info.debug_given)   _cppp_log_level_ = LOG_DEBUG;
-        if (getenv("CPPP_LOG_LEVEL") != NULL)
-                _cppp_log_level_ = atoi(getenv("CPPP_LOG_LEVEL"));
 }
 
 void log_array(const char* name, const uint32_t* arr, const uint32_t size) {
