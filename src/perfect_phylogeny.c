@@ -490,21 +490,20 @@ fewest_characters(state_s* stp) {
         assert(stp != NULL);
         bool** components = connected_components(stp->red_black);
         stp->character_queue_size = stp->red_black->num_vertices + 1;
-        /**
-           Since we need only the connected components that
-           contain at least a species, it suffices to explore
-           only the connected components associated to a
-           species.
+/**
+   Since we need only the connected components that contain at least a
+   species, it suffices to explore only the connected components
+   associated to a species.
 
-           We only have to count the number of characters
-           contained in the component.
+   We only have to count the number of characters contained in the
+   component.
 
-           The first character in \c character_queue is the one with
-           the largest degree in the red-black graph, since it is the
-           most likely to be realized first.
-           Moreover, when the instance has no conflict, we simulate
-           the standard algorithm to compute the perfect phylogeny
-        */
+   The first character in \c character_queue is the one with the
+   largest degree in the red-black graph, since it is the most likely
+   to be realized first.
+   Moreover, when the instance has no conflict, we simulate the
+   standard algorithm to compute the perfect phylogeny.
+*/
         for (uint32_t v = 0; v < stp->num_species_orig; v++) {
                 uint32_t card = 0;
                 for (uint32_t w = stp->num_species_orig; w < stp->num_species_orig + stp->num_characters_orig; w++)
