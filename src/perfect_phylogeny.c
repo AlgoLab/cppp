@@ -67,17 +67,10 @@ void log_state(const state_s* stp) {
 
 void log_state_lists(const state_s* stp) {
         // return immediately if no log should be output
-        if (!log_debug("log_state_lists"))
-                return;
-        fprintf(stderr, "  tried_characters. Size %d  Address %p Values: ", stp->tried_characters_size, stp->tried_characters);
-        for(uint32_t i = 0; i < stp->tried_characters_size; i++)
-                fprintf(stderr, "%d ", stp->tried_characters[i]);
-        fprintf(stderr, "\n");
-
-        fprintf(stderr, "  character_queue. Size %d Address %p Values: ", stp->character_queue_size, stp->character_queue);
-        for(uint32_t i = 0; i < stp->character_queue_size; i++)
-                fprintf(stderr, "%d ", stp->character_queue[i]);
-        fprintf(stderr, "\n");
+        if (log_debug("log_state_lists")) {
+                log_array("  tried_characters", stp->tried_characters, stp->tried_characters_size);
+                log_array("  character_queue", stp->character_queue, stp->character_queue_size);
+        }
 }
 
 void log_state_graphs(const state_s* stp) {

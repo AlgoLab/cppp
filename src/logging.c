@@ -70,3 +70,13 @@ void start_logging(struct gengetopt_args_info args_info) {
         if (getenv("CPPP_LOG_LEVEL") != NULL)
                 _cppp_log_level_ = atoi(getenv("CPPP_LOG_LEVEL"));
 }
+
+void log_array(const char* name, const uint32_t* arr, const uint32_t size) {
+        fprintf(stderr, "  %s. Size %d  Address %p Values: ", name, size, arr);
+        if (arr != NULL)
+                for(uint32_t i = 0; i < size; i++)
+                        fprintf(stderr, "%d ", arr[i]);
+        else
+                fprintf(stderr, "NULL");
+        fprintf(stderr, "\n");
+}

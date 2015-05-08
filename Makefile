@@ -22,7 +22,7 @@ CFLAGS = $(CFLAGS_STD) $(CFLAGS_EXTRA) $(CFLAGS_LIB)
 OBJECTS = $(SOURCES:%.c=$(OBJ_DIR)/%.o) $(LIBS)
 CC_FULL = $(CC) $(CFLAGS) -I$(SRC_DIR) -I$(LIB_DIR) $(CFLAGS_LIBS)
 
-dist: CFLAGS += -NDEBUG -O3
+dist: CFLAGS += -DNDEBUG -O3
 dist: bin
 bin: $(P)
 
