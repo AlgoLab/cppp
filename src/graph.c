@@ -123,12 +123,7 @@ graph_reachable(graph_s* gp, uint32_t v, bool* reached) {
                                         }
                 memcpy(border, new_border, n * sizeof(new_border[0]));
         }
-        if (log_debug("component: ")) {
-                for (v = 0; v < gp->num_vertices; v++)
-                        if (reached[v])
-                                fprintf(stderr, "%d ", v);
-                fprintf(stderr, "\n");
-        }
+        log_array("reached: ", reached, gp->num_vertices);
 }
 
 bool **
@@ -170,9 +165,9 @@ connected_components(graph_s* gp) {
 
 void
 graph_pp(graph_s* gp) {
+#ifdef DEBUG
         assert(gp != NULL);
-        if (!log_debug("graph_pp"))
-                return;
+        log_debug("graph_pp");
         check_graph(gp);
         uint32_t n = gp->num_vertices;
         fprintf(stderr, "Graph %p has %d vertices\n", gp, n);
@@ -183,12 +178,14 @@ graph_pp(graph_s* gp) {
                                 fprintf(stderr, " %d", v2);
                 fprintf(stderr, "\n");
         }
+#endif
 }
 
 
 void
 graph_copy(graph_s* dst, graph_s* src) {
         assert(dst != NULL);
+        log_debug("graph_copy: input");
         assert(check_graph(src));
         graph_pp(src);
         dst->num_vertices = src->num_vertices;
@@ -196,6 +193,7 @@ graph_copy(graph_s* dst, graph_s* src) {
                 (dst->vertices)[v]->degree = (src->vertices)[v]->degree;
                 memcpy((dst->vertices)[v]->adjacent, (src->vertices)[v]->adjacent, src->num_vertices * sizeof(src->vertices)[v]->adjacent[0]);
         }
+        log_debug("graph_copy: return");
         assert(check_graph(dst));
 }
 

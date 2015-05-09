@@ -37,8 +37,8 @@ level_completed(const state_s * stp) {
 */
 static uint32_t
 next_character(state_s *stp) {
-        if (log_debug("next_character: pre"))
-                log_state_lists(stp);
+        log_debug("next_character: pre");
+        log_state_lists(stp);
         if (stp->character_queue_size > 0 ) {
                 /* we have found a character to try */
                 uint32_t c = stp->character_queue[0];
@@ -48,8 +48,8 @@ next_character(state_s *stp) {
                 for (uint32_t i = 0; i < stp->character_queue_size; i++)
                         stp->character_queue[i] = stp->character_queue[i+1];
                 log_debug("next_character: %d", c);
-                if (log_debug("next_character: post"))
-                        log_state_lists(stp);
+                log_debug("next_character: post");
+                log_state_lists(stp);
                 return c;
         }
         return -1;
@@ -90,8 +90,8 @@ init_node(state_s *stp, strategy_fn get_characters_to_realize) {
 static uint32_t
 next_node(state_s *states, uint32_t level, strategy_fn get_characters_to_realize) {
         state_s *current = states + level;
-        if (log_debug("Called next_node"))
-                log_state(current);
+        log_debug("Called next_node");
+        log_state(current);
 
         for (uint32_t i = 0; i <= level; i++)
                 log_debug("malloc stack level %d %p", i, &((states+i)->red_black));
@@ -99,8 +99,8 @@ next_node(state_s *states, uint32_t level, strategy_fn get_characters_to_realize
                 log_debug("LEVEL. Backtrack to level: %d", level - 1);
                 return (level - 1);
         }
-        if (log_debug("Inside next_node"))
-                log_state(current);
+        log_debug("Inside next_node");
+        log_state(current);
         current->realize = next_character(current);
         state_s *next = states + (level + 1);
         log_debug("realizing %d %p %p", level, next, current);
@@ -110,11 +110,11 @@ next_node(state_s *states, uint32_t level, strategy_fn get_characters_to_realize
                 init_node(next, get_characters_to_realize);
                 return (level + 1);
         }
-        /***********************************************/
-        /* The next solution is not feasible        */
-        /***********************************************/
-        log_debug("LEVEL. Stay at level: %d", level);
-        return (level);
+/***********************************************/
+/* The next solution is not feasible        */
+/***********************************************/
+	log_debug("LEVEL. Stay at level: %d", level);
+	return (level);
 }
 
 bool

@@ -51,12 +51,16 @@ unsigned int log_error(const char* message, ...) {
         return ret;
 }
 unsigned int log_info(const char* message, ...) {
+#ifdef DEBUG
         va_list args; va_start(args, message);
         unsigned int ret = log_format("info", LOG_INFO, message, args);
         va_end(args);
         return ret;
+#else
+        return 0;
+#endif
 }
-unsigned int log_debug(const char* message, ...) {
+unsigned int log_debug2(const char* message, ...) {
         va_list args; va_start(args, message);
         unsigned int ret = log_format("debug", LOG_DEBUG, message, args);
         va_end(args);
@@ -69,17 +73,16 @@ void start_logging(struct gengetopt_args_info args_info) {
         if (args_info.debug_given)   _cppp_log_level_ = LOG_DEBUG;
 }
 
-void log_array(const char* name, const uint32_t* arr, const uint32_t size) {
+void log_array(const char* name, const void* arr, const uint32_t size) {
+#ifdef DEBUG
         fprintf(stderr, "  %s. Size %d  Address %p Values: ", name, size, arr);
-        if (arr != NULL)
+        if (arr != NULL) {
+                uint32_t* arrp = (uint32t *) arr;
                 for(uint32_t i = 0; i < size; i++)
                         fprintf(stderr, "%d ", arr[i]);
-        else
-                fprintf(stderr, "NULL");
+                else
+                        fprintf(stderr, "NULL");
+        }
         fprintf(stderr, "\n");
-}
-
-bool
-debugp_func(void) {
-return (_cppp_log_level_ <= LOG_DEBUG);
+#endif
 }

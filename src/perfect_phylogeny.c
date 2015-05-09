@@ -30,9 +30,8 @@
    Mainly used for debug
 */
 void log_state(const state_s* stp) {
-        // return immediately if no log should be output
-        if (!log_debug("log_state"))
-                return;
+#ifdef DEBUG
+        log_debug("log_state");
         fprintf(stderr, "=======================================\n");
         fprintf(stderr, "State=");
         if (!check_state(stp)) fprintf(stderr, "NOT ");
@@ -63,20 +62,20 @@ void log_state(const state_s* stp) {
 
         log_state_lists(stp);
         log_state_graphs(stp);
+#endif
 }
 
 void log_state_lists(const state_s* stp) {
-        // return immediately if no log should be output
-        if (log_debug("log_state_lists")) {
-                log_array("  tried_characters", stp->tried_characters, stp->tried_characters_size);
-                log_array("  character_queue", stp->character_queue, stp->character_queue_size);
-        }
+#ifdef DEBUG
+        log_debug("log_state_lists");
+        log_array("  tried_characters", stp->tried_characters, stp->tried_characters_size);
+        log_array("  character_queue", stp->character_queue, stp->character_queue_size);
+#endif
 }
 
 void log_state_graphs(const state_s* stp) {
-        // return immediately if no log should be output
-        if (!log_debug("log_state_graphs"))
-                return;
+#ifdef DEBUG
+        log_debug("log_state_graphs");
         fprintf(stderr, "  Red-black graph. Address\n", stp->red_black);
         graph_pp(stp->red_black);
         fprintf(stderr, "\n");
@@ -84,6 +83,7 @@ void log_state_graphs(const state_s* stp) {
         fprintf(stderr, "  Conflict graph. Address\n", stp->conflict);
         graph_pp(stp->conflict);
         fprintf(stderr, "\n");
+#endif
 }
 
 /**
@@ -139,8 +139,8 @@ full_copy_state(state_s* dst, const state_s* src) {
 void
 copy_state(state_s* dst, const state_s* src) {
         assert(dst != NULL);
-        if (debugp)
-                log_debug("Checking state src: %d", check_state(src));
+        log_debug("copy_state: input");
+        assert(check_state(src));
         dst->realize = src->realize;
         dst->num_species = src->num_species;
         dst->num_characters = src->num_characters;
@@ -154,10 +154,9 @@ copy_state(state_s* dst, const state_s* src) {
         dst->operation = src->operation;
         dst->character_queue = NULL;
         dst->tried_characters = NULL;
-        if (debugp) {
-                log_debug("Checking state dst: %d", check_state(dst));
-                log_debug("Checking copy_state: %d", state_cmp(dst, src));
-        }
+        log_debug("copy_state: return");
+        assert(check_state(dst));
+        log_debug("Checking copy_state: %d", state_cmp(dst, src));
 }
 
 /**
@@ -181,23 +180,21 @@ realize_character(state_s* dst, const state_s* src) {
         assert (dst != NULL);
         assert (src != dst);
         copy_state(dst, src);
-        if (debugp) {
-                assert(state_cmp(src, dst) == 0);
-                assert(check_state(src));
-        }
+        log_debug("realize_character: input");
+        assert(check_state(src));
+        assert(state_cmp(src, dst) == 0);
         uint32_t character = src->realize;
         uint32_t n = src->num_species_orig;
 
         log_debug("Trying to realize CHAR %d", character);
-        if (debugp)
-                assert(check_state(dst));
+        assert(check_state(dst));
         uint32_t c = src->num_species_orig + character;
         int color = src->colors[character];
         bool conn_comp[src->num_species_orig + src->num_characters_orig];
         graph_reachable(dst->red_black, c, conn_comp);
 
-        if (debugp)
-                assert(check_state(dst));
+        log_debug("realize_character: dst");
+        assert(check_state(dst));
         if (color == BLACK) {
                 log_debug("color %d = BLACK", color);
                 /*
@@ -238,16 +235,15 @@ realize_character(state_s* dst, const state_s* src) {
                                 }
         }
         dst->realize = character;
-        if (log_debug("realized")) {
-                log_debug("color %d", color);
-                log_debug("outcome %d", dst->operation);
-                log_state(dst);
-        }
-        if (debugp)
-                assert(check_state(dst));
+        log_debug("realized");
+        log_debug("color %d", color);
+        log_debug("outcome %d", dst->operation);
+        log_state(dst);
+        log_debug("realize_character: before cleanup");
+        assert(check_state(dst));
         cleanup(dst);
-        if (debugp)
-                assert(check_state(dst));
+        log_debug("realize_character: return");
+        assert(check_state(dst));
         return true;
 }
 
@@ -303,13 +299,14 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp) {
                         }
                         matrix_set_value(stp, s, c, x);
                 }
-        if (log_debug("MATRIX"))
-                for(uint32_t s=0; s < stp->num_species; s++) {
-                        for(uint32_t c=0; c < stp->num_characters; c++)
-                                fprintf(stderr, "%d", matrix_get_value(stp, s, c));
-                        fprintf(stderr, "\n");
-                }
-
+#ifdef DEBUG
+        log_debug("MATRIX");
+        for(uint32_t s=0; s < stp->num_species; s++) {
+                for(uint32_t c=0; c < stp->num_characters; c++)
+                        fprintf(stderr, "%d", matrix_get_value(stp, s, c));
+                fprintf(stderr, "\n");
+        }
+#endif
         /* red-black graph */
         for(uint32_t s=0; s < stp->num_species; s++)
                 for(uint32_t c=0; c < stp->num_characters; c++)
@@ -317,12 +314,10 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp) {
                                 graph_add_edge(stp->red_black, s, c + stp->num_species);
 
         /* check the red-black graph */
-        if (debugp)
-                for(uint32_t s=0; s < stp->num_species; s++)
-                        for(uint32_t c=0; c < stp->num_characters; c++)
-                                assert(matrix_get_value(stp, s, c) == 0 && !graph_edge_p(stp->red_black, s, c + stp->num_species) ||
-                                       matrix_get_value(stp, s, c) == 1 && graph_edge_p(stp->red_black, s, c + stp->num_species));
-
+        for(uint32_t s=0; s < stp->num_species; s++)
+                for(uint32_t c=0; c < stp->num_characters; c++)
+                        assert(matrix_get_value(stp, s, c) == 0 && !graph_edge_p(stp->red_black, s, c + stp->num_species) ||
+                               matrix_get_value(stp, s, c) == 1 && graph_edge_p(stp->red_black, s, c + stp->num_species));
         /* conflict graph */
         for(uint32_t c1 = 0; c1 < stp->num_characters; c1++)
                 for(uint32_t c2 = c1 + 1; c2 < stp->num_characters; c2++) {
@@ -332,13 +327,11 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp) {
                         if(states[0][0] + states[0][1] + states[1][0] + states[1][1] == 4)
                                 graph_add_edge(stp->conflict, c1, c2);
                 }
-
-        if (debugp)
-                assert(check_state(stp));
-        if (debugp)
-                log_state(stp);
+        assert(check_state(stp));
+        log_state(stp);
         return true;
 }
+
 
 /*
   \brief Simplify the instance whenever possible.
@@ -346,9 +339,8 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp) {
   We remove null characters and species.
 */
 void cleanup(state_s *stp) {
-        if (log_debug("Cleanup"))
-                log_state(stp);
-
+        log_debug("Cleanup");
+        log_state(stp);
         // Looking for null species
         for (uint32_t s=0; s < stp->num_species_orig; s++)
                 if (stp->species[s] && graph_degree(stp->red_black, s) == 0) {
@@ -358,6 +350,7 @@ void cleanup(state_s *stp) {
         // Looking for null characters
         for (uint32_t c = 0; c < stp->num_characters_orig; c++)
                 if (stp->characters[c] && graph_degree(stp->red_black, c + stp->num_species_orig) == 0) {
+
                         log_debug("Want to delete character %d\n", c);
                         delete_character(stp, c);
                 }
@@ -419,12 +412,9 @@ void init_state(state_s *stp, uint32_t nspecies, uint32_t nchars) {
 }
 
 bool check_state(const state_s* stp) {
-        /*
-          check the state only when debugging
-        */
-        if (!log_debug("check_state"))
-                return true;
         uint32_t err = true;
+#ifdef DEBUG
+        log_debug("check_state");
         if (stp->num_species == -1 || stp->num_species > stp->num_species_orig) {
                 err = false;
                 log_debug("FATAL ERROR: __FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_species, 0);
@@ -463,6 +453,7 @@ bool check_state(const state_s* stp) {
                 err = false;
                 log_debug("FATAL ERROR: __FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_characters, count);
         }
+#endif
         return err;
 }
 
@@ -477,16 +468,8 @@ characters_list(state_s * stp, uint32_t *array) {
         return size;
 }
 
-
-void delete_species(state_s *stp, uint32_t s) {
-        log_debug("Deleting species %d", s);
-        assert(s < stp->num_species_orig);
-        assert(stp->species[s] > 0);
-        stp->species[s] = 0;
-        (stp->num_species)--;
-}
-
-void delete_character(state_s *stp, uint32_t c) {
+void
+delete_character(state_s *stp, uint32_t c) {
         log_debug("Deleting character %d", c);
         assert(c < stp->num_characters_orig);
         assert(stp->characters[c] > 0);
@@ -495,6 +478,17 @@ void delete_character(state_s *stp, uint32_t c) {
         stp->current_states[c] = -1;
         (stp->num_characters)--;
 }
+
+void
+delete_species(state_s *stp, uint32_t s) {
+        log_debug("Deleting species %d", s);
+        assert(s < stp->num_species_orig);
+        assert(stp->species[s] > 0);
+        stp->species[s] = 0;
+        (stp->num_species)--;
+}
+
+
 
 void
 fewest_characters(state_s* stp) {
@@ -520,11 +514,9 @@ fewest_characters(state_s* stp) {
                 for (uint32_t w = stp->num_species_orig; w < stp->num_species_orig + stp->num_characters_orig; w++)
                         if (components[v][w])
                                 card += 1;
-                if (log_debug("component: %d %d", v, card)) {
-                        for (uint32_t w = 0; w < stp->num_species_orig + stp->num_characters_orig; w++)
-                                fprintf(stderr, "%d ", components[v][w]);
-                        fprintf(stderr, "\n");
-                }
+                log_debug("component: %d %d", v, card);
+                log_array("component:", components[v], stp->num_species_orig + stp->num_characters_orig);
+
                 if (card > 0 && card < stp->character_queue_size) {
                         stp->character_queue_size = card;
                         uint32_t maximal_char = 0;
@@ -543,9 +535,6 @@ fewest_characters(state_s* stp) {
                         stp->character_queue[maximal_char] = temp;
                 }
         }
-        if (log_debug("fewest_characters: %d", stp->character_queue_size)) {
-                for (uint32_t p = 0; p < stp->character_queue_size; p++)
-                        fprintf(stderr, "%d ", stp->character_queue[p]);
-                fprintf(stderr, "\n");
-        }
+        log_debug("fewest_characters: %d", stp->character_queue_size);
+        log_array("character_queue", stp->character_queue, stp->character_queue_size);
 }
