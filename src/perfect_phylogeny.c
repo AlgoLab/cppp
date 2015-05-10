@@ -68,8 +68,8 @@ void log_state(const state_s* stp) {
 void log_state_lists(const state_s* stp) {
 #ifdef DEBUG
         log_debug("log_state_lists");
-        log_array("  tried_characters", stp->tried_characters, stp->tried_characters_size);
-        log_array("  character_queue", stp->character_queue, stp->character_queue_size);
+        log_array_uint32_t("  tried_characters", stp->tried_characters, stp->tried_characters_size);
+        log_array_uint32_t("  character_queue", stp->character_queue, stp->character_queue_size);
 #endif
 }
 
@@ -204,7 +204,7 @@ realize_character(state_s* dst, const state_s* src) {
                 */
                 for (uint32_t v=0; v<n; v++)
                         if (conn_comp[v])
-                                if (graph_edge_p(dst->red_black, c, v))
+                                if (graph_get_edge(dst->red_black, c, v))
                                         graph_del_edge(dst->red_black, c, v);
                                 else
                                         graph_add_edge(dst->red_black, c, v);
@@ -227,7 +227,7 @@ realize_character(state_s* dst, const state_s* src) {
                 */
                 for (uint32_t v=0; v<n; v++)
                         if (conn_comp[v])
-                                if (graph_edge_p(dst->red_black, c, v))
+                                if (graph_get_edge(dst->red_black, c, v))
                                         graph_del_edge(dst->red_black, c, v);
                                 else {
                                         dst->operation = 0;
@@ -316,8 +316,8 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp) {
         /* check the red-black graph */
         for(uint32_t s=0; s < stp->num_species; s++)
                 for(uint32_t c=0; c < stp->num_characters; c++)
-                        assert(matrix_get_value(stp, s, c) == 0 && !graph_edge_p(stp->red_black, s, c + stp->num_species) ||
-                               matrix_get_value(stp, s, c) == 1 && graph_edge_p(stp->red_black, s, c + stp->num_species));
+                        assert(matrix_get_value(stp, s, c) == 0 && !graph_get_edge(stp->red_black, s, c + stp->num_species) ||
+                               matrix_get_value(stp, s, c) == 1 && graph_get_edge(stp->red_black, s, c + stp->num_species));
         /* conflict graph */
         for(uint32_t c1 = 0; c1 < stp->num_characters; c1++)
                 for(uint32_t c2 = c1 + 1; c2 < stp->num_characters; c2++) {
@@ -515,7 +515,7 @@ fewest_characters(state_s* stp) {
                         if (components[v][w])
                                 card += 1;
                 log_debug("component: %d %d", v, card);
-                log_array("component:", components[v], stp->num_species_orig + stp->num_characters_orig);
+                log_array_bool("component:", components[v], stp->num_species_orig + stp->num_characters_orig);
 
                 if (card > 0 && card < stp->character_queue_size) {
                         stp->character_queue_size = card;
@@ -524,8 +524,8 @@ fewest_characters(state_s* stp) {
                         uint32_t p = 0;
                         for (uint32_t w = stp->num_species_orig; w < stp->num_species_orig + stp->num_characters_orig; w++)
                                 if (components[v][w]) {
-                                        if (stp->red_black->vertices[w]->degree > max_degree) {
-                                                max_degree = stp->red_black->vertices[w]->degree;
+                                        if (graph_degree(stp->red_black, w) > max_degree) {
+                                                max_degree = graph_degree(stp->red_black, w);
                                                 maximal_char = p;
                                         }
                                         stp->character_queue[p++] = w - stp->num_species_orig;
@@ -536,5 +536,5 @@ fewest_characters(state_s* stp) {
                 }
         }
         log_debug("fewest_characters: %d", stp->character_queue_size);
-        log_array("character_queue", stp->character_queue, stp->character_queue_size);
+        log_array_uint32_t("character_queue", stp->character_queue, stp->character_queue_size);
 }

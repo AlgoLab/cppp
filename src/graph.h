@@ -59,6 +59,8 @@ typedef struct graph_s {
         /* vertices is an array of pointers to the struct containing
            the vertex */
         uint32_t num_vertices;
+        uint32_t *degrees;
+        bool *adjacency;
 } graph_s;
 
 /**
@@ -83,13 +85,6 @@ graph_del_edge(graph_s* gp, uint32_t v1, uint32_t v2);
 
 bool
 graph_get_edge(graph_s* gp, uint32_t v1, uint32_t v2);
-
-/**
-   \brief check if a graph is internally consistent
-
-   \return 0 if all check have been passed, otherwise an error code larger than 0.
-*/
-uint32_t graph_check(const graph_s* gp);
 
 /**
    \brief stores in \c reached all vertices that are in same connected

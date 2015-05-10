@@ -73,16 +73,26 @@ void start_logging(struct gengetopt_args_info args_info) {
         if (args_info.debug_given)   _cppp_log_level_ = LOG_DEBUG;
 }
 
-void log_array(const char* name, const void* arr, const uint32_t size) {
+void log_array_bool(const char* name, const bool* arr, const uint32_t size) {
 #ifdef DEBUG
-        fprintf(stderr, "  %s. Size %d  Address %p Values: ", name, size, arr);
-        if (arr != NULL) {
-                uint32_t* arrp = (uint32t *) arr;
-                for(uint32_t i = 0; i < size; i++)
-                        fprintf(stderr, "%d ", arr[i]);
-                else
-                        fprintf(stderr, "NULL");
-        }
-        fprintf(stderr, "\n");
+fprintf(stderr, "  %s. Size: %d  Address: %p Values: ", name, size, arr);
+if (arr != NULL)
+        for(uint32_t i = 0; i < size; i++)
+                fprintf(stderr, "%d ", arr[i]);
+else
+        fprintf(stderr, "NULL");
+fprintf(stderr, "\n");
+#endif
+}
+
+void log_array_uint32_t(const char* name, const uint32_t* arr, const uint32_t size) {
+#ifdef DEBUG
+fprintf(stderr, "  %s. Size %d  Address %p Values: ", name, size, arr);
+if (arr != NULL)
+        for(uint32_t i = 0; i < size; i++)
+                fprintf(stderr, "%d ", arr[i]);
+else
+        fprintf(stderr, "NULL");
+fprintf(stderr, "\n");
 #endif
 }

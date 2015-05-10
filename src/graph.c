@@ -31,15 +31,15 @@ check_graph(graph_s *gp) {
 #ifdef DEBUG
         assert(gp != NULL);
         uint32_t n = gp->num_vertices;
-        for (uint32_t v=0; v < n; v++) {
-                if ((gp->vertices)[v] == NULL)
-                        res = false;
-                if ((gp->vertices)[v]->adjacent == NULL)
-                        res = false;
+        if (gp->degrees == NULL)
+                res = false;
+        if (gp->adjacency == NULL)
+                res = false;
+        for (uint32_t v=0; v < n; v++)
                 for (uint32_t v2=0; v2 < n; v2++)
-                        if ((gp->vertices)[v]->adjacent[v2] > n)
+                        if ((gp->adjacency)[v * gp->num_vertices + v2] !=
+                            (gp->adjacency)[v2 * gp->num_vertices + v])
                                 res = false;
-        }
 #endif
         return res;
 }
@@ -50,53 +50,42 @@ graph_new(uint32_t num_vertices) {
         graph_s* gp = GC_MALLOC(sizeof(graph_s));
         assert(gp != NULL);
         gp->num_vertices = num_vertices;
-        gp->vertices = GC_MALLOC(num_vertices * sizeof(graph_vertex_s *));
-        assert(gp->vertices != NULL);
-
-        for (uint32_t v=0; v<num_vertices; v++) {
-                (gp->vertices)[v] = GC_MALLOC(sizeof(graph_vertex_s));
-                assert((gp->vertices)[v] != NULL);
-                graph_vertex_s* vs = (gp->vertices)[v];
-                vs->adjacent = GC_MALLOC(num_vertices * sizeof(uint32_t));
-                assert(vs->adjacent != NULL);
-                for (uint32_t v2=0; v2<num_vertices; v2++)
-                        vs->adjacent[v2] = 0;
-                vs->degree = 0;
-        }
+        gp->adjacency = GC_MALLOC(num_vertices * num_vertices * sizeof(bool *));
+        assert(gp->adjacency != NULL);
+        memset(gp->adjacency, 0, num_vertices * num_vertices * sizeof((gp->adjacency)[0]));
+        gp->degrees = GC_MALLOC(num_vertices * sizeof(uint32_t *));
+        assert(gp->degrees != NULL);
+        memset(gp->degrees, 0, num_vertices * sizeof((gp->degrees)[0]));
         return gp;
 }
 
 bool
 graph_add_edge(graph_s* gp, uint32_t v1, uint32_t v2) {
-        bool ret = 1 - (gp->vertices)[v1]->adjacent[v2];
-        (gp->vertices)[v1]->adjacent[v2] = 1;
-        (gp->vertices)[v2]->adjacent[v1] = 1;
-        (gp->vertices)[v1]->degree += 1;
-        (gp->vertices)[v2]->degree += 1;
+        bool ret = 1 - gp->adjacency[v1 * gp->num_vertices + v2];
+        gp->adjacency[v1 * gp->num_vertices + v2] = 1;
+        gp->adjacency[v2 * gp->num_vertices + v1] = 1;
+        gp->degrees[v1] += 1;
+        gp->degrees[v2] += 1;
         return ret;
 }
 
 bool
 graph_get_edge(graph_s* gp, uint32_t v1, uint32_t v2) {
-        return ((gp->vertices)[v1]->adjacent[v2] > 0);
+        return (gp->adjacency[v1 * gp->num_vertices + v2]);
 }
 
 void
 graph_del_edge(graph_s* gp, uint32_t v1, uint32_t v2) {
-        (gp->vertices)[v1]->adjacent[v2] = 0;
-        (gp->vertices)[v2]->adjacent[v1] = 0;
-        (gp->vertices)[v1]->degree -= 1;
-        (gp->vertices)[v2]->degree -= 1;
+        gp->adjacency[v1 * gp->num_vertices + v2] = 0;
+        gp->adjacency[v2 * gp->num_vertices + v1] = 0;
+        gp->degrees[v1] -= 1;
+        gp->degrees[v2] -= 1;
 }
 /**
    \brief check if a graph is internally consistent
 
    \return 0 if all check have been passed, otherwise an error code larger than 0.
 */
-uint32_t graph_check(const graph_s* gp) {
-        // TOOD
-        return 0;
-}
 
 void
 graph_reachable(graph_s* gp, uint32_t v, bool* reached) {
@@ -123,7 +112,7 @@ graph_reachable(graph_s* gp, uint32_t v, bool* reached) {
                 memcpy(border, new_border, new_border_size * sizeof(new_border[0]));
                 border_size = new_border_size;
         }
-        log_array("reached: ", reached, gp->num_vertices);
+        log_array_bool("reached: ", reached, gp->num_vertices);
 }
 
 bool **
@@ -167,7 +156,7 @@ void
 graph_pp(graph_s* gp) {
 #ifdef DEBUG
         assert(gp != NULL);
-        check_graph(src);
+        check_graph(gp);
         log_debug("graph_pp");
         check_graph(gp);
         uint32_t n = gp->num_vertices;
@@ -175,7 +164,7 @@ graph_pp(graph_s* gp) {
         for (uint32_t v=0; v < n; v++) {
                 fprintf(stderr, "Vertex %d (degree %d):", v, graph_degree(gp, v));
                 for (uint32_t v2=0; v2 < n; v2++)
-                        if (graph_edge_p(gp, v, v2))
+                        if (graph_get_edge(gp, v, v2))
                                 fprintf(stderr, " %d", v2);
                 fprintf(stderr, "\n");
         }
@@ -190,10 +179,8 @@ graph_copy(graph_s* dst, graph_s* src) {
         check_graph(src);
         graph_pp(src);
         dst->num_vertices = src->num_vertices;
-        for (uint32_t v=0; v < src->num_vertices; v++) {
-                (dst->vertices)[v]->degree = (src->vertices)[v]->degree;
-                memcpy((dst->vertices)[v]->adjacent, (src->vertices)[v]->adjacent, src->num_vertices * sizeof(src->vertices)[v]->adjacent[0]);
-        }
+        memcpy(dst->adjacency, src->adjacency, src->num_vertices * src->num_vertices * sizeof((src->adjacency)[0]));
+        memcpy(dst->degrees, src->degrees, src->num_vertices * sizeof((src->degrees)[0]));
         log_debug("graph_copy: return");
         assert(check_graph(dst));
 }
@@ -201,5 +188,5 @@ graph_copy(graph_s* dst, graph_s* src) {
 uint32_t
 graph_degree(graph_s* gp, uint32_t v) {
         assert(v < gp->num_vertices);
-        return (gp->vertices)[v]->degree;
+        return (gp->degrees)[v];
 }
