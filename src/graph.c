@@ -115,7 +115,7 @@ graph_reachable(graph_s* gp, uint32_t v, bool* reached) {
                 for (uint32_t vx = 0; vx < border_size; vx++) {
                         uint32_t v1 = border[vx];
                         for (uint32_t v2 = 0; v2 < n; v2++)
-                                if (graph_edge_p(gp, v1, v2) && !reached[v2]) {
+                                if (graph_get_edge(gp, v1, v2) && !reached[v2]) {
                                         new_border[new_border_size++] = v2;
                                         reached[v2] = true;
                                 }
