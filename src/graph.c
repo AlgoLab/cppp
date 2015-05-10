@@ -27,8 +27,9 @@
 
 static bool
 check_graph(graph_s *gp) {
-        assert(gp != NULL);
         bool res = true;
+#ifdef DEBUG
+        assert(gp != NULL);
         uint32_t n = gp->num_vertices;
         for (uint32_t v=0; v < n; v++) {
                 if ((gp->vertices)[v] == NULL)
@@ -39,6 +40,7 @@ check_graph(graph_s *gp) {
                         if ((gp->vertices)[v]->adjacent[v2] > n)
                                 res = false;
         }
+#endif
         return res;
 }
 
@@ -167,6 +169,7 @@ void
 graph_pp(graph_s* gp) {
 #ifdef DEBUG
         assert(gp != NULL);
+        check_graph(src);
         log_debug("graph_pp");
         check_graph(gp);
         uint32_t n = gp->num_vertices;
@@ -186,7 +189,7 @@ void
 graph_copy(graph_s* dst, graph_s* src) {
         assert(dst != NULL);
         log_debug("graph_copy: input");
-        assert(check_graph(src));
+        check_graph(src);
         graph_pp(src);
         dst->num_vertices = src->num_vertices;
         for (uint32_t v=0; v < src->num_vertices; v++) {
