@@ -23,7 +23,7 @@ OBJECTS = $(SOURCES:%.c=$(OBJ_DIR)/%.o) $(LIBS)
 CC_FULL = $(CC) $(CFLAGS) -I$(SRC_DIR) -I$(LIB_DIR) $(CFLAGS_LIBS)
 
 dist: CFLAGS +=  -O3
-dist: clean bin
+dist: bin
 bin: $(P)
 
 debug: CFLAGS += -DDEBUG -O0
@@ -32,7 +32,7 @@ debug: bin
 
 profile: CFLAGS += -O3 -pg -DNDEBUG
 
-profile: clean bin
+profile: bin
 	valgrind --tool=callgrind --dump-instr=yes $(P) -o ~/dev/null $(REG_TESTS_DIR)/input/matrix.no.test
 
 $(P): $(OBJECTS)
