@@ -104,23 +104,24 @@ graph_reachable(graph_s* gp, uint32_t v, bool* reached) {
         assert(reached != NULL);
         log_debug("graph_reachable: %d", v);
         uint32_t n = gp->num_vertices;
-        bool border[n];
+        uint32_t border[n];
+        uint32_t new_border[n];
+        uint32_t border_size = 1;
         memset(reached, 0, n * sizeof(reached[0]));
-        memset(border, 0, n * sizeof(border[0]));
-        border[v] = true;
-        for(bool exp = true; exp;) {
-                exp = false;
-                bool new_border[n];
-                memset(new_border, 0, n * sizeof(new_border[0]));
-                for (uint32_t v1 = 0; v1 < n; v1++)
-                        if (border[v1])
-                                for (uint32_t v2 = 0; v2 < n; v2++)
-                                        if (graph_edge_p(gp, v1, v2) && !border[v2] && !reached[v2]) {
-                                                exp = true;
-                                                new_border[v2] = true;
-                                                reached[v2] = true;
-                                        }
-                memcpy(border, new_border, n * sizeof(new_border[0]));
+        border[0] = v;
+        reached[v] = true;
+        for(; border_size > 0; ) {
+                uint32_t new_border_size = 0;
+                for (uint32_t vx = 0; vx < border_size; vx++) {
+                        uint32_t v1 = border[vx];
+                        for (uint32_t v2 = 0; v2 < n; v2++)
+                                if (graph_edge_p(gp, v1, v2) && !reached[v2]) {
+                                        new_border[new_border_size++] = v2;
+                                        reached[v2] = true;
+                                }
+                }
+                memcpy(border, new_border, new_border_size * sizeof(new_border[0]));
+                border_size = new_border_size;
         }
         log_array("reached: ", reached, gp->num_vertices);
 }
