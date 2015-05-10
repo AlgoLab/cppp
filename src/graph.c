@@ -78,10 +78,7 @@ graph_add_edge(graph_s* gp, uint32_t v1, uint32_t v2) {
 
 bool
 graph_edge_p(graph_s* gp, uint32_t v1, uint32_t v2) {
-        if ((gp->vertices)[v1]->adjacent[v2] > 0)
-                return true;
-        else
-                return false;
+        return ((gp->vertices)[v1]->adjacent[v2] > 0);
 }
 
 void
