@@ -32,7 +32,8 @@ debug: bin
 
 profile: CFLAGS += -O3 -pg -DNDEBUG
 
-profile: bin
+profile: clean bin
+	valgrind --tool=callgrind --dump-instr=yes $(P) -o ~/dev/null $(REG_TESTS_DIR)/input/matrix.no.test
 
 $(P): $(OBJECTS)
 	@echo 'Linking $@'
@@ -57,7 +58,7 @@ ${LIB_DIR}/%.o: $(LIB_DIR)/%.c
 
 clean: clean-test
 	@echo "Cleaning..."
-	rm -rf  ${OBJ_DIR} ${BIN_DIR} $(SRC_DIR)/*.d $(LIB_DIR)/getopt cmdline.[ch]
+	rm -rf  ${OBJ_DIR} ${BIN_DIR} $(SRC_DIR)/*.d $(LIB_DIR)/getopt cmdline.[ch] callgrind.out.*
 
 clean-test:
 	@echo "Cleaning tests..."
@@ -79,7 +80,7 @@ test: dist $(REG_TESTS_OK)
 doc: dist docs/latex/refman.pdf
 	doxygen && cd docs/latex/ && latexmk -recorder -use-make -pdf refman
 
-.PHONY: all clean doc unit-test clean-test regression-test
+.PHONY: all clean doc unit-test clean-test regression-test profile
 
 ifneq "$(MAKECMDGOALS)" "clean"
 -include ${SOURCES:.c=.d}
