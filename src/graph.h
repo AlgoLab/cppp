@@ -46,18 +46,12 @@
 #include "logging.h"
 
 /**
-   \struct graph_s graph_adjacent_s
-   \brief a graph and the adjacency list of each vertex
+   \struct graph_s
+   \brief a graph is made of the adjacency list and the degree of each
+   vertex, as well as the number of vertices
 */
-typedef struct graph_vertex_s {
-        uint32_t *adjacent;
-        uint32_t degree;
-} graph_vertex_s;
 
 typedef struct graph_s {
-        graph_vertex_s **vertices;
-        /* vertices is an array of pointers to the struct containing
-           the vertex */
         uint32_t num_vertices;
         uint32_t *degrees;
         bool *adjacency;
