@@ -35,11 +35,17 @@ check_graph(graph_s *gp) {
                 res = false;
         if (gp->adjacency == NULL)
                 res = false;
-        for (uint32_t v=0; v < n; v++)
-                for (uint32_t v2=0; v2 < n; v2++)
-                        if ((gp->adjacency)[v * gp->num_vertices + v2] !=
-                            (gp->adjacency)[v2 * gp->num_vertices + v])
+        for (uint32_t v=0; v < n; v++) {
+                uint32_t deg = 0;
+                for (uint32_t v2=0; v2 < n; v2++) {
+                        if (graph_get_edge(gp, v, v2) != graph_get_edge(gp, v, v2))
                                 res = false;
+                        if (graph_get_edge(gp, v, v2))
+                                deg += 1;
+                }
+                if (deg != graph_degree(gp, v))
+                        res=false;
+        }
 #endif
         return res;
 }
