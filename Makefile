@@ -15,7 +15,7 @@ STD_LIBS = bdw-gc
 DEBUG_LIBS = #efence
 
 LIBS 	= $(OBJ_DIR)/cmdline.o
-CFLAGS_EXTRA =  -m64 -std=c11 -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes
+CFLAGS_EXTRA =  -m64 -std=c11 -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -fopenmp
 CFLAGS_LIBS = `pkg-config --cflags $(STD_LIBS)`
 LDLIBS = `pkg-config --libs $(STD_LIBS)`
 CFLAGS = $(CFLAGS_STD) $(CFLAGS_EXTRA) $(CFLAGS_LIB)

@@ -43,7 +43,7 @@
 #include <inttypes.h>
 #include <gc.h>
 #include "logging.h"
-
+#include <omp.h>
 /**
    \struct graph_s
    \brief a graph is made of the adjacency list and the degree of each
