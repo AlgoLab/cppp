@@ -102,6 +102,7 @@ next_node(state_s *states, uint32_t level, strategy_fn get_characters_to_realize
         log_debug("Inside next_node");
         log_state(current);
         current->realize = next_character(current);
+        assert(current->realize <= current->num_characters_orig);
         state_s *next = states + (level + 1);
         log_debug("realizing %d %p %p", level, next, current);
         bool status = realize_character(next, current);
@@ -113,8 +114,8 @@ next_node(state_s *states, uint32_t level, strategy_fn get_characters_to_realize
 /***********************************************/
 /* The next solution is not feasible        */
 /***********************************************/
-	log_debug("LEVEL. Stay at level: %d", level);
-	return (level);
+        log_debug("LEVEL. Stay at level: %d", level);
+        return (level);
 }
 
 bool

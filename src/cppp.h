@@ -1,6 +1,2 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <assert.h>
-#include <string.h>
-#include <err.h>
+#include "decision_tree.h"
+#include "cmdline.h"

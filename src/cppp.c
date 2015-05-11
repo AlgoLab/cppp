@@ -19,10 +19,7 @@
 
 */
 
-#include "getopt/cmdline.h"
 #include "cppp.h"
-#include "decision_tree.h"
-#include "gc/leak_detector.h"
 
 static uint32_t
 alphabetic(state_s *stp, uint32_t *arr) {
@@ -69,5 +66,6 @@ int main(int argc, char **argv) {
         }
         fclose(outf);
         cmdline_parser_free(&args_info);
+        log_debug("END");
         return 0;
 }

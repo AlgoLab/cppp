@@ -41,18 +41,8 @@
 #undef basename         /*  (snide comment about libgen.h removed) */
 #include <string.h>     /*  for basename(3) (GNU version) and strcmp(3) */
 #endif
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <assert.h>
-#include <string.h>
-#include <err.h>
-#include "graph.h"
-#include <inttypes.h>
-#include <gc.h>
-#include "logging.h"
 #include <error.h>
+#include "graph.h"
 
 #define SPECIES 0
 #define BLACK 1

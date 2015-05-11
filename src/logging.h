@@ -22,10 +22,11 @@
 #include <time.h>
 #include <stdlib.h>
 #include <string.h>
-#include "getopt/cmdline.h"
+#include "cmdline.h"
 #include <stdarg.h>
 #include <inttypes.h>
 #include <stdbool.h>
+#include "bitmap.h"
 
 unsigned int log_error(const char* message, ...);
 unsigned int log_info(const char* message, ...);

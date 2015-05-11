@@ -320,7 +320,10 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp) {
                 for(uint32_t c=0; c < stp->num_characters; c++)
                         if (matrix_get_value(stp, s, c) == 1)
                                 graph_add_edge(stp->red_black, s, c + stp->num_species);
-
+#ifdef DEBUG
+        log_debug("MATRIX");
+        graph_pp(stp->red_black);
+#endif
         /* check the red-black graph */
         for(uint32_t s=0; s < stp->num_species; s++)
                 for(uint32_t c=0; c < stp->num_characters; c++)
