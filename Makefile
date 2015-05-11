@@ -14,7 +14,7 @@ CFLAGS_STD = -g -Wall -march=native -Wno-deprecated -Wno-parentheses -Wno-format
 STD_LIBS = bdw-gc
 DEBUG_LIBS = #efence
 
-LIBS 	= $(LIB_DIR)/getopt/cmdline.o
+LIBS 	= $(OBJ_DIR)/cmdline.o
 CFLAGS_EXTRA =  -m64 -std=c11 -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes
 CFLAGS_LIBS = `pkg-config --cflags $(STD_LIBS)`
 LDLIBS = `pkg-config --libs $(STD_LIBS)`
@@ -59,7 +59,7 @@ ${LIB_DIR}/%.o: $(LIB_DIR)/%.c
 
 clean: clean-test
 	@echo "Cleaning..."
-	rm -rf  ${OBJ_DIR} ${BIN_DIR} $(SRC_DIR)/*.d $(LIB_DIR)/getopt cmdline.[ch] callgrind.out.*
+	rm -rf  ${OBJ_DIR} ${BIN_DIR} $(SRC_DIR)/*.d $(SRC_DIR)/cmdline.[ch] callgrind.out.*
 
 clean-test:
 	@echo "Cleaning tests..."
@@ -88,6 +88,5 @@ ifneq "$(MAKECMDGOALS)" "clean"
 -include ${T_SOURCES:.c=.d}
 endif
 
-$(LIB_DIR)/getopt/cmdline.c $(LIB_DIR)/getopt/cmdline.h: cppp.ggo
-	@mkdir -p $(LIB_DIR)/getopt
-	gengetopt -i $< --output-dir=$(LIB_DIR)/getopt
+$(SRC_DIR)/cmdline.c $(SRC_DIR)/cmdline.h: cppp.ggo
+	gengetopt -i $< --output-dir=$(SRC_DIR)
