@@ -75,24 +75,37 @@ void start_logging(struct gengetopt_args_info args_info) {
 
 void log_array_bool(const char* name, const bool* arr, const uint32_t size) {
 #ifdef DEBUG
-fprintf(stderr, "  %s. Size: %d  Address: %p Values: ", name, size, arr);
-if (arr != NULL)
-        for(uint32_t i = 0; i < size; i++)
-                fprintf(stderr, "%d ", arr[i]);
-else
-        fprintf(stderr, "NULL");
-fprintf(stderr, "\n");
+        fprintf(stderr, "  %s. Size: %d  Address: %p Values: ", name, size, arr);
+        if (arr != NULL)
+                for(uint32_t i = 0; i < size; i++)
+                        fprintf(stderr, "%d ", arr[i]);
+        else
+                fprintf(stderr, "NULL");
+        fprintf(stderr, "\n");
 #endif
 }
 
 void log_array_uint32_t(const char* name, const uint32_t* arr, const uint32_t size) {
 #ifdef DEBUG
-fprintf(stderr, "  %s. Size %d  Address %p Values: ", name, size, arr);
-if (arr != NULL)
-        for(uint32_t i = 0; i < size; i++)
-                fprintf(stderr, "%d ", arr[i]);
-else
-        fprintf(stderr, "NULL");
-fprintf(stderr, "\n");
+        fprintf(stderr, "  %s. Size %d  Address %p Values: ", name, size, arr);
+        if (arr != NULL)
+                for(uint32_t i = 0; i < size; i++)
+                        fprintf(stderr, "%d ", arr[i]);
+        else
+                fprintf(stderr, "NULL");
+        fprintf(stderr, "\n");
+#endif
+}
+
+void
+log_bitmap(const char* name, const bitmap_word* arr, const uint32_t nbits) {
+#ifdef DEBUG
+        fprintf(stderr, "  %s. Size %d. Words %d  Address %p Values: ", name, nbits, BITMAP_NWORDS(nbits), arr);
+        if (arr != NULL)
+                for(uint32_t i = 0; i < BITMAP_NWORDS(nbits); i++)
+                        fprintf(stderr, "%a ", arr[i]);
+        else
+                fprintf(stderr, "NULL");
+        fprintf(stderr, "\n");
 #endif
 }

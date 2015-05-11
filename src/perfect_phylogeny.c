@@ -190,9 +190,9 @@ realize_character(state_s* dst, const state_s* src) {
         assert(check_state(dst));
         uint32_t c = src->num_species_orig + character;
         int color = src->colors[character];
-        bool conn_comp[src->num_species_orig + src->num_characters_orig];
+        bitmap_word* conn_comp = bitmap_alloc0(src->num_species_orig + src->num_characters_orig);
         graph_reachable(dst->red_black, c, conn_comp);
-
+        log_bitmap("conn_comp: ", conn_comp, src->red_black->num_vertices);
         log_debug("realize_character: dst");
         assert(check_state(dst));
         if (color == BLACK) {
@@ -203,7 +203,7 @@ realize_character(state_s* dst, const state_s* src) {
                   create the edge (s,c) if it does not exist
                 */
                 for (uint32_t v=0; v<n; v++)
-                        if (conn_comp[v])
+                        if (bitmap_get_bit(conn_comp, v))
                                 if (graph_get_edge(dst->red_black, c, v))
                                         graph_del_edge(dst->red_black, c, v);
                                 else
@@ -226,7 +226,7 @@ realize_character(state_s* dst, const state_s* src) {
                   is free.
                 */
                 for (uint32_t v=0; v<n; v++)
-                        if (conn_comp[v])
+                        if (bitmap_get_bit(conn_comp, v))
                                 if (graph_get_edge(dst->red_black, c, v))
                                         graph_del_edge(dst->red_black, c, v);
                                 else {
@@ -495,7 +495,7 @@ delete_species(state_s *stp, uint32_t s) {
 void
 fewest_characters(state_s* stp) {
         assert(stp != NULL);
-        bool** components = connected_components(stp->red_black);
+        bitmap_word** components = connected_components(stp->red_black);
         stp->character_queue_size = stp->red_black->num_vertices + 1;
 /**
    Since we need only the connected components that contain at least a
@@ -514,10 +514,10 @@ fewest_characters(state_s* stp) {
         for (uint32_t v = 0; v < stp->num_species_orig; v++) {
                 uint32_t card = 0;
                 for (uint32_t w = stp->num_species_orig; w < stp->num_species_orig + stp->num_characters_orig; w++)
-                        if (components[v][w])
+                        if (bitmap_get_bit(components[v], w))
                                 card += 1;
                 log_debug("component: %d %d", v, card);
-                log_array_bool("component:", components[v], stp->num_species_orig + stp->num_characters_orig);
+                log_bitmap("component:", components[v], stp->red_black->num_vertices);
 
                 if (card > 0 && card < stp->character_queue_size) {
                         stp->character_queue_size = card;
@@ -525,7 +525,7 @@ fewest_characters(state_s* stp) {
                         uint32_t max_degree = 0;
                         uint32_t p = 0;
                         for (uint32_t w = stp->num_species_orig; w < stp->num_species_orig + stp->num_characters_orig; w++)
-                                if (components[v][w]) {
+                                if (bitmap_get_bit(components[v], w)) {
                                         if (graph_degree(stp->red_black, w) > max_degree) {
                                                 max_degree = graph_degree(stp->red_black, w);
                                                 maximal_char = p;

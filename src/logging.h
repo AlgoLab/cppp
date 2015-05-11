@@ -35,10 +35,11 @@ void start_logging(struct gengetopt_args_info args_info);
 
 void log_array_bool(const char* name, const bool* arr, const uint32_t size);
 void log_array_uint32_t(const char* name, const uint32_t* arr, const uint32_t size);
+void log_bitmap(const char* name, const bitmap_word* arr, const uint32_t nbits);
 
 #ifdef DEBUG
 #define log_debug(...)                          \
-	log_debug2(__VA_ARGS__);
+        log_debug2(__VA_ARGS__);
 #else
 #define log_debug(...)
 #endif

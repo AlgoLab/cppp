@@ -53,7 +53,7 @@
 typedef struct graph_s {
         uint32_t num_vertices;
         uint32_t *degrees;
-        bool *adjacency;
+        bitmap_word *adjacency;
 } graph_s;
 
 /**
@@ -91,7 +91,7 @@ graph_nuke_edges(graph_s* gp);
    is reachable from v
 */
 void
-graph_reachable(graph_s* gp, uint32_t v, bool* reached);
+graph_reachable(graph_s* gp, uint32_t v, bitmap_word* reached);
 
 void
 graph_pp(graph_s* gp);
@@ -111,5 +111,5 @@ graph_degree(graph_s* gp, uint32_t v);
    \return a pointer to the array of the  connected components found
 */
 
-bool **
+bitmap_word **
 connected_components(graph_s* gp);
