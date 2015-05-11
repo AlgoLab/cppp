@@ -31,8 +31,11 @@ alphabetic(state_s *stp, uint32_t *arr) {
 
 int main(int argc, char **argv) {
         static struct gengetopt_args_info args_info;
-        assert(cmdline_parser(argc, argv, &args_info) == 0);
-        assert(args_info.inputs_num >= 1);
+        int cmd_status = cmdline_parser(argc, argv, &args_info);
+        if (cmd_status != 0)
+                error(4, 0, "Could not parse the command line\n");
+        if (args_info.inputs_num < 1)
+                error(5, 0, "There is no input matrix to analyze\n");
         start_logging(args_info);
         FILE* outf = fopen(args_info.output_arg, "w");
 
@@ -53,7 +56,8 @@ int main(int argc, char **argv) {
                         init_state(states + level, temp.num_species, temp.num_characters);
 
                 copy_state(states, &temp);
-                assert(outf != NULL);
+                if (outf == NULL)
+                        error(6, 0, "Input file ended prematurely\n");
                 if (exhaustive_search(states, alphabetic, states[0].num_species + 2 * states[0].num_characters)) {
                         for (uint32_t level=0; (states + level)->num_species > 0; level++)
                                 fprintf(outf, "%d ", (states + level)->realize);

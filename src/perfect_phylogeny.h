@@ -52,6 +52,7 @@
 #include <inttypes.h>
 #include <gc.h>
 #include "logging.h"
+#include <error.h>
 
 #define SPECIES 0
 #define BLACK 1

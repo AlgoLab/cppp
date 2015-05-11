@@ -278,10 +278,13 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp) {
         if (global_props->file == NULL) {
                 global_props->file = fopen(global_props->filename, "r");
                 assert(global_props->file != NULL);
-                assert(!feof(global_props->file));
+                if (feof(global_props->file))
+                        error(3, 0, "Could not open input file: %s\n", global_props->filename);
 
-                assert(fscanf(global_props->file, "%"SCNu32" %"SCNu32, &(global_props->num_species),
-                              &(global_props->num_characters)) != EOF);
+                int err = fscanf(global_props->file, "%"SCNu32" %"SCNu32, &(global_props->num_species),
+                                 &(global_props->num_characters));
+                if (err == EOF)
+                        error(1, 0, "Could not read the first line of file: %s\n", global_props->filename);
         }
 
         init_state(stp, global_props->num_species, global_props->num_characters);
@@ -292,7 +295,12 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp) {
         for(uint32_t s=0; s < stp->num_species; s++)
                 for(uint32_t c=0; c < stp->num_characters; c++) {
                         uint32_t x = -1;
-                        assert(fscanf(global_props->file, "%"SCNu32, &x) != EOF || s == 0 && c == 0);
+                        int err = fscanf(global_props->file, "%"SCNu32, &x);
+/*
+  Check that the file is not ended in the middle of an instance
+*/
+                        if (err == EOF && (s != 0 || c != 0))
+                                error(2, 0, "Badly formatted input file: %s\n", global_props->filename);
                         if (feof(global_props->file)) {
                                 fclose(global_props->file);
                                 return false;
