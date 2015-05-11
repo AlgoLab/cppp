@@ -12,13 +12,13 @@
 
 typedef uint64_t bitmap_word;
 
-#define BITMAP_WORD_BITS        (sizeof(bitmap_word) * CHAR_BIT)
-#define BITMAP_NWORDS(_n)       (((_n) + BITMAP_WORD_BITS - 1) / BITMAP_WORD_BITS)
-#define BITMAP_WORD(_bm, _n)    ((_bm)[(_n) / BITMAP_WORD_BITS])
-#define BITMAP_WORDBIT(_n)      (1UL << (BITMAP_WORD_BITS - ((_n) % BITMAP_WORD_BITS) - 1))
-#define BITMAP_BIT_OFFSET(_n)   ((_n) % BITMAP_WORD_BITS)
-#define BITMAP_BIT_MASK(_n)     (1UL << ((_n) % BITMAP_WORD_BITS))
-
+#define BITMAP_WORD_BITS        64
+#define LOG_BITMAP_WORD_BITS    6
+#define BITMAP_BIT_PLACE(_n)    ((_n) >> LOG_BITMAP_WORD_BITS)
+#define BITMAP_BIT_OFFSET(_n)   ((_n) & (BITMAP_WORD_BITS - 1))
+#define BITMAP_NWORDS(_n)       (((_n) + BITMAP_WORD_BITS - 1) >> LOG_BITMAP_WORD_BITS)
+#define BITMAP_WORD(_bm, _n)    ((_bm)[(_n) >> LOG_BITMAP_WORD_BITS])
+#define BITMAP_BIT_MASK(_n)     (1UL << (BITMAP_BIT_OFFSET(_n)))
 
 static inline size_t bitmap_sizeof(unsigned long nbits) {
         return BITMAP_NWORDS(nbits) * sizeof(bitmap_word);
