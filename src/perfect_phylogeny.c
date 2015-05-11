@@ -326,15 +326,6 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp) {
                 for(uint32_t c=0; c < stp->num_characters; c++)
                         assert(matrix_get_value(stp, s, c) == 0 && !graph_get_edge(stp->red_black, s, c + stp->num_species) ||
                                matrix_get_value(stp, s, c) == 1 && graph_get_edge(stp->red_black, s, c + stp->num_species));
-        /* conflict graph */
-        for(uint32_t c1 = 0; c1 < stp->num_characters; c1++)
-                for(uint32_t c2 = c1 + 1; c2 < stp->num_characters; c2++) {
-                        uint32_t states[2][2] = { {0, 0}, {0, 0} };
-                        for(uint32_t s=0; s < stp->num_species; s++)
-                                states[matrix_get_value(stp, s, c1)][matrix_get_value(stp, s, c2)] = 1;
-                        if(states[0][0] + states[0][1] + states[1][0] + states[1][1] == 4)
-                                graph_add_edge(stp->conflict, c1, c2);
-                }
         assert(check_state(stp));
         log_state(stp);
         return true;
@@ -545,4 +536,17 @@ fewest_characters(state_s* stp) {
         }
         log_debug("fewest_characters: %d", stp->character_queue_size);
         log_array_uint32_t("character_queue", stp->character_queue, stp->character_queue_size);
+}
+
+void
+update_conflict_graph(state_s* stp) {
+        graph_nuke_edges(stp->conflict);
+        for(uint32_t c1 = 0; c1 < stp->num_characters; c1++)
+                for(uint32_t c2 = c1 + 1; c2 < stp->num_characters; c2++) {
+                        uint32_t states[2][2] = { {0, 0}, {0, 0} };
+                        for(uint32_t s=0; s < stp->num_species; s++)
+                                states[matrix_get_value(stp, s, c1)][matrix_get_value(stp, s, c2)] = 1;
+                        if(states[0][0] + states[0][1] + states[1][0] + states[1][1] == 4)
+                                graph_add_edge(stp->conflict, c1, c2);
+                }
 }

@@ -87,6 +87,13 @@ graph_del_edge(graph_s* gp, uint32_t v1, uint32_t v2) {
         gp->degrees[v1] -= 1;
         gp->degrees[v2] -= 1;
 }
+
+void
+graph_nuke_edges(graph_s* gp) {
+        memset(gp->adjacency, 0, gp->num_vertices * gp->num_vertices * sizeof((gp->adjacency)[0]));
+        memset(gp->degrees, 0, gp->num_vertices * sizeof((gp->degrees)[0]));
+}
+
 /**
    \brief check if a graph is internally consistent
 

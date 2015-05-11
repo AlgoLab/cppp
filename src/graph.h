@@ -80,6 +80,9 @@ graph_del_edge(graph_s* gp, uint32_t v1, uint32_t v2);
 bool
 graph_get_edge(graph_s* gp, uint32_t v1, uint32_t v2);
 
+void
+graph_nuke_edges(graph_s* gp);
+
 /**
    \brief stores in \c reached all vertices that are in same connected
    component of \c gp as \c v

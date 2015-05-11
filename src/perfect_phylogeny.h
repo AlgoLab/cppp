@@ -273,3 +273,9 @@ void log_state_graphs(const state_s* stp);
 */
 void
 fewest_characters(state_s* stp);
+
+/**
+   \brief update the conflict graph
+*/
+void
+update_conflict_graph(state_s* stp);
