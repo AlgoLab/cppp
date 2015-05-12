@@ -30,11 +30,12 @@ debug: CFLAGS += -DDEBUG -O0
 
 debug: bin
 
-#profile: CFLAGS += -O3 -pg -DNDEBUG
+profile: CFLAGS += -O3 -pg -DNDEBUG
 
 profile: dist
 	rm -f callgrind.*
-	valgrind -q --tool=callgrind --dump-instr=yes $(P) -o /dev/null $(REG_TESTS_DIR)/input/matrix.no.test
+	valgrind -q --tool=callgrind --dump-instr=yes $(P) -o /dev/null $(REG_TESTS_DIR)/input/no_8x4.00.txt
+
 
 $(P): $(OBJECTS)
 	@echo 'Linking $@'
