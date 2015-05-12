@@ -136,19 +136,27 @@ connected_components(graph_s* gp) {
         for (uint32_t i = 0; i < gp->num_vertices; i++)
                 components[i] = bitmap_alloc0(gp->num_vertices);
         bitmap_word* visited = bitmap_alloc0(gp->num_vertices);
+
         for (uint32_t v = 0; v < gp->num_vertices;) {
                 log_debug("Reaching %d", v);
-                graph_reachable(gp, v, components[v]);
-                bitmap_set_bit(visited, v);
+/*
+  Check if v is an isolated vertex.
+  In that case we do not call graph_reachable to find its connected
+*/
+                if (graph_degree(gp, v) > 0) {
+                        graph_reachable(gp, v, components[v]);
 /*
   After computing a new component, it is copied to all other vertices
   of that component
 */
-                for (uint32_t w = v + 1; w < gp->num_vertices; w++)
-                        if (bitmap_get_bit(components[v], w)) {
-                                bitmap_copy(components[w], components[v], gp->num_vertices);
-                                bitmap_set_bit(visited, w);
-                        }
+                        for (uint32_t w = v + 1; w < gp->num_vertices; w++)
+                                if (bitmap_get_bit(components[v], w)) {
+                                        bitmap_copy(components[w], components[v], gp->num_vertices);
+                                        bitmap_set_bit(visited, w);
+                                }
+                } else
+                        bitmap_set_bit(components[v], v);
+                bitmap_set_bit(visited, v);
 /*
   Find the next vertex in an unexplored component
 */
