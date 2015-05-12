@@ -384,9 +384,9 @@ void init_state(state_s *stp, uint32_t nspecies, uint32_t nchars) {
         log_debug("malloc new %p %p", stp->red_black, stp->conflict);
         stp->current_states = GC_MALLOC_ATOMIC(nchars * sizeof(uint32_t));
         assert(stp->current_states != NULL);
-        stp->species = GC_MALLOC_ATOMIC(nspecies * sizeof(uint32_t));
+        stp->species = GC_MALLOC_ATOMIC(nspecies * sizeof(bool));
         assert(stp->species != NULL);
-        stp->characters = GC_MALLOC_ATOMIC(nchars * sizeof(uint32_t));
+        stp->characters = GC_MALLOC_ATOMIC(nchars * sizeof(bool));
         assert(stp->characters != NULL);
         stp->colors = GC_MALLOC_ATOMIC(nchars * sizeof(uint8_t));
         assert(stp->colors != NULL);
@@ -400,11 +400,11 @@ void init_state(state_s *stp, uint32_t nspecies, uint32_t nchars) {
 
         stp->operation = 0;
         for (uint32_t i=0; i < stp->num_species_orig; i++) {
-                stp->species[i] = 1;
+                stp->species[i] = true;
         }
         for (uint32_t i=0; i < stp->num_characters_orig; i++) {
                 stp->current_states[i] = 0;
-                stp->characters[i] = 1;
+                stp->characters[i] = true;
                 stp->colors[i] = BLACK;
                 stp->tried_characters[i] = -1;
                 stp->character_queue[i] = -1;
@@ -463,10 +463,12 @@ uint32_t
 characters_list(state_s * stp, uint32_t *array) {
         assert(array != NULL);
         uint32_t size = 0;
-        for (unsigned int color = 1; color <= MAX_COLOR; color++)
-                for (uint32_t c=0; c < stp->num_characters_orig; c++)
-                        if (stp->characters[c] == color)
-                                array[size++] = c;
+        for (uint32_t c=0; c < stp->num_characters_orig; c++)
+                if (stp->colors[c] == RED)
+                        array[size++] = c;
+        for (uint32_t c=0; c < stp->num_characters_orig; c++)
+                if (stp->colors[c] == BLACK)
+                        array[size++] = c;
         return size;
 }
 
@@ -475,8 +477,8 @@ delete_character(state_s *stp, uint32_t c) {
         log_debug("Deleting character %d", c);
         assert(c < stp->num_characters_orig);
         assert(stp->characters[c] > 0);
-        assert(stp->current_states[c] != -1);
-        stp->characters[c] = 0;
+        assert(stp->colors[c] > 0);
+        stp->characters[c] = false;
         stp->current_states[c] = -1;
         (stp->num_characters)--;
 }
@@ -486,7 +488,7 @@ delete_species(state_s *stp, uint32_t s) {
         log_debug("Deleting species %d", s);
         assert(s < stp->num_species_orig);
         assert(stp->species[s] > 0);
-        stp->species[s] = 0;
+        stp->species[s] = false;
         (stp->num_species)--;
 }
 

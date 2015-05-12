@@ -93,8 +93,8 @@ typedef struct state_s {
         graph_s *conflict;
         uint32_t *matrix;
         uint32_t *current_states;
-        uint32_t *species;
-        uint32_t *characters;
+        bool *species;
+        bool *characters;
         uint8_t  *colors;
         uint32_t operation;
         uint32_t  *tried_characters;
