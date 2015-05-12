@@ -84,23 +84,25 @@
    RED   => the character is active
 */
 typedef struct state_s {
-        uint32_t realize;
-        uint32_t num_species;
-        uint32_t num_characters;
-        uint32_t num_species_orig;
-        uint32_t num_characters_orig;
         graph_s *red_black;
         graph_s *conflict;
         uint32_t *matrix;
         uint32_t *current_states;
         bool *species;
         bool *characters;
+        uint32_t num_species;
+        uint32_t num_characters;
+        uint32_t num_species_orig;
+        uint32_t num_characters_orig;
         uint8_t  *colors;
-        uint32_t operation;
         uint32_t  *tried_characters;
         uint32_t  *character_queue;
         uint32_t tried_characters_size;
         uint32_t character_queue_size;
+        bitmap_word *current_component;
+        uint32_t operation;
+        uint32_t realize;
+        bool disconnected;
 } state_s;
 
 /**
@@ -201,9 +203,9 @@ void delete_character(state_s* stp, uint32_t c);
 */
 typedef struct instances_schema_s {
         FILE* file;
+        char* filename;
         uint32_t num_species;
         uint32_t num_characters;
-        char* filename;
 } instances_schema_s;
 
 /* /\** */
