@@ -30,7 +30,7 @@ debug: CFLAGS += -DDEBUG -O0
 
 debug: bin
 
-profile: CFLAGS += -O3 -pg -DNDEBUG
+profile: CFLAGS += -O3 -DNDEBUG
 
 profile: dist
 	rm -f callgrind.*
