@@ -46,19 +46,26 @@ void log_state(const state_s* stp) {
         fprintf(stderr, "  c   |states |characters|colors\n");
         fprintf(stderr, "------|-------|----------|------\n");
         for (size_t i = 0; i < stp->num_characters_orig; i++)
-                fprintf(stderr, "%6d|%7d|%10d|%6d\n", i, stp->current_states[i], stp->characters[i], stp->colors[i]);
+                fprintf(stderr, "%6d|%7d|%10d|%6d\n", i, stp->current_states[i], (stp->characters)[i], stp->colors[i]);
         fprintf(stderr, "------|-------|----------|------\n");
 
         fprintf(stderr, "------|-------\n");
         fprintf(stderr, "  s   |species\n");
         fprintf(stderr, "------|-------\n");
         for (size_t i = 0; i < stp->num_species_orig; i++) {
-                fprintf(stderr, "%6d|%7d\n", i, stp->species[i]);
+                fprintf(stderr, "%6d|%7d\n", i, (stp->species)[i]);
         }
         fprintf(stderr, "------|-------\n");
 
         fprintf(stderr, "  operation: %d\n", stp->operation);
         fprintf(stderr, "  realize: %d\n", stp->realize);
+
+        fprintf(stderr, "connected_components: size %d\n", stp->red_black->num_vertices);
+        for (size_t i = 0; i < stp->red_black->num_vertices; i++) {
+                fprintf(stderr, "%d", (stp->connected_components)[i]);
+        }
+	fprintf(stderr, "\n");
+
 
         log_state_lists(stp);
         log_state_graphs(stp);
@@ -179,32 +186,33 @@ realize_character(state_s* dst, const state_s* src) {
         assert (src != NULL);
         assert (dst != NULL);
         assert (src != dst);
-        copy_state(dst, src);
-        log_debug("realize_character: input");
+        log_debug("realize_character: dst=%p, src=%p character=%d", dst, src, src->realize);
         assert(check_state(src));
+        log_state(src);
+        copy_state(dst, src);
         assert(state_cmp(src, dst) == 0);
         uint32_t character = src->realize;
+        assert(src->characters[character]);
         uint32_t n = src->num_species_orig;
 
         log_debug("Trying to realize CHAR %d", character);
         assert(check_state(dst));
         uint32_t c = src->num_species_orig + character;
         int color = src->colors[character];
-        bitmap_word* conn_comp = bitmap_alloc0(src->num_species_orig + src->num_characters_orig);
-        graph_reachable(dst->red_black, c, conn_comp);
-        log_bitmap("conn_comp: ", conn_comp, src->red_black->num_vertices);
-        log_debug("realize_character: dst");
+        graph_reachable(dst->red_black, c, src->current_component);
+        memcpy(dst->current_component, src->current_component, src->num_species_orig + src->num_characters_orig * src->current_component[0]);
+        log_array_bool("src->current_component: ", src->current_component, src->red_black->num_vertices);
+        log_debug("realize_character: check dst");
         assert(check_state(dst));
         if (color == BLACK) {
-                log_debug("color %d = BLACK", color);
-                /*
-                  for each species s in the same connected component
-                  as c, delete the edge (s,c) if it exists and
-                  create the edge (s,c) if it does not exist
-                */
+                log_debug("realize_character: color %d = BLACK", color);
+/*
+  for each species s in the same connected component as c, delete the
+  edge (s,c) if it exists and create the edge (s,c) if it does not exist
+*/
                 for (uint32_t v=0; v<n; v++)
-                        if (bitmap_get_bit(conn_comp, v))
-                                if (graph_get_edge(dst->red_black, c, v))
+                        if (src->current_component[v])
+                                if (graph_get_edge(src->red_black, c, v) && c != v)
                                         graph_del_edge(dst->red_black, c, v);
                                 else
                                         graph_add_edge(dst->red_black, c, v);
@@ -213,31 +221,31 @@ realize_character(state_s* dst, const state_s* src) {
                 dst->current_states[character] = 1;
         }
         if (color == RED) {
-                log_debug("color %d = RED", color);
+                log_debug("realize_character: color %d = RED", color);
                 dst->operation = 2;
                 dst->colors[character] = RED + 1;
-                /*
-                  if there is a species in the same connected
-                  component as c, but that it is not adjacent to c,
-                  then the realization is impossible.
+/*
+  if there is a species in the same connected component as c, but that
+  it is not adjacent to c, then the realization is impossible.
 
-                  If c is adjacent to all species in its connected
-                  component, remove all edges incident on c, because c
-                  is free.
-                */
+  If c is adjacent to all species in its connected component, remove
+  all edges incident on c, because c is free.
+*/
                 for (uint32_t v=0; v<n; v++)
-                        if (bitmap_get_bit(conn_comp, v))
-                                if (graph_get_edge(dst->red_black, c, v))
+                        if (src->current_component[v])
+                                if (graph_get_edge(src->red_black, c, v) && c != v)
                                         graph_del_edge(dst->red_black, c, v);
                                 else {
                                         dst->operation = 0;
+                                        log_debug("realize_character: end. REALIZATION IMPOSSIBLE");
                                         return false;
                                 }
         }
         dst->realize = character;
-        log_debug("realized");
-        log_debug("color %d", color);
-        log_debug("outcome %d", dst->operation);
+        log_debug("realize_character: call update_connected_components");
+        update_connected_components(dst);
+        log_debug("realize_character: color %d", color);
+        log_debug("realize_character: outcome %d (1=>activated, 2=>freed)", dst->operation);
         log_state(dst);
         log_debug("realize_character: before cleanup");
         assert(check_state(dst));
@@ -302,6 +310,7 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp) {
                         if (err == EOF && (s != 0 || c != 0))
                                 error(2, 0, "Badly formatted input file: %s\n", global_props->filename);
                         if (feof(global_props->file)) {
+                                log_debug("Read instance: EOF");
                                 fclose(global_props->file);
                                 return false;
                         }
@@ -331,6 +340,9 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp) {
                                matrix_get_value(stp, s, c) == 1 && graph_get_edge(stp->red_black, s, c + stp->num_species));
         assert(check_state(stp));
         log_state(stp);
+        cleanup(stp);
+        assert(check_state(stp));
+        log_state(stp);
         return true;
 }
 
@@ -341,7 +353,8 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp) {
   We remove null characters and species.
 */
 void cleanup(state_s *stp) {
-        log_debug("Cleanup");
+        assert(stp != NULL);
+        log_debug("cleanup");
         log_state(stp);
         // Looking for null species
         for (uint32_t s=0; s < stp->num_species_orig; s++)
@@ -349,7 +362,7 @@ void cleanup(state_s *stp) {
                         log_debug("Want to delete species %d\n", s);
                         delete_species(stp, s);
                 }
-        // Looking for null characters
+// Looking for null characters
         for (uint32_t c = 0; c < stp->num_characters_orig; c++)
                 if (stp->characters[c] && graph_degree(stp->red_black, c + stp->num_species_orig) == 0) {
 
@@ -359,6 +372,9 @@ void cleanup(state_s *stp) {
 /* TODO (if necessary) */
 /* we remove duplicated characters */
 /* we remove duplicated species */
+        log_debug("cleanup: final state");
+        log_state(stp);
+        log_debug("cleanup: end");
 }
 
 graph_s *
@@ -381,31 +397,31 @@ void init_state(state_s *stp, uint32_t nspecies, uint32_t nchars) {
         stp->num_characters = 0;
         stp->num_species = 0;
         stp->realize = 0;
-        log_debug("malloc new %p %p", stp->red_black, stp->conflict);
         stp->current_states = GC_MALLOC_ATOMIC(nchars * sizeof(uint32_t));
         assert(stp->current_states != NULL);
-        stp->species = GC_MALLOC_ATOMIC(nspecies * sizeof(bool));
+        memset(stp->current_states, 0, nchars);
+        stp->species = GC_MALLOC(nspecies * sizeof(bool));
         assert(stp->species != NULL);
-        stp->characters = GC_MALLOC_ATOMIC(nchars * sizeof(bool));
+        memset(stp->species, 1, nspecies);
+        stp->characters = GC_MALLOC(nchars * sizeof(bool));
         assert(stp->characters != NULL);
+        memset(stp->characters, 1, nchars);
         stp->colors = GC_MALLOC_ATOMIC(nchars * sizeof(uint8_t));
         assert(stp->colors != NULL);
-        log_debug("New graph %p\n", stp->red_black);
+        memset(stp->colors, BLACK, nchars);
+
         stp->red_black = graph_new(nspecies + nchars);
         stp->conflict = graph_new(nchars);
         stp->tried_characters = GC_MALLOC_ATOMIC(nchars * sizeof(uint32_t));
         assert(stp->tried_characters != NULL);
         stp->character_queue = GC_MALLOC_ATOMIC(nchars * sizeof(uint32_t));
         assert(stp->character_queue != NULL);
-
+        stp->connected_components = GC_MALLOC_ATOMIC((nchars + nspecies) * sizeof(uint32_t));
+        assert(stp->connected_components != NULL);
+        stp->current_component = GC_MALLOC(nchars * sizeof(bool));
+        assert(stp->current_component != NULL);
         stp->operation = 0;
-        for (uint32_t i=0; i < stp->num_species_orig; i++) {
-                stp->species[i] = true;
-        }
         for (uint32_t i=0; i < stp->num_characters_orig; i++) {
-                stp->current_states[i] = 0;
-                stp->characters[i] = true;
-                stp->colors[i] = BLACK;
                 stp->tried_characters[i] = -1;
                 stp->character_queue[i] = -1;
         }
@@ -478,7 +494,7 @@ delete_character(state_s *stp, uint32_t c) {
         assert(c < stp->num_characters_orig);
         assert(stp->characters[c] > 0);
         assert(stp->colors[c] > 0);
-        stp->characters[c] = false;
+        stp->characters[c] = 0;
         stp->current_states[c] = -1;
         (stp->num_characters)--;
 }
@@ -488,22 +504,22 @@ delete_species(state_s *stp, uint32_t s) {
         log_debug("Deleting species %d", s);
         assert(s < stp->num_species_orig);
         assert(stp->species[s] > 0);
-        stp->species[s] = false;
+        stp->species[s] = 0;
         (stp->num_species)--;
 }
 
 
 
 void
-fewest_characters(state_s* stp) {
+smallest_component(state_s* stp) {
         assert(stp != NULL);
-        bitmap_word** components = connected_components(stp->red_black);
+        assert(stp->connected_components != NULL);
+        log_debug("smallest_component. stp=%p", stp);
+        log_array_uint32_t("stp->connected_components", stp->connected_components, stp->red_black->num_vertices);
         stp->character_queue_size = stp->red_black->num_vertices + 1;
 /**
-   Since we need only the connected components that contain at least a
-   species, it suffices to explore only the connected components
-   associated to a species.
-
+   We need only the connected components that contain at least a
+   species and a character.
    We only have to count the number of characters contained in the
    component.
 
@@ -513,34 +529,51 @@ fewest_characters(state_s* stp) {
    Moreover, when the instance has no conflict, we simulate the
    standard algorithm to compute the perfect phylogeny.
 */
-        for (uint32_t v = 0; v < stp->num_species_orig; v++) {
-                uint32_t card = 0;
-                for (uint32_t w = stp->num_species_orig; w < stp->num_species_orig + stp->num_characters_orig; w++)
-                        if (bitmap_get_bit(components[v], w))
-                                card += 1;
-                log_debug("component: %d %d", v, card);
-                log_bitmap("component:", components[v], stp->red_black->num_vertices);
-
-                if (card > 0 && card < stp->character_queue_size) {
-                        stp->character_queue_size = card;
-                        uint32_t maximal_char = 0;
-                        uint32_t max_degree = 0;
-                        uint32_t p = 0;
-                        for (uint32_t w = stp->num_species_orig; w < stp->num_species_orig + stp->num_characters_orig; w++)
-                                if (bitmap_get_bit(components[v], w)) {
-                                        if (graph_degree(stp->red_black, w) > max_degree) {
-                                                max_degree = graph_degree(stp->red_black, w);
-                                                maximal_char = p;
-                                        }
-                                        stp->character_queue[p++] = w - stp->num_species_orig;
-                                }
-                        uint32_t temp = stp->character_queue[0];
-                        stp->character_queue[0] = stp->character_queue[maximal_char];
-                        stp->character_queue[maximal_char] = temp;
+        uint32_t card[stp->red_black->num_vertices];
+        memset(card, 0, stp->red_black->num_vertices * sizeof(card[0]));
+        for (uint32_t w = 0; w < stp->num_species_orig + stp->num_characters_orig; w++)
+                card[stp->connected_components[w]] += 1;
+        uint32_t smallest_component = stp->red_black->num_vertices + 1;
+        uint32_t smallest_size = stp->red_black->num_vertices + 1;
+        for (uint32_t w = 0; w < stp->num_species_orig + stp->num_characters_orig; w++)
+                if (card[w] > 1 && card [w] < smallest_size) {
+                        smallest_size = card[w];
+                        smallest_component = w;
                 }
-        }
-        log_debug("fewest_characters: %d", stp->character_queue_size);
+
+        log_debug("smallest_component: %d smallest_size: %d", smallest_component, smallest_size);
+        for (uint32_t w = 0; w < stp->num_species_orig + stp->num_characters_orig; w++)
+                if (stp->connected_components[w] == smallest_component)
+                        stp->current_component[w] = 1;
+                else
+                        stp->current_component[w] = 0;
+
+        uint32_t p = 0;
+        uint32_t maximum_char = 0;
+        uint32_t max_degree = 0;
+        for (uint32_t w = stp->num_species_orig; w < stp->num_species_orig + stp->num_characters_orig; w++)
+                if (stp->connected_components[w] == smallest_component) {
+                        if (graph_degree(stp->red_black, w) > max_degree) {
+                                max_degree = graph_degree(stp->red_black, w);
+                                maximum_char = p;
+                        }
+                        stp->character_queue[p++] = w - stp->num_species_orig;
+                }
+        stp->character_queue_size = p;
+        log_array_uint32_t("card: ", card, stp->red_black->num_vertices);
+        log_debug("maximum_char: %d max_degree: %d", maximum_char, max_degree);
         log_array_uint32_t("character_queue", stp->character_queue, stp->character_queue_size);
+/* Put the character with maximum degree in front of
+   stp->character_queue */
+
+        if (maximum_char > 0) {
+                uint32_t temp = stp->character_queue[0];
+                stp->character_queue[0] = stp->character_queue[maximum_char];
+                stp->character_queue[maximum_char] = temp;
+        }
+        log_debug("character_queue_size: %d", stp->character_queue_size);
+        log_array_uint32_t("character_queue", stp->character_queue, stp->character_queue_size);
+        log_debug("smallest_component: end");
 }
 
 void
@@ -554,4 +587,12 @@ update_conflict_graph(state_s* stp) {
                         if(states[0][0] + states[0][1] + states[1][0] + states[1][1] == 4)
                                 graph_add_edge(stp->conflict, c1, c2);
                 }
+}
+
+void
+update_connected_components(state_s* stp) {
+        log_debug("update_connected_components. stp=%p", stp);
+        stp->connected_components = connected_components(stp->red_black);
+        log_array_uint32_t("stp->connected_components", stp->connected_components, stp->red_black->num_vertices);
+        log_debug("update_connected_components: end");
 }

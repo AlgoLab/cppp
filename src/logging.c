@@ -98,12 +98,12 @@ void log_array_uint32_t(const char* name, const uint32_t* arr, const uint32_t si
 }
 
 void
-log_bitmap(const char* name, const bitmap_word* arr, const uint32_t nbits) {
+log_bitmap(const char* name, bitmap_word* arr, const uint32_t nbits) {
 #ifdef DEBUG
         fprintf(stderr, "  %s. Size %d. Words %d  Address %p Values: ", name, nbits, BITMAP_NWORDS(nbits), arr);
         if (arr != NULL)
-                for(uint32_t i = 0; i < BITMAP_NWORDS(nbits); i++)
-                        fprintf(stderr, "%a ", arr[i]);
+                for(uint32_t i = 0; i < nbits; i++)
+                        fprintf(stderr, "%d", (int) bitmap_get_bit(arr, i));
         else
                 fprintf(stderr, "NULL");
         fprintf(stderr, "\n");

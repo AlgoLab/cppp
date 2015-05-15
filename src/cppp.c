@@ -34,6 +34,7 @@ int main(int argc, char **argv) {
         if (args_info.inputs_num < 1)
                 error(5, 0, "There is no input matrix to analyze\n");
         start_logging(args_info);
+        log_debug("cppp: start");
         FILE* outf = fopen(args_info.output_arg, "w");
 
         instances_schema_s props = {
@@ -41,7 +42,7 @@ int main(int argc, char **argv) {
                 .filename = args_info.inputs[0]
         };
         state_s temp;
-        for (;read_instance_from_filename(&props, &temp);) {
+        while (read_instance_from_filename(&props, &temp)) {
 /**
    Notice that each character is realized at most twice (once positive and once
    negative) and that each species can be declared null at most once.
@@ -56,13 +57,12 @@ int main(int argc, char **argv) {
                 if (outf == NULL)
                         error(6, 0, "Input file ended prematurely\n");
                 if (exhaustive_search(states, alphabetic, states[0].num_species + 2 * states[0].num_characters)) {
+                        log_debug("Writing solution");
                         for (uint32_t level=0; (states + level)->num_species > 0; level++)
                                 fprintf(outf, "%d ", (states + level)->realize);
                         fprintf(outf, "\n");
                 } else
                         fprintf(outf, "Not found\n");
-                for (uint32_t level=0; (states + level)->num_species > 0; level++)
-                        log_debug("malloc flushing level %d %p", level, &((states + level)->red_black));
         }
         fclose(outf);
         cmdline_parser_free(&args_info);

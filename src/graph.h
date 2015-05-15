@@ -53,7 +53,7 @@
 typedef struct graph_s {
         uint32_t num_vertices;
         uint32_t *degrees;
-        bitmap_word *adjacency;
+        bool *adjacency;
 } graph_s;
 
 /**
@@ -91,7 +91,7 @@ graph_nuke_edges(graph_s* gp);
    is reachable from v
 */
 void
-graph_reachable(graph_s* gp, uint32_t v, bitmap_word* reached);
+graph_reachable(graph_s* gp, uint32_t v, bool* reached);
 
 void
 graph_pp(graph_s* gp);
@@ -108,8 +108,23 @@ graph_degree(graph_s* gp, uint32_t v);
 /**
    \brief computes the connected components of a graph
 
-   \return a pointer to the array of the  connected components found
+   \return a pointer to the array where each vertex has a number
+   encoding the connected component it belongs to.
 */
 
-bitmap_word **
+uint32_t *
 connected_components(graph_s* gp);
+
+/**
+   \brief test if a vertex is adjacent to all vertices that it can
+   reach, ie it is the central vertex of a star and no other vertex is
+   at distance larger than 1.
+*/
+
+
+bool
+small_world_1(graph_s* gp, uint32_t v);
+
+// TODO
+// Test if a bitmap really helps or not
+// Test if a adjacency list is better

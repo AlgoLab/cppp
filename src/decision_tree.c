@@ -37,7 +37,7 @@ level_completed(const state_s * stp) {
 */
 static uint32_t
 next_character(state_s *stp) {
-        log_debug("next_character: pre");
+        log_debug("next_character: stp=%p", stp);
         log_state_lists(stp);
         if (stp->character_queue_size > 0 ) {
                 /* we have found a character to try */
@@ -48,7 +48,7 @@ next_character(state_s *stp) {
                 for (uint32_t i = 0; i < stp->character_queue_size; i++)
                         stp->character_queue[i] = stp->character_queue[i+1];
                 log_debug("next_character: %d", c);
-                log_debug("next_character: post");
+                log_debug("next_character: end");
                 log_state_lists(stp);
                 return c;
         }
@@ -66,8 +66,9 @@ init_node(state_s *stp, strategy_fn get_characters_to_realize) {
         stp->character_queue = GC_MALLOC_ATOMIC(stp->num_characters_orig * sizeof(uint32_t));
         assert(stp->character_queue != NULL);
         stp->tried_characters_size = 0;
-        fewest_characters(stp);
+        smallest_component(stp);
         log_state(stp);
+        log_debug("init_node:end");
 }
 
 /**
@@ -89,44 +90,75 @@ init_node(state_s *stp, strategy_fn get_characters_to_realize) {
 */
 static uint32_t
 next_node(state_s *states, uint32_t level, strategy_fn get_characters_to_realize) {
+        log_debug("next_node: level=%d", level);
         state_s *current = states + level;
         log_debug("Called next_node");
         log_state(current);
 
-        for (uint32_t i = 0; i <= level; i++)
-                log_debug("malloc stack level %d %p", i, &((states+i)->red_black));
+        assert(current->backtrack_level < level || level == 0);
         if (level_completed(current)) {
-                log_debug("LEVEL. Backtrack to level: %d", level - 1);
+                log_debug("next_node: end. LEVEL. Backtrack to level: %d from %d", current->backtrack_level, level);
                 return (level - 1);
         }
         log_debug("Inside next_node");
-        log_state(current);
         current->realize = next_character(current);
         assert(current->realize <= current->num_characters_orig);
         state_s *next = states + (level + 1);
-        log_debug("realizing %d %p %p", level, next, current);
+        log_debug("next_node: realizing level=%d current->realize=%d %p %p", level, current->realize, next, current);
         bool status = realize_character(next, current);
         if (status) {
-                log_debug("LEVEL. Go to level: %d", level + 1);
+/* Check if we have resolved the whole instance */
+                if (next->num_species == 0) {
+                        log_debug("next_node: Solution found");
+                        return(level + 1);
+                }
+                log_debug("next_node: LEVEL. Go to level: %d", level + 1);
                 init_node(next, get_characters_to_realize);
+                next-> backtrack_level = level;
+                if (level_completed(current)) {
+/* In this case we have resolved a connected component of the
+   red-black graph. Find the level of the decision tree where we have
+   started resolving such connected component.
+
+   It is equal to the topmost level whose current_component has
+   includes the original species and characters that are not current.
+*/
+                        bool current_species_characters[current->red_black->num_vertices];
+                        memset(current_species_characters, 0, current->red_black->num_vertices * sizeof(current_species_characters[0]));
+                        for (uint32_t s = 0; s < current->num_species; s++)
+                                current_species_characters[s] = current->species[s];
+                        for (uint32_t c = 0; c < current->num_characters; c++)
+                                current_species_characters[c + current->num_species] = current->characters[c];
+
+                        uint32_t blevel = level - 1;
+                        while (blevel <= level && bool_array_includes(current_species_characters, (states+blevel)->current_component, current->red_black->num_vertices)) {
+                                current->backtrack_level = blevel;
+                                blevel -= 1;
+                        }
+                }
+                log_debug("next_node: end. LEVEL. Move to level: %d", level + 1);
                 return (level + 1);
         }
 /***********************************************/
 /* The next solution is not feasible        */
 /***********************************************/
-        log_debug("LEVEL. Stay at level: %d", level);
+        log_debug("next_node: end. LEVEL. Stay at level: %d", level);
         return (level);
 }
 
 bool
 exhaustive_search(state_s *states, strategy_fn strategy, uint32_t max_depth) {
-        init_node(states, strategy);
+        cleanup(states + 0);
+        update_connected_components(states + 0);
+        init_node(states + 0, strategy);
+        (states + 0)->backtrack_level = -1;
         for(uint32_t level = 0; level != -1; level = next_node(states, level, strategy)) {
-                cleanup(states + level);
                 if ((states + level)->num_species == 0) {
+                        log_debug("exhaustive_search: solution found");
                         return true;
                 }
                 assert(level <= max_depth);
         }
+        log_debug("exhaustive_search: solution not found");
         return false;
 }

@@ -17,7 +17,12 @@ typedef uint64_t bitmap_word;
 #define BITMAP_BIT_PLACE(_n)    ((_n) >> LOG_BITMAP_WORD_BITS)
 #define BITMAP_BIT_OFFSET(_n)   ((_n) & (BITMAP_WORD_BITS - 1))
 #define BITMAP_NWORDS(_n)       (((_n) + BITMAP_WORD_BITS - 1) >> LOG_BITMAP_WORD_BITS)
-#define BITMAP_WORD(_bm, _n)    ((_bm)[(_n) >> LOG_BITMAP_WORD_BITS])
+#define BITMAP_HEADWORDS(_n)    ((_n) / BITMAP_WORD_BITS)
+#define BITMAP_TAILWORD(_bm,_n) ((_bm)[BITMAP_HEADWORDS(_n)])
+#define BITMAP_HASTAIL(_n)      (((_n) % BITMAP_WORD_BITS) != 0)
+#define BITMAP_TAILBITS(_n)     (~(-1UL >> ((_n) % BITMAP_WORD_BITS)))
+#define BITMAP_TAIL(_bm,_n)     (BITMAP_TAILWORD(_bm, _n) & BITMAP_TAILBITS(_n))
+#define BITMAP_WORD(_bm,_n)     ((_bm)[(_n) >> LOG_BITMAP_WORD_BITS])
 #define BITMAP_BIT_MASK(_n)     (1UL << (BITMAP_BIT_OFFSET(_n)))
 
 static inline size_t bitmap_sizeof(unsigned long nbits) {
@@ -53,4 +58,28 @@ static inline void bitmap_clear_bit(bitmap_word *bitmap, unsigned long n) {
 
 static inline void bitmap_copy(bitmap_word *dst, const bitmap_word *src, unsigned long nbits) {
         memcpy(dst, src, bitmap_sizeof(nbits));
+}
+
+static inline bool bitmap_includes(bitmap_word *src1, const bitmap_word *src2, unsigned long nbits) {
+        unsigned long i;
+        for (i = 0; i < BITMAP_HEADWORDS(nbits); i++) {
+                if (src1[i]  & ~src2[i])
+                        return false;
+        }
+
+        if (BITMAP_HASTAIL(nbits) && (BITMAP_TAIL(src1, nbits) & ~BITMAP_TAIL(src2, nbits)))
+                return false;
+        return true;
+}
+
+
+/**
+   \brief true if the first array includes the second
+*/
+static inline bool
+bool_array_includes(bool* a1, bool* a2, uint32_t n) {
+        for (uint32_t i = 0; i < n; i++)
+                if (a2[i] && !a1[i])
+                        return false;
+        return true;
 }

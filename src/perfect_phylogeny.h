@@ -70,6 +70,11 @@
 
    The \c current_states gives the current state for each original species.
 
+   \c current_component contains the current connected component of
+   the red-black graph. It is used to solve separately each connected
+   component by a careful managing of the backtracking
+
+
    \c species and \c characters are two arrays whose values are 1 for the actual species and characters
    respectively.
 
@@ -87,8 +92,9 @@ typedef struct state_s {
         graph_s *red_black;
         graph_s *conflict;
         uint32_t *current_states;
-        bitmap_word *species;
-        bitmap_word *characters;
+        bool *species;
+        bool *characters;
+        uint32_t *connected_components;
         uint32_t num_species;
         uint32_t num_characters;
         uint32_t num_species_orig;
@@ -98,11 +104,11 @@ typedef struct state_s {
         uint32_t *character_queue;
         uint32_t tried_characters_size;
         uint32_t character_queue_size;
-        bitmap_word *current_component;
+        bool *current_component;
         uint32_t *matrix;
         uint32_t operation;
         uint32_t realize;
-        bool disconnected;
+        uint32_t backtrack_level;
 } state_s;
 
 /**
@@ -235,6 +241,14 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp);
 */
 bool realize_character(state_s* dst, const state_s* src);
 
+/**
+   \brief updates the connected components of the red-black graph of
+   the current state
+*/
+
+void
+update_connected_components(state_s* stp);
+
 
 /**
    \param inst: state_s
@@ -259,12 +273,14 @@ void log_state_lists(const state_s* stp);
 void log_state_graphs(const state_s* stp);
 
 /**
-   \brief find the connected component in a red-black graph that
-   contains at least a species (i.e. contains at least an edge) and has
-   the fewest characters.
+   \brief
+   updates the current_component field a state, computing the
+   smallest nontrivial connected component of the red-black graph.
+
+   It requires that the connected_component field has been previously updated.
 */
 void
-fewest_characters(state_s* stp);
+smallest_component(state_s* stp);
 
 /**
    \brief update the conflict graph

@@ -30,6 +30,10 @@ debug: CFLAGS += -DDEBUG -O0
 
 debug: bin
 
+debug-dist: CFLAGS += -DDEBUG -O3
+
+debug-dist: bin
+
 profile: CFLAGS += -O3 -DNDEBUG
 
 profile: dist
