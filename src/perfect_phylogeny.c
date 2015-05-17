@@ -45,26 +45,23 @@ void log_state(const state_s* stp) {
         fprintf(stderr, "      |current|          |      \n");
         fprintf(stderr, "  c   |states |characters|colors\n");
         fprintf(stderr, "------|-------|----------|------\n");
-        for (size_t i = 0; i < stp->num_characters_orig; i++)
-                fprintf(stderr, "%6d|%7d|%10d|%6d\n", i, stp->current_states[i], (stp->characters)[i], stp->colors[i]);
+        log_array_bool("stp->characters", stp->characters, stp->num_characters_orig);
         fprintf(stderr, "------|-------|----------|------\n");
 
         fprintf(stderr, "------|-------\n");
         fprintf(stderr, "  s   |species\n");
         fprintf(stderr, "------|-------\n");
-        for (size_t i = 0; i < stp->num_species_orig; i++) {
-                fprintf(stderr, "%6d|%7d\n", i, (stp->species)[i]);
-        }
+        log_array_bool("stp->species", stp->species, stp->num_species_orig);
         fprintf(stderr, "------|-------\n");
 
         fprintf(stderr, "  operation: %d\n", stp->operation);
         fprintf(stderr, "  realize: %d\n", stp->realize);
 
         fprintf(stderr, "connected_components: size %d\n", stp->red_black->num_vertices);
-        for (size_t i = 0; i < stp->red_black->num_vertices; i++) {
-                fprintf(stderr, "%d", (stp->connected_components)[i]);
-        }
-	fprintf(stderr, "\n");
+	log_array_uint32_t("connected_components", stp->connected_components, stp->red_black->num_vertices);
+
+        log_array_bool("current_component", stp->current_component, stp->red_black->num_vertices);
+        fprintf(stderr, "\n");
 
 
         log_state_lists(stp);
@@ -198,9 +195,8 @@ realize_character(state_s* dst, const state_s* src) {
         log_debug("Trying to realize CHAR %d", character);
         assert(check_state(dst));
         uint32_t c = src->num_species_orig + character;
+        assert(src->current_component[c]);
         int color = src->colors[character];
-        graph_reachable(dst->red_black, c, src->current_component);
-        memcpy(dst->current_component, src->current_component, src->num_species_orig + src->num_characters_orig * src->current_component[0]);
         log_array_bool("src->current_component: ", src->current_component, src->red_black->num_vertices);
         log_debug("realize_character: check dst");
         assert(check_state(dst));
@@ -543,11 +539,7 @@ smallest_component(state_s* stp) {
 
         log_debug("smallest_component: %d smallest_size: %d", smallest_component, smallest_size);
         for (uint32_t w = 0; w < stp->num_species_orig + stp->num_characters_orig; w++)
-                if (stp->connected_components[w] == smallest_component)
-                        stp->current_component[w] = 1;
-                else
-                        stp->current_component[w] = 0;
-
+                stp->current_component[w] = (stp->connected_components[w] == smallest_component);
         uint32_t p = 0;
         uint32_t maximum_char = 0;
         uint32_t max_degree = 0;

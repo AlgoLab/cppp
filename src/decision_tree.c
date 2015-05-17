@@ -22,6 +22,22 @@
 #include "decision_tree.h"
 
 /**
+   \brief prints a dump of the sequence of characters realized
+
+*/
+static void log_decisions(const state_s* arr_stp, const uint32_t max_depth) {
+#ifdef DEBUG
+        log_debug("log_decisions");
+        fprintf(stderr, "=======================================\n");
+        for (uint32_t l = 0; l <= max_depth; l++)
+                fprintf(stderr, "level=%4d Character=%d\n", l, (arr_stp+l)->realize);
+        fprintf(stderr, "=========END DECISIONS=================\n");
+#endif
+}
+
+
+
+/**
    \c no_sibling_p returns \c true iff there are no other characters
    to  try at the current level
 */
@@ -40,7 +56,7 @@ next_character(state_s *stp) {
         log_debug("next_character: stp=%p", stp);
         log_state_lists(stp);
         if (stp->character_queue_size > 0 ) {
-                /* we have found a character to try */
+/* we have found a character to try */
                 uint32_t c = stp->character_queue[0];
                 stp->tried_characters[stp->tried_characters_size] = c;
                 stp->tried_characters_size += 1;
@@ -72,6 +88,33 @@ init_node(state_s *stp, strategy_fn get_characters_to_realize) {
 }
 
 /**
+   \brief tests if the states \c root and \c leaf are first and the
+   last of portion of states solving a connected component of the
+   red-black graph of the state \c root.
+
+   The goal is to simulate the fact that each connected component of a
+   red-black graph can be solved independently.
+
+   The set of characters at the state root that are not in the state
+   leaf are exactly the characters fully realized in the portion
+   between root and leaf. We have to check if those states are exactly
+   those in the \c current_component at state root.
+*/
+static bool
+component_borders(state_s* states, uint32_t root_level, uint32_t leaf_level) {
+        state_s* root = states + root_level;
+        state_s* leaf = states + leaf_level;
+        bool* solved = bool_array_difference(root->characters, leaf->characters, root->num_characters_orig);
+        bool found = bool_array_equal(solved, (root->current_component) + root->num_species_orig, root->num_characters_orig);
+        if (!found)
+                return false;
+        for (uint32_t l = root_level + 1; l <= leaf_level; l++)
+                if (!bool_array_includes(root->current_component , (states + l)->current_component, root->red_black->num_vertices))
+                        return false;
+        return true;
+}
+
+/**
    \brief computes the next node of the decision tree
 
    \param states: the set of states, since the decision tree can move to the
@@ -92,13 +135,12 @@ static uint32_t
 next_node(state_s *states, uint32_t level, strategy_fn get_characters_to_realize) {
         log_debug("next_node: level=%d", level);
         state_s *current = states + level;
-        log_debug("Called next_node");
         log_state(current);
+        log_decisions(states, level);
 
-        assert(current->backtrack_level < level || level == 0);
         if (level_completed(current)) {
                 log_debug("next_node: end. LEVEL. Backtrack to level: %d from %d", current->backtrack_level, level);
-                return (level - 1);
+                return (current->backtrack_level);
         }
         log_debug("Inside next_node");
         current->realize = next_character(current);
@@ -106,6 +148,7 @@ next_node(state_s *states, uint32_t level, strategy_fn get_characters_to_realize
         state_s *next = states + (level + 1);
         log_debug("next_node: realizing level=%d current->realize=%d %p %p", level, current->realize, next, current);
         bool status = realize_character(next, current);
+        log_debug("next_node: result of realizing level=%d current->realize=%d outcome=%d", level, current->realize, status);
         if (status) {
 /* Check if we have resolved the whole instance */
                 if (next->num_species == 0) {
@@ -116,6 +159,7 @@ next_node(state_s *states, uint32_t level, strategy_fn get_characters_to_realize
                 init_node(next, get_characters_to_realize);
                 next-> backtrack_level = level;
                 if (level_completed(current)) {
+                        log_debug("next_node: connected component completed");
 /* In this case we have resolved a connected component of the
    red-black graph. Find the level of the decision tree where we have
    started resolving such connected component.
@@ -123,18 +167,22 @@ next_node(state_s *states, uint32_t level, strategy_fn get_characters_to_realize
    It is equal to the topmost level whose current_component has
    includes the original species and characters that are not current.
 */
-                        bool current_species_characters[current->red_black->num_vertices];
-                        memset(current_species_characters, 0, current->red_black->num_vertices * sizeof(current_species_characters[0]));
-                        for (uint32_t s = 0; s < current->num_species; s++)
-                                current_species_characters[s] = current->species[s];
-                        for (uint32_t c = 0; c < current->num_characters; c++)
-                                current_species_characters[c + current->num_species] = current->characters[c];
-
-                        uint32_t blevel = level - 1;
-                        while (blevel <= level && bool_array_includes(current_species_characters, (states+blevel)->current_component, current->red_black->num_vertices)) {
-                                current->backtrack_level = blevel;
-                                blevel -= 1;
-                        }
+                        for (uint32_t blevel = 0; blevel < level; blevel++)
+                                if (component_borders(states, blevel, level + 1)) {
+                                        next->backtrack_level = blevel - 1;
+                                        log_decisions(states, level);
+                                        log_debug("Preparing backtrack to level %d from %d (level=%d)", blevel - 1, level + 1, level);
+                                        for (uint32_t l = blevel; l <= level; l++) {
+                                                log_debug("Level=%d (%d-%d)", l, blevel, level);
+                                                log_array_bool("current_component", (states + l)->current_component, (states + blevel)->red_black->num_vertices);
+                                                log_array_bool("characters", (states + l)->characters, (states + blevel)->num_characters_orig);
+                                        }
+                                        log_debug("Next state");
+                                        log_state(next);
+                                        log_debug("Backtracked state");
+                                        log_state(states + blevel);
+                                        break;
+                                }
                 }
                 log_debug("next_node: end. LEVEL. Move to level: %d", level + 1);
                 return (level + 1);

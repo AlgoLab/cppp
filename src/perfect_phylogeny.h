@@ -276,6 +276,7 @@ void log_state_graphs(const state_s* stp);
    \brief
    updates the current_component field a state, computing the
    smallest nontrivial connected component of the red-black graph.
+   Updates also the queue of characters that can be realized.
 
    It requires that the connected_component field has been previously updated.
 */

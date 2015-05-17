@@ -83,3 +83,29 @@ bool_array_includes(bool* a1, bool* a2, uint32_t n) {
                         return false;
         return true;
 }
+
+
+/**
+   \brief true if the two arrays are the same
+*/
+static inline bool
+bool_array_equal(bool* a1, bool* a2, uint32_t n) {
+        for (uint32_t i = 0; i < n; i++)
+                if (a1[i] != a2[i])
+                        return false;
+        return true;
+}
+
+
+
+/**
+   \brief computes the difference a1-a2 of two sets a1, a2, receiving the
+   characteristics function of those two sets.
+*/
+static inline bool*
+bool_array_difference(const bool* a1, const bool* a2, uint32_t n) {
+        bool* b = GC_MALLOC(n * sizeof(bool));
+        for (uint32_t i = 0; i < n; i++)
+                b[i] = (a1[i] && !a2[i]);
+        return b;
+}
