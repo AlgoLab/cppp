@@ -241,3 +241,6 @@ end
 
 
 puts "#{build_tree(m, m.c_labels)};"
+
+#TODO
+## Test 4gamete.matrix
