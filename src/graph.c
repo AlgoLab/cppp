@@ -25,6 +25,39 @@
 
 #include "graph.h"
 
+static inline int intcmp (const void *pa, const void *pb) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+        if (*(uint32_t *) pa < *(uint32_t *) pb)
+                return -1;
+        if (*(uint32_t *) pa > *(uint32_t *) pb)
+                return 1;
+        return 0;
+#pragma GCC diagnostic pop
+}
+
+static void
+insertion_sort(uint32_t* arr, uint32_t n) {
+        uint32_t sorted_prefix = 1;
+        // sorted_prefix is the number of initial elements that are
+        // already sorted
+        for (; sorted_prefix < n; sorted_prefix++)
+                if (arr[sorted_prefix - 1] >= arr[sorted_prefix]) {
+                        break;
+                }
+        if (sorted_prefix < n) {
+/* the array is not already sorted */
+                for (; sorted_prefix < n; sorted_prefix++) {
+                        uint32_t x = arr[sorted_prefix];
+                        while (sorted_prefix > 0 && arr[sorted_prefix - 1] > x) {
+                                arr[sorted_prefix] = arr[sorted_prefix - 1];
+                                sorted_prefix -= 1;
+                        }
+                        arr[sorted_prefix] = x;
+                }
+        }
+}
+
 static bool
 check_graph(graph_s *gp) {
         bool res = true;
@@ -189,11 +222,13 @@ graph_reachable(graph_s* gp, uint32_t v, bool* reached) {
                 uint32_t new_border_size = 0;
                 for (uint32_t vx = 0; vx < border_size; vx++) {
                         uint32_t v1 = border[vx];
-                        for (uint32_t v2 = 0; v2 < n; v2++)
-                                if (graph_get_edge(gp, v1, v2) && !reached[v2]) {
-                                        new_border[new_border_size++] = v2;
-                                        reached[v2] = true;
+                        for (uint32_t p = 0; p < graph_degree(gp, v1); p++) {
+                                uint32_t w = graph_get_edge_pos(gp, v1, p);
+                                if (!reached[w]) {
+                                        new_border[new_border_size++] = w;
+                                        reached[w] = true;
                                 }
+                        }
                 }
                 memcpy(border, new_border, new_border_size * sizeof(new_border[0]));
                 border_size = new_border_size;
@@ -254,16 +289,14 @@ void
 graph_pp(graph_s* gp) {
 #ifdef DEBUG
         assert(gp != NULL);
-        check_graph(gp);
         log_debug("graph_pp");
         check_graph(gp);
         uint32_t n = gp->num_vertices;
         fprintf(stderr, "Graph %p has %d vertices\n", gp, n);
         for (uint32_t v=0; v < n; v++) {
                 fprintf(stderr, "Vertex %d (degree %d):", v, graph_degree(gp, v));
-                for (uint32_t v2=0; v2 < n; v2++)
-                        if (graph_get_edge(gp, v, v2))
-                                fprintf(stderr, " %d", v2);
+                for (uint32_t p=0; p < graph_degree(gp, v); p++)
+                        fprintf(stderr, " %d", graph_get_edge_pos(gp, v, p));
                 fprintf(stderr, "\n");
         }
 #endif

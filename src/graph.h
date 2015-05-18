@@ -53,7 +53,7 @@
 typedef struct graph_s {
         uint32_t num_vertices;
         uint32_t *degrees;
-        bool *adjacency;
+        uint32_t *adjacency;
 } graph_s;
 
 /**
@@ -70,18 +70,29 @@ typedef struct graph_s {
 graph_s*
 graph_new(uint32_t num_vertices);
 
-bool
+void
 graph_add_edge(graph_s* gp, uint32_t v1, uint32_t v2);
+
+void
+graph_add_edge_unsafe(graph_s* gp, uint32_t v1, uint32_t v2);
 
 void
 graph_del_edge(graph_s* gp, uint32_t v1, uint32_t v2);
 
+void
+graph_del_edge_unsafe(graph_s* gp, uint32_t v1, uint32_t v2);
+
 bool
 graph_get_edge(graph_s* gp, uint32_t v1, uint32_t v2);
+
+uint32_t
+graph_get_edge_pos(graph_s* gp, uint32_t v1, uint32_t pos);
 
 void
 graph_nuke_edges(graph_s* gp);
 
+void
+graph_fix_edges(graph_s* gp, uint32_t v1);
 /**
    \brief stores in \c reached all vertices that are in same connected
    component of \c gp as \c v

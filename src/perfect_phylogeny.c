@@ -58,7 +58,7 @@ void log_state(const state_s* stp) {
         fprintf(stderr, "  realize: %d\n", stp->realize);
 
         fprintf(stderr, "connected_components: size %d\n", stp->red_black->num_vertices);
-	log_array_uint32_t("connected_components", stp->connected_components, stp->red_black->num_vertices);
+        log_array_uint32_t("connected_components", stp->connected_components, stp->red_black->num_vertices);
 
         log_array_bool("current_component", stp->current_component, stp->red_black->num_vertices);
         fprintf(stderr, "\n");
@@ -200,18 +200,24 @@ realize_character(state_s* dst, const state_s* src) {
         log_array_bool("src->current_component: ", src->current_component, src->red_black->num_vertices);
         log_debug("realize_character: check dst");
         assert(check_state(dst));
+        bool to_fix[src->red_black->num_vertices];
+        memset(to_fix, false, (src->red_black->num_vertices) * sizeof(bool));
+        to_fix[c] = true;
+
         if (color == BLACK) {
-                log_debug("realize_character: color %d = BLACK", color);
+                log_debug("realize_character %d (vertex %d): color %d = BLACK", character, c, color);
 /*
   for each species s in the same connected component as c, delete the
   edge (s,c) if it exists and create the edge (s,c) if it does not exist
 */
                 for (uint32_t v=0; v<n; v++)
-                        if (src->current_component[v])
+                        if (src->current_component[v]) {
                                 if (graph_get_edge(src->red_black, c, v) && c != v)
-                                        graph_del_edge(dst->red_black, c, v);
+                                        graph_del_edge_unsafe(dst->red_black, c, v);
                                 else
-                                        graph_add_edge(dst->red_black, c, v);
+                                        graph_add_edge_unsafe(dst->red_black, c, v);
+                                to_fix[v] = true;
+                        }
                 dst->operation = 1;
                 dst->colors[character] = RED;
                 dst->current_states[character] = 1;
@@ -229,14 +235,21 @@ realize_character(state_s* dst, const state_s* src) {
 */
                 for (uint32_t v=0; v<n; v++)
                         if (src->current_component[v])
-                                if (graph_get_edge(src->red_black, c, v) && c != v)
+                                if (graph_get_edge(src->red_black, c, v) && c != v) {
                                         graph_del_edge(dst->red_black, c, v);
-                                else {
+					to_fix[v] = true;
+                                } else {
                                         dst->operation = 0;
                                         log_debug("realize_character: end. REALIZATION IMPOSSIBLE");
                                         return false;
                                 }
         }
+        log_debug("realize_character before fixing %d (vertex %d): color %d = BLACK", character, c, color);
+        log_array_bool("to fix", to_fix, dst->red_black->num_vertices);
+        for (uint32_t v=0; v < dst->red_black->num_vertices; v++)
+                if (to_fix[v])
+                        graph_fix_edges(dst->red_black, v);
+
         dst->realize = character;
         log_debug("realize_character: call update_connected_components");
         update_connected_components(dst);
