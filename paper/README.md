@@ -36,3 +36,19 @@ Options:
 positive and negative characters. This case is suitable to generate a
 persistent phylogeny. If this option is missing, it computes a perfect phylogeny.
 *     ```-d``` to output lots of debugging information
+
+
+### generate-persistent-phylogeny
+
+A sample call follows
+
+```./generate-persistent-phylogeny -p ~/lib/msdir/ms -n 20 -m 30 -r 10```
+
+Generates some random instances, all admitting a persistent phylogeny
+
+Options:
+*     ```-m``` the number of characters
+*     ```-n``` the number of species
+*     ```-r``` the number of instances to generate
+*     ```-p``` the path to the ms executable that is used to actually
+      produce the matrix.

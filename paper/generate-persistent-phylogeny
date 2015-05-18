@@ -1,0 +1,119 @@
+#!/usr/bin/env ruby
+# coding: utf-8
+
+# Copyright 2015
+# Gianluca Della Vedova <http://gianluca.dellavedova.org>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+require 'fileutils'
+require 'optparse'
+require 'optparse/time'
+require 'ostruct'
+require 'pp'
+require 'set'
+require 'tempfile'
+
+class OptparseExample
+  def self.parse(args)
+    # The options specified on the command line will be collected in *options*.
+    # We set default values here.
+    options = OpenStruct.new
+    options.library = []
+    options.inplace = false
+    options.encoding = "utf8"
+    options.transfer_type = :auto
+    options.verbose = false
+
+    opt_parser = OptionParser.new do |opts|
+      opts.banner = "Usage: generate-persistent-phylogeny [options]"
+
+      opts.separator ""
+      opts.separator "Specific options:"
+
+
+      # Mandatory argument.
+      opts.on("-m", "--characters NUMBER",
+              "Number of characters") do |num_characters|
+        options.characters = num_characters.to_i
+      end
+
+      # Mandatory argument.
+      opts.on("-n", "--species NUMBER",
+              "Number of species") do |species|
+        options.species = species.to_i
+      end
+
+      # Mandatory argument.
+      opts.on("-p", "--mspath PATH",
+              "path to the ms executable") do |mspath|
+        options.mspath = mspath
+      end
+
+      # Mandatory argument.
+      opts.on("-r", "--replicates NUMBER",
+              "number of replicates to compute") do |replicates|
+        options.replicates = replicates.to_i
+      end
+
+
+      # Mandatory argument.
+      opts.on("-d", "--debug") do
+        options.debug = true
+      end
+
+      # No argument, shows at tail.  This will print an options summary.
+      # Try it and see!
+      opts.on_tail("-h", "--help", "Show this message") do
+        puts opts
+        exit
+      end
+    end
+    opt_parser.parse!(args)
+    options
+  end
+end
+
+options = OptparseExample.parse(ARGV)
+
+# The idea is to use ms to create a matrix with 2m characters.
+# Then the matrix produced by ms is analyzed and the characters are read in pairs:
+# The first character is the positive character and the second is the negative char.
+# We force the fact that a character can be negated only if it has been previously
+# activated
+
+puts "#{options.species} #{options.characters}"
+puts ""
+options.replicates.times do |replicate|
+  tmp = Tempfile.new('msfile')
+  system("#{options.mspath} #{options.species} 1 -s #{2 * options.characters} -r 0.0 5000 > #{tmp.path}");
+  rows = File.readlines(tmp)
+  rows.each do |row|
+    next unless (row =~ /^[01]+$/)
+    states = row.split('')
+    result = Array.new()
+    while (not states.empty?)
+      a = states.shift
+      b = states.shift
+      if (a == '1' and b == '0')
+        result.push(1)
+      else
+        result.push(0)
+      end
+    end
+    puts result.join(" ")
+  end
+  if (replicate < options.replicates)
+    puts ""
+  end
+end
