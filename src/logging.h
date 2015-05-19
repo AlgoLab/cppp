@@ -27,6 +27,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include "bitmap.h"
+#include <execinfo.h>
 
 unsigned int log_error(const char* message, ...);
 unsigned int log_info(const char* message, ...);
@@ -43,3 +44,5 @@ void log_bitmap(const char* name, bitmap_word* arr, const uint32_t nbits);
 #else
 #define log_debug(...)
 #endif
+
+void print_trace (void);
