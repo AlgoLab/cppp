@@ -25,39 +25,13 @@
 
 #include "graph.h"
 
-static inline int intcmp (const void *pa, const void *pb) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
-        if (*(uint32_t *) pa < *(uint32_t *) pb)
-                return -1;
-        if (*(uint32_t *) pa > *(uint32_t *) pb)
-                return 1;
-        return 0;
-#pragma GCC diagnostic pop
-}
 
+/**
+   \brief check if a graph is internally consistent
+
+   Exits with an error code in case of a problem.
+*/
 static void
-insertion_sort(uint32_t* arr, uint32_t n) {
-        uint32_t sorted_prefix = 1;
-        // sorted_prefix is the number of initial elements that are
-        // already sorted
-        for (; sorted_prefix < n; sorted_prefix++)
-                if (arr[sorted_prefix - 1] >= arr[sorted_prefix]) {
-                        break;
-                }
-        if (sorted_prefix < n) {
-/* the array is not already sorted */
-                for (; sorted_prefix < n; sorted_prefix++) {
-                        uint32_t x = arr[sorted_prefix];
-                        while (sorted_prefix > 0 && arr[sorted_prefix - 1] > x) {
-                                arr[sorted_prefix] = arr[sorted_prefix - 1];
-                                sorted_prefix -= 1;
-                        }
-                        arr[sorted_prefix] = x;
-                }
-        }
-}
-
 graph_check(const graph_s *gp) {
         assert(gp != NULL);
 #ifdef DEBUG
@@ -134,69 +108,51 @@ graph_get_edge_pos(const graph_s* gp, uint32_t v, uint32_t pos) {
 
 void
 graph_del_edge(graph_s* gp, uint32_t v1, uint32_t v2) {
-        log_debug("graph_del_edge %d %d", v1, v2);
-        graph_pp(gp);
-        uint32_t k = v2;
-
-        uint32_t* found = bsearch(&k, (gp->adjacency) + v1 * (gp->num_vertices), graph_degree(gp, v1), sizeof(uint32_t), intcmp);
-        assert(found != NULL);
-        log_debug("graph_del_edge. deleting %d", *found);
-        *found = (gp->adjacency)[v1 * (gp->num_vertices) + graph_degree(gp, v1) - 1];
-        (gp->adjacency)[v1 * (gp->num_vertices) + graph_degree(gp, v1) - 1] = -1;
-        (gp->degrees)[v1] -= 1;
-
-        k = v1;
-        found = bsearch(&k, (gp->adjacency) + v2 * (gp->num_vertices), graph_degree(gp, v2), sizeof(uint32_t), intcmp);
-        assert(found != NULL);
-        log_debug("graph_del_edge. deleting %d", *found);
-        *found = (gp->adjacency)[v2 * (gp->num_vertices) + graph_degree(gp, v2) - 1];
-        (gp->degrees)[v2] -= 1;
-
-        graph_fix_edges(gp, v1);
-        graph_fix_edges(gp, v2);
+        log_debug("graph_add_edge %d %d", v1, v2);
+        graph_check(gp);
+        graph_del_edge_unsafe(gp, v1, v2);
+        graph_fix_graph(gp);
+        graph_check(gp);
 }
 
 void
 graph_del_edge_unsafe(graph_s* gp, uint32_t v1, uint32_t v2) {
         log_debug("graph_del_edge_unsafe %d %d", v1, v2);
+        graph_check(gp);
         graph_pp(gp);
 
-        for (uint32_t pos = 0; pos < graph_degree(gp, v1); pos++)
-                if ((gp->adjacency)[v1 * (gp->num_vertices) + pos] == v2) {
-                        log_debug("graph_del_edge_unsafe: removed %d %d", v1, v2);
-                        (gp->adjacency)[v1 * (gp->num_vertices) + pos] = (gp->adjacency)[v1 * (gp->num_vertices) + graph_degree(gp, v1) - 1];
-                        (gp->adjacency)[v1 * (gp->num_vertices) + graph_degree(gp, v1) - 1] = -1;
-                        (gp->degrees)[v1] -= 1;
-                        break;
-                }
+        gp->adjacency[v1 * (gp->num_vertices) + v2] = 0;
+        gp->adjacency[v2 * (gp->num_vertices) + v1] = 0;
+        gp->degrees[v1] -= 1;
+        gp->degrees[v2] -= 1;
+        gp->dirty_lists[v1] = true;
+        gp->dirty_lists[v2] = true;
+        gp->dirty = true;
 
-        for (uint32_t pos = 0; pos < graph_degree(gp, v2); pos++)
-                if ((gp->adjacency)[v2 * (gp->num_vertices) + pos] == v1) {
-                        log_debug("graph_del_edge_unsafe: removed %d %d", v1, v2);
-                        (gp->adjacency)[v2 * (gp->num_vertices) + pos] = (gp->adjacency)[v2 * (gp->num_vertices) + graph_degree(gp, v2) - 1];
-                        (gp->adjacency)[v2 * (gp->num_vertices) + graph_degree(gp, v2) - 1] = -1;
-                        (gp->degrees)[v2] -= 1;
-                        break;
-                }
+        log_debug("graph_del_edge_unsafe %d %d: completed", v1, v2);
         graph_pp(gp);
+        graph_check(gp);
 }
 
 
 void
 graph_fix_graph(graph_s* gp) {
         log_debug("graph_fix_graph");
+        graph_check(gp);
         if (!gp->dirty)
                 return;
         for (uint32_t v = 0; v < gp->num_vertices; v++)
                 if (gp->dirty_lists[v])
                         graph_fix_edges(gp, v);
-        gp->dirty = true;
+        gp->dirty = false;
+        graph_check(gp);
 }
 
 
 void
 graph_fix_edges(graph_s* gp, uint32_t v) {
         log_debug("graph_fix_edges %d", v);
+        graph_check(gp);
         graph_pp(gp);
         if (!gp->dirty_lists[v])
                 return;
@@ -207,7 +163,7 @@ graph_fix_edges(graph_s* gp, uint32_t v) {
                                 gp->adjacency_lists[v * (gp->num_vertices) + pos++] = w;
                 assert(pos == graph_degree(gp, v));
         }
-        gp->dirty_lists[v] = true;
+        gp->dirty_lists[v] = false;
         log_debug("graph_fix_edges: sorted %d", v);
         graph_pp(gp);
 }
