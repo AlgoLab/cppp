@@ -330,3 +330,16 @@ small_world_1(graph_s* gp, uint32_t v) {
                         return false;
         return true;
 }
+
+uint32_t graph_cmp(const graph_s *gp1, const graph_s *gp2) {
+        if (gp1->num_vertices != gp2->num_vertices)
+                return 1;
+
+        if (memcmp(gp1->degrees, gp2->degrees, (gp1->num_vertices) * sizeof((gp1->degrees)[0])))
+                return 2;
+
+        if (memcmp(gp1->adjacency, gp2->adjacency, (gp1->num_vertices) * (gp1->num_vertices) * sizeof((gp1->adjacency)[0])))
+                return 3;
+
+        return 0;
+}

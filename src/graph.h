@@ -137,6 +137,15 @@ connected_components(graph_s* gp);
 bool
 small_world_1(graph_s* gp, uint32_t v);
 
+
+/**
+   \brief check if two graphs are the same.
+   return a nonzero code if they differ
+*/
+uint32_t graph_cmp(const graph_s *gp1, const graph_s *gp2);
+
+
+
 // TODO
 // Test if a bitmap really helps or not
 // Test if a adjacency list is better
