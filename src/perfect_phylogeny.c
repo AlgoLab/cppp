@@ -105,59 +105,123 @@ matrix_set_value(state_s *stp, uint32_t species, uint32_t character, uint32_t va
 }
 
 
-static uint32_t state_cmp(const state_s *stp1, const state_s *stp2) {
-        uint32_t result = 0;
-        if (stp1->num_characters != stp2->num_characters) result += 1;
-        if (stp1->num_species != stp2->num_species) result += 2;
-        if (stp1->num_characters_orig != stp2->num_characters_orig) result += 4;
-        if (stp1->num_species_orig != stp2->num_species_orig) result += 8;
-        if (stp1->current_states == NULL || stp2->current_states == NULL)  result += 16;
-        else for (size_t i = 0; i < stp2->num_characters_orig; i++)
-                     if (stp1->current_states[i] != stp2->current_states[i]) {
-                             result += 16;
-                             break;
-                     }
-        if (stp1->species == NULL || stp2->species == NULL)  result += 32;
-        else for (size_t i = 0; i < stp2->num_species_orig; i++)
-                     if (stp1->species[i] != stp2->species[i]) {
-                             result += 32;
-                             break;
-                     }
-        if (stp1->characters == NULL || stp2->characters == NULL)  result += 64;
-        else for (size_t i = 0; i < stp2->num_characters_orig; i++)
-                     if (stp1->characters[i] != stp2->characters[i]) {
-                             result += 64;
-                             break;
-                     }
-        return result;
-}
+static uint32_t
+state_cmp(const state_s *stp1, const state_s *stp2) {
+        if (stp1->num_characters != stp2->num_characters)
+                return 1;
+        if (stp1->num_species != stp2->num_species)
+                return 2;
+        if (stp1->num_characters_orig != stp2->num_characters_orig)
+                return 3;
+        if (stp1->num_species_orig != stp2->num_species_orig)
+                return 4;
+        if (stp1->tried_characters_size != stp2->tried_characters_size)
+                return 41;
+        if (stp1->character_queue_size != stp2->character_queue_size)
+                return 42;
+        if (stp1->operation != stp2->operation)
+                return 43;
+        if (stp1->realize != stp2->realize)
+                return 44;
+        if (stp1->backtrack_level != stp2->backtrack_level)
+                return 45;
 
-void
-full_copy_state(state_s* dst, const state_s* src) {
-        copy_state(dst, src);
-        memcpy(dst->character_queue, src->character_queue, src->num_characters_orig * sizeof(src->character_queue[0]));
-        memcpy(dst->tried_characters, src->tried_characters, src->num_characters_orig * sizeof(src->tried_characters[0]));
-}
+        if (stp1->current_states == NULL || stp2->current_states == NULL)
+                return 5;
+        if (memcmp(stp1->current_states, stp2->current_states, (stp2->num_species_orig) * sizeof((stp1->current_states)[0])) != 0)
+                return 6;
+        if (stp1->species == NULL || stp2->species == NULL)
+                return 7;
+        if (memcmp(stp1->species, stp2->species, (stp2->num_species_orig) * sizeof((stp1->species)[0])) != 0)
+                return 8;
+        if (stp1->characters == NULL || stp2->characters == NULL)
+                return 9;
+        if (memcmp(stp1->characters, stp2->characters, (stp2->num_characters_orig) * sizeof((stp1->characters)[0])) != 0)
+                return 10;
+        if (stp1->current_states == NULL || stp2->current_states == NULL)
+                return 11;
+        if (memcmp(stp1->current_states, stp2->current_states, (stp2->num_species_orig) * sizeof((stp1->current_states)[0])) != 0)
+                return 12;
+        if (stp1->character_queue == NULL || stp2->character_queue == NULL)
+                return 13;
+        if (memcmp(stp1->character_queue, stp2->character_queue, (stp2->num_characters_orig) * sizeof((stp1->character_queue)[0])) != 0)
+                return 14;
+        if (stp1->tried_characters == NULL || stp2->tried_characters == NULL)
+                return 15;
+        if (memcmp(stp1->tried_characters, stp2->tried_characters, (stp2->num_characters_orig) * sizeof((stp1->tried_characters)[0])) != 0)
+                return 16;
+        if (stp1->characters == NULL || stp2->characters == NULL)
+                return 17;
+        if (memcmp(stp1->colors, stp2->colors, (stp2->num_characters_orig) * sizeof((stp1->colors)[0])) != 0)
+                return 18;
 
+        if ((stp2->num_characters) + (stp2->num_species) != stp2->red_black->num_vertices)
+                return 19;
+        if (stp1->connected_components == NULL || stp2->connected_components == NULL)
+                return 20;
+        if (memcmp(stp1->connected_components, stp2->connected_components, ((stp2->num_characters) + (stp2->num_species)) * sizeof((stp1->connected_components)[0])) != 0)
+                return 21;
+        if (stp1->current_component == NULL || stp2->current_component == NULL)
+                return 22;
+        if (memcmp(stp1->current_component, stp2->current_component, ((stp2->num_characters) + (stp2->num_species)) * sizeof((stp1->current_component)[0])) != 0)
+                return 23;
+
+        if (stp1->matrix == NULL || stp2->matrix == NULL)
+                return 22;
+        if (memcmp(stp1->matrix, stp2->matrix, ((stp2->num_characters) * (stp2->num_species)) * sizeof((stp1->matrix)[0])) != 0)
+                return 23;
+
+        if (stp1->red_black == NULL || stp2->red_black == NULL)
+                return 50;
+        if (graph_cmp(stp1->red_black, stp2->red_black) != 0)
+                return 51;
+        if (stp1->conflict == NULL || stp2->conflict == NULL)
+                return 52;
+        if (graph_cmp(stp1->conflict, stp2->conflict) != 0)
+                return 53;
+
+        return 0;
+}
 
 void
 copy_state(state_s* dst, const state_s* src) {
         assert(dst != NULL);
         log_debug("copy_state: input");
-        assert(check_state(src));
+        if (!check_state(src)) {
+                fprintf(stderr, "check_state failed. error %d\n", check_state(src));
+                exit(EXIT_FAILURE);
+        }
         dst->realize = src->realize;
         dst->num_species = src->num_species;
         dst->num_characters = src->num_characters;
         graph_copy(dst->red_black, src->red_black);
         graph_copy(dst->conflict, src->conflict);
         dst->matrix = src->matrix;
+        assert(dst != NULL);
+
+        assert(dst->current_states != NULL);
+        assert(dst->characters != NULL);
+        assert(dst->colors != NULL);
+        assert(dst->species != NULL);
         memcpy(dst->current_states, src->current_states, src->num_characters_orig * sizeof(src->current_states[0]));
         memcpy(dst->characters, src->characters, src->num_characters_orig * sizeof(src->characters[0]));
         memcpy(dst->colors, src->colors, src->num_characters_orig * sizeof(src->colors[0]));
         memcpy(dst->species, src->species, src->num_species_orig * sizeof(src->species[0]));
+
         dst->operation = src->operation;
-        dst->character_queue = NULL;
-        dst->tried_characters = NULL;
+
+        assert(dst->connected_components != NULL);
+        assert(dst->current_component != NULL);
+        memcpy(dst->connected_components, src->connected_components, src->red_black->num_vertices * sizeof(src->connected_components[0]));
+        memcpy(dst->current_component, src->current_component, src->red_black->num_vertices * sizeof(src->current_component[0]));
+
+        memcpy(dst->character_queue, src->character_queue, src->num_characters_orig * sizeof(src->character_queue[0]));
+        memcpy(dst->tried_characters, src->tried_characters, src->num_characters_orig * sizeof(src->tried_characters[0]));
+        dst->tried_characters_size = src->tried_characters_size;
+        dst->character_queue_size = src->character_queue_size;
+
+        dst->backtrack_level = src->backtrack_level;
+        assert(state_cmp(src, dst) == 0);
         log_debug("copy_state: return");
         assert(check_state(dst));
         log_debug("Checking copy_state: %d", state_cmp(dst, src));
