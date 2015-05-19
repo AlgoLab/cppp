@@ -43,6 +43,7 @@
 #endif
 #include <error.h>
 #include "graph.h"
+#include "memory.h"
 
 #define SPECIES 0
 #define BLACK 1
