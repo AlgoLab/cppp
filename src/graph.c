@@ -68,19 +68,23 @@ graph_new(uint32_t num_vertices) {
         bool dirty = false;
 
         graph_nuke_edges(gp);
+        graph_check(gp);
         return gp;
 }
 
 void
 graph_add_edge(graph_s* gp, uint32_t v1, uint32_t v2) {
         log_debug("graph_add_edge %d %d", v1, v2);
+        graph_check(gp);
         graph_add_edge_unsafe(gp, v1, v2);
         graph_fix_edges(gp, v1);
         graph_fix_edges(gp, v2);
+        graph_check(gp);
 }
 
 void
 graph_add_edge_unsafe(graph_s* gp, uint32_t v1, uint32_t v2) {
+        graph_check(gp);
         graph_pp(gp);
         log_debug("graph_add_edge_unsafe %d %d", v1, v2);
 
@@ -88,6 +92,7 @@ graph_add_edge_unsafe(graph_s* gp, uint32_t v1, uint32_t v2) {
         gp->adjacency[v2 * (gp->num_vertices) + graph_degree(gp, v2)] = v1;
         gp->degrees[v1] += 1;
         gp->degrees[v2] += 1;
+        graph_check(gp);
 }
 
 bool
@@ -166,28 +171,28 @@ graph_fix_edges(graph_s* gp, uint32_t v) {
         gp->dirty_lists[v] = false;
         log_debug("graph_fix_edges: sorted %d", v);
         graph_pp(gp);
+        graph_check(gp);
 }
 
 
 void
 graph_nuke_edges(graph_s* gp) {
+        log_debug("graph_nuke_edges");
+        graph_check(gp);
         memset(gp->degrees, 0, (gp->num_vertices) * sizeof((gp->degrees)[0]));
         memset(gp->dirty_lists, 0, (gp->num_vertices) * sizeof((gp->dirty_lists)[0]));
         gp->dirty = false;
         memset(gp->adjacency, 0, (gp->num_vertices) * (gp->num_vertices) * sizeof((gp->adjacency)[0]));
         memset(gp->adjacency_lists, 0, (gp->num_vertices) * (gp->num_vertices) * sizeof((gp->adjacency_lists)[0]));
+        graph_check(gp);
 }
 
-/**
-   \brief check if a graph is internally consistent
-
-   \return 0 if all check have been passed, otherwise an error code larger than 0.
-*/
 
 void
 graph_reachable(const graph_s* gp, uint32_t v, bool* reached) {
         assert(gp != NULL);
         assert(reached != NULL);
+        graph_check(gp);
         log_debug("graph_reachable: graph_s=%p, v=%d, reached=%p", gp, v, reached);
         uint32_t n = gp->num_vertices;
         uint32_t border[n];
@@ -220,6 +225,7 @@ connected_components(graph_s* gp) {
         assert(gp!=NULL);
         log_debug("connected_components");
         log_debug("connected_components: graph_s=%p", gp);
+        graph_check(gp);
         graph_pp(gp);
         uint32_t* components = xmalloc((gp->num_vertices) * sizeof(uint32_t));
         memset(components, 0, (gp->num_vertices) * sizeof(uint32_t));
@@ -268,9 +274,19 @@ graph_pp(const graph_s* gp) {
 #ifdef DEBUG
         assert(gp != NULL);
         log_debug("graph_pp");
-        check_graph(gp);
         uint32_t n = gp->num_vertices;
         fprintf(stderr, "Graph %p has %d vertices\n", gp, n);
+
+        fprintf(stderr, "Adjacency matrix\n");
+        for (uint32_t v=0; v < n; v++) {
+                fprintf(stderr, "Vertex %d (degree %d):", v, graph_degree(gp, v));
+                for (uint32_t v2=0; v2 < n; v2++)
+                        if (graph_get_edge(gp, v, v2))
+                                fprintf(stderr, " %d", v2);
+                fprintf(stderr, "\n");
+        }
+
+        fprintf(stderr, "Adjacency lists\n");
         for (uint32_t v=0; v < n; v++) {
                 fprintf(stderr, "Vertex %d (degree %d):", v, graph_degree(gp, v));
                 for (uint32_t p=0; p < graph_degree(gp, v); p++)
@@ -285,7 +301,7 @@ void
 graph_copy(graph_s* dst, const graph_s* src) {
         assert(dst != NULL);
         log_debug("graph_copy");
-        check_graph(src);
+        graph_check(src);
         graph_pp(src);
         dst->num_vertices = src->num_vertices;
         memcpy(dst->adjacency, src->adjacency, (src->num_vertices) * (src->num_vertices) * sizeof((src->adjacency)[0]));
@@ -296,7 +312,7 @@ graph_copy(graph_s* dst, const graph_s* src) {
         log_debug("graph_copy: dst");
         graph_pp(dst);
         assert(graph_cmp(src, dst) == 0);
-        assert(check_graph(dst));
+        graph_check(dst);
         log_debug("graph_copy: end");
 }
 
@@ -308,6 +324,11 @@ graph_degree(const graph_s* gp, uint32_t v) {
 
 
 uint32_t graph_cmp(const graph_s *gp1, const graph_s *gp2) {
+        assert(gp1 != NULL);
+        assert(gp2 != NULL);
+        graph_check(gp1);
+        graph_check(gp2);
+
         if (gp1->num_vertices != gp2->num_vertices)
                 return 1;
 

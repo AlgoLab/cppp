@@ -597,7 +597,7 @@ check_state(const state_s* stp) {
                         err = false;
                         log_debug("Line %d %d %d", __LINE__, c, colors[c]);
                 }
-
+        assert(stp->red_black != NULL);
 #endif
         return err;
 }
