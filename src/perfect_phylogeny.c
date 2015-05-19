@@ -512,11 +512,11 @@ bool check_state(const state_s* stp) {
         log_debug("check_state");
         if (stp->num_species == -1 || stp->num_species > stp->num_species_orig) {
                 err = false;
-                log_debug("FATAL ERROR: __FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_species, 0);
+                log_debug("check_state error: Line %d (%d != %d)", __LINE__, stp->num_species, 0);
         }
         if (stp->num_characters == -1 || stp->num_characters > stp->num_characters_orig) {
                 err = false;
-                log_debug("FATAL ERROR: __FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_characters, 0);
+                log_debug("check_state error: Line %d (%d != %d)", __LINE__, stp->num_characters, 0);
         }
 
         uint32_t count = 0;
@@ -526,7 +526,7 @@ bool check_state(const state_s* stp) {
         }
         if (count != stp->num_species) {
                 err = false;
-                log_debug("FATAL ERROR: __FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_species, count);
+                log_debug("check_state error: Line %d (%d != %d)", __LINE__, stp->num_species, count);
         }
 
         count = 0;
@@ -536,7 +536,7 @@ bool check_state(const state_s* stp) {
         }
         if (count != stp->num_characters) {
                 err = false;
-                log_debug("FATAL ERROR: __FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_characters, count);
+                log_debug("check_state error: Line %d (%d != %d)", __LINE__, stp->num_characters, count);
         }
 
         count = 0;
@@ -546,8 +546,24 @@ bool check_state(const state_s* stp) {
         }
         if (count != stp->num_characters) {
                 err = false;
-                log_debug("FATAL ERROR: __FUNCTION__@__FILE__: __LINE__ (%d != %d)", stp->num_characters, count);
+                log_debug("Line %d (%d != %d)", __LINE__, stp->num_characters, count);
         }
+
+        // check connected_components
+        uint32_t max_conn = 0;
+        for (uint32_t v = 0; v < stp->red_black->num_vertices; v++)
+                if ((stp->connected_components)[v] > max_conn)
+                        max_conn = (stp->connected_components)[v];
+        bool colors[max_conn + 1];
+        memset(colors, 0, (max_conn + 1) * sizeof(bool));
+        for (uint32_t v = 0; v < stp->red_black->num_vertices; v++)
+                colors[(stp->connected_components)[v]] = true;
+        for (uint32_t c = 0; c <= max_conn; c++)
+                if (!colors[c]) {
+                        err = false;
+                        log_debug("Line %d %d %d", __LINE__, c, colors[c]);
+                }
+
 #endif
         return err;
 }
@@ -651,7 +667,11 @@ smallest_component(state_s* stp) {
 
 void
 update_conflict_graph(state_s* stp) {
+        log_debug("update_conflict_graph");
+        graph_pp(stp->conflict);
         graph_nuke_edges(stp->conflict);
+        log_debug("update_conflict_graph: nuked edges");
+        graph_pp(stp->conflict);
         for(uint32_t c1 = 0; c1 < stp->num_characters; c1++)
                 for(uint32_t c2 = c1 + 1; c2 < stp->num_characters; c2++) {
                         uint32_t states[2][2] = { {0, 0}, {0, 0} };
@@ -660,6 +680,8 @@ update_conflict_graph(state_s* stp) {
                         if(states[0][0] + states[0][1] + states[1][0] + states[1][1] == 4)
                                 graph_add_edge(stp->conflict, c1, c2);
                 }
+        log_debug("update_conflict_graph: end");
+        graph_pp(stp->conflict);
 }
 
 void
