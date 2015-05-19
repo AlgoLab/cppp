@@ -91,6 +91,7 @@ graph_new(uint32_t num_vertices) {
         gp->num_vertices = num_vertices;
         gp->adjacency = xmalloc(num_vertices * num_vertices * sizeof(uint32_t));
         gp->degrees = xmalloc(num_vertices * sizeof(uint32_t));
+        graph_nuke_edges(gp);
         return gp;
 }
 
