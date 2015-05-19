@@ -315,14 +315,18 @@ realize_character(state_s* dst, const state_s* src) {
                         graph_fix_edges(dst->red_black, v);
 
         dst->realize = character;
-        log_debug("realize_character: call update_connected_components");
-        update_connected_components(dst);
-        log_debug("realize_character: color %d", color);
-        log_debug("realize_character: outcome %d (1=>activated, 2=>freed)", dst->operation);
-        log_state(dst);
         log_debug("realize_character: before cleanup");
         assert(check_state(dst));
         cleanup(dst);
+        log_state(dst);
+        log_debug("realize_character: call update_connected_components");
+        update_connected_components(dst);
+        log_state(dst);
+        log_debug("realize_character: update_conflict_graph");
+        update_conflict_graph(dst);
+        log_state(dst);
+        log_debug("realize_character: color %d", color);
+        log_debug("realize_character: outcome %d (1=>activated, 2=>freed)", dst->operation);
         log_debug("realize_character: return");
         assert(check_state(dst));
         return true;
