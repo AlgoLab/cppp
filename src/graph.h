@@ -42,6 +42,7 @@
 #include <err.h>
 #include <inttypes.h>
 #include <gc.h>
+#include <error.h>
 #include "logging.h"
 #include "memory.h"
 #include <omp.h>

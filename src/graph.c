@@ -34,40 +34,54 @@
 static void
 graph_check(const graph_s *gp) {
         assert(gp != NULL);
+        unsigned int err = 0;
 #ifdef DEBUG
         if (gp->degrees == NULL)
-                res = false;
+                err = 1;
         if (gp->adjacency == NULL)
-                res = false;
+                err = 2;
         uint32_t n = gp->num_vertices;
-        for (uint32_t v=0; v < n; v++) {
-                uint32_t deg = 0;
-                for (uint32_t v2=0; v2 < n; v2++) {
-                        if (graph_get_edge(gp, v, v2) != graph_get_edge(gp, v, v2))
-                                res = false;
-                        if (graph_get_edge(gp, v, v2))
-                                deg += 1;
+
+        for (uint32_t v=0; v < n; v++)
+                if (gp->degrees[v] > n)
+                        err = 3;
+
+        if (err == 0)
+                for (uint32_t v=0; v < n; v++) {
+                        uint32_t deg = 0;
+                        if (gp->degrees[v] > n)
+                                err = 3;
+                        for (uint32_t v2=0; v2 < n; v2++) {
+                                if (graph_get_edge(gp, v, v2) != graph_get_edge(gp, v, v2))
+                                        err = 4;
+                                if (graph_get_edge(gp, v, v2))
+                                        deg += 1;
+                        }
+                        if (deg != graph_degree(gp, v))
+                                err = 5;
                 }
-                if (deg != graph_degree(gp, v))
-                        res=false;
-        }
 #endif
-        return res;
+        if (err > 0) {
+                graph_pp(gp);
+                error(88, 0, "FATAL: graph_check failed. Error code %d\n", err);
+        }
 }
 
 
 graph_s*
-graph_new(uint32_t num_vertices) {
+graph_new(uint32_t n) {
+        log_debug("graph_new (n=%d)", n);
         graph_s* gp = GC_MALLOC(sizeof(graph_s));
         assert(gp != NULL);
-        gp->num_vertices = num_vertices;
-        gp->adjacency = xmalloc(num_vertices * num_vertices * sizeof(uint32_t));
-        gp->degrees = xmalloc(num_vertices * sizeof(bool));
-        gp->adjacency_lists = xmalloc(num_vertices * sizeof(uint32_t));
-        bool *dirty_lists = xmalloc(num_vertices * sizeof(bool));
-        bool dirty = false;
-
-        graph_nuke_edges(gp);
+        gp->num_vertices = n;
+        gp->adjacency = xmalloc(n * n * sizeof(bool));
+        memset(gp->adjacency, 0, n * n * sizeof(bool));
+        gp->degrees = xmalloc(n * sizeof(uint32_t));
+        memset(gp->degrees, 0, n * n * sizeof(uint32_t));
+        gp->adjacency_lists = xmalloc(n * n * sizeof(uint32_t));
+        memset(gp->adjacency_lists, 0, n * n * sizeof(uint32_t));
+        gp->dirty_lists = xmalloc(n * sizeof(bool));
+        memset(gp->dirty_lists, 0, n * n * sizeof(bool));
         graph_check(gp);
         return gp;
 }
