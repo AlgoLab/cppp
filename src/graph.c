@@ -361,7 +361,7 @@ uint32_t graph_cmp(const graph_s *gp1, const graph_s *gp2) {
                 return 2;
 
         for (uint32_t v = 0; v < gp1->num_vertices; v++)
-                for (uint32_t w = 0; v < gp1->degrees[v]; w++)
+                for (uint32_t w = 0; w < gp1->degrees[v]; w++)
                         if (gp1->adjacency_lists[w] != gp2->adjacency_lists[w])
                                 return 3;
 
