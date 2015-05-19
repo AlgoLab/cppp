@@ -27,7 +27,7 @@ dist: bin
 bin: $(P)
 
 debug: CFLAGS += -DDEBUG -O0
-
+debug: LDLIBS += -lefence
 debug: bin
 
 debug-dist: CFLAGS += -DDEBUG -O3
