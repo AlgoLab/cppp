@@ -492,56 +492,64 @@ get_conflict_graph(const state_s *inst) {
 
 void
 init_state(state_s *stp, uint32_t nspecies, uint32_t nchars) {
+        log_debug("init_state n=%d m=%d", nspecies, nchars);
         assert(stp != NULL);
         stp->num_characters_orig = nchars;
         stp->num_species_orig = nspecies;
-        stp->num_characters = 0;
-        stp->num_species = 0;
+        stp->num_characters = nchars;
+        stp->num_species = nspecies;
         stp->realize = 0;
-        stp->current_states = GC_MALLOC_ATOMIC(nchars * sizeof(uint32_t));
-        assert(stp->current_states != NULL);
-        memset(stp->current_states, 0, nchars);
-        stp->species = GC_MALLOC_ATOMIC(nspecies * sizeof(bool));
-        assert(stp->species != NULL);
-        memset(stp->species, 1, nspecies);
-        stp->characters = GC_MALLOC_ATOMIC(nchars * sizeof(bool));
-        assert(stp->characters != NULL);
-        memset(stp->characters, 1, nchars);
-        stp->colors = GC_MALLOC_ATOMIC(nchars * sizeof(uint8_t));
-        assert(stp->colors != NULL);
-        memset(stp->colors, BLACK, nchars);
+        stp->current_states = xmalloc(nchars * sizeof(uint32_t));
+        stp->species = xmalloc(nspecies * sizeof(bool));
+        stp->characters = xmalloc(nchars * sizeof(bool));
+        stp->colors = xmalloc(nchars * sizeof(uint8_t));
 
-        stp->tried_characters = GC_MALLOC_ATOMIC(nchars * sizeof(uint32_t));
-        assert(stp->tried_characters != NULL);
-        stp->character_queue = GC_MALLOC_ATOMIC(nchars * sizeof(uint32_t));
-        assert(stp->character_queue != NULL);
-        stp->connected_components = GC_MALLOC_ATOMIC((nchars + nspecies) * sizeof(uint32_t));
-        assert(stp->connected_components != NULL);
-        stp->current_component = GC_MALLOC_ATOMIC(nchars * sizeof(bool));
-        assert(stp->current_component != NULL);
+        stp->tried_characters = xmalloc(nchars * sizeof(uint32_t));
+        stp->character_queue = xmalloc(nchars * sizeof(uint32_t));
+        stp->connected_components = xmalloc((nchars + nspecies) * sizeof(uint32_t));
+        stp->current_component = xmalloc((nchars + nspecies) * sizeof(bool));
         stp->operation = 0;
 
         stp->red_black = graph_new(nspecies + nchars);
+        assert(stp->red_black != NULL);
         stp->conflict = graph_new(nchars);
+        assert(stp->red_black != NULL);
+
+        for (uint32_t i=0; i < stp->num_species_orig; i++) {
+                stp->species[i] = 1;
+        }
+
         for (uint32_t i=0; i < stp->num_characters_orig; i++) {
                 stp->tried_characters[i] = -1;
                 stp->character_queue[i] = -1;
+                stp->current_states[i] = 0;
+                stp->characters[i] = 1;
+                stp->colors[i] = BLACK;
         }
         stp->character_queue_size = 0;
         stp->tried_characters_size = 0;
+
+
+        log_debug("init_state: before update_connected_components");
+        update_connected_components(stp);
+        log_debug("init_state: completed");
+        log_state(stp);
+        assert(check_state(stp));
 }
 
-bool check_state(const state_s* stp) {
+bool
+check_state(const state_s* stp) {
         uint32_t err = true;
 #ifdef DEBUG
         log_debug("check_state");
+        log_state(stp);
         if (stp->num_species == -1 || stp->num_species > stp->num_species_orig) {
                 err = false;
-                log_debug("check_state error: Line %d (%d != %d)", __LINE__, stp->num_species, 0);
+                log_debug("check_state error: Line %d (%d != %d)", __LINE__, stp->num_species, stp->num_species_orig);
         }
         if (stp->num_characters == -1 || stp->num_characters > stp->num_characters_orig) {
                 err = false;
-                log_debug("check_state error: Line %d (%d != %d)", __LINE__, stp->num_characters, 0);
+                log_debug("check_state error: Line %d (%d != %d)", __LINE__, stp->num_characters, stp->num_characters_orig);
         }
 
         uint32_t count = 0;
