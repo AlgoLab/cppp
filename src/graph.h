@@ -53,7 +53,10 @@
 
 typedef struct graph_s {
         uint32_t *degrees;
-        uint32_t *adjacency;
+        bool *adjacency;
+        uint32_t *adjacency_lists;
+        bool *dirty_lists;
+        bool dirty;
         uint32_t num_vertices;
 } graph_s;
 
@@ -89,11 +92,25 @@ graph_get_edge(graph_s* gp, uint32_t v1, uint32_t v2);
 uint32_t
 graph_get_edge_pos(graph_s* gp, uint32_t v1, uint32_t pos);
 
+/**
+   \brief removes all edges of a graph
+*/
 void
 graph_nuke_edges(graph_s* gp);
 
+/**
+   Updates the correct \c adjacency_lists of all dirty vertices of a
+   graph
+*/
 void
 graph_fix_edges(graph_s* gp, uint32_t v1);
+
+/**
+   Updates the correct \c adjacency_lists of a single dirty vertex of a
+   graph
+*/
+void
+graph_fix_graph(graph_s* gp);
 /**
    \brief stores in \c reached all vertices that are in same connected
    component of \c gp as \c v

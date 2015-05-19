@@ -90,7 +90,11 @@ graph_new(uint32_t num_vertices) {
         assert(gp != NULL);
         gp->num_vertices = num_vertices;
         gp->adjacency = xmalloc(num_vertices * num_vertices * sizeof(uint32_t));
-        gp->degrees = xmalloc(num_vertices * sizeof(uint32_t));
+        gp->degrees = xmalloc(num_vertices * sizeof(bool));
+        gp->adjacency_lists = xmalloc(num_vertices * sizeof(uint32_t));
+        bool *dirty_lists = xmalloc(num_vertices * sizeof(bool));
+        bool dirty = false;
+
         graph_nuke_edges(gp);
         return gp;
 }
@@ -179,12 +183,33 @@ graph_del_edge_unsafe(graph_s* gp, uint32_t v1, uint32_t v2) {
         graph_pp(gp);
 }
 
+
+void
+graph_fix_graph(graph_s* gp) {
+        log_debug("graph_fix_graph");
+        if (!gp->dirty)
+                return;
+        for (uint32_t v = 0; v < gp->num_vertices; v++)
+                if (gp->dirty_lists[v])
+                        graph_fix_edges(gp, v);
+        gp->dirty = true;
+}
+
+
 void
 graph_fix_edges(graph_s* gp, uint32_t v) {
         log_debug("graph_fix_edges %d", v);
         graph_pp(gp);
-        if (graph_degree(gp, v) > 0)
-                insertion_sort((gp->adjacency) + v * (gp->num_vertices), graph_degree(gp, v));
+        if (!gp->dirty_lists[v])
+                return;
+        if (graph_degree(gp, v) > 0) {
+                uint32_t pos = 0;
+                for (uint32_t w = 0; w < gp->num_vertices; w++)
+                        if (graph_get_edge(gp, v, w))
+                                gp->adjacency_lists[v * (gp->num_vertices) + pos++] = w;
+                assert(pos == graph_degree(gp, v));
+        }
+        gp->dirty_lists[v] = true;
         log_debug("graph_fix_edges: sorted %d", v);
         graph_pp(gp);
 }
@@ -193,6 +218,10 @@ graph_fix_edges(graph_s* gp, uint32_t v) {
 void
 graph_nuke_edges(graph_s* gp) {
         memset(gp->degrees, 0, (gp->num_vertices) * sizeof((gp->degrees)[0]));
+        memset(gp->dirty_lists, 0, (gp->num_vertices) * sizeof((gp->dirty_lists)[0]));
+        gp->dirty = false;
+        memset(gp->adjacency, 0, (gp->num_vertices) * (gp->num_vertices) * sizeof((gp->adjacency)[0]));
+        memset(gp->adjacency_lists, 0, (gp->num_vertices) * (gp->num_vertices) * sizeof((gp->adjacency_lists)[0]));
 }
 
 /**
@@ -338,8 +367,13 @@ uint32_t graph_cmp(const graph_s *gp1, const graph_s *gp2) {
         if (memcmp(gp1->degrees, gp2->degrees, (gp1->num_vertices) * sizeof((gp1->degrees)[0])))
                 return 2;
 
+        for (uint32_t v = 0; v < gp1->num_vertices; v++)
+                for (uint32_t w = 0; v < gp1->degrees[v]; w++)
+                        if (gp1->adjacency_lists[w] != gp2->adjacency_lists[w])
+                                return 3;
+
         if (memcmp(gp1->adjacency, gp2->adjacency, (gp1->num_vertices) * (gp1->num_vertices) * sizeof((gp1->adjacency)[0])))
-                return 3;
+                return 4;
 
         return 0;
 }
