@@ -126,7 +126,7 @@ graph_get_edge(graph_s* gp, uint32_t v1, uint32_t v2) {
 uint32_t
 graph_get_edge_pos(graph_s* gp, uint32_t v1, uint32_t pos) {
         assert(pos < graph_degree(gp, v1));
-        return gp->adjacency[v1 * gp->num_vertices + pos];
+        return (gp->adjacency)[v1 * (gp->num_vertices) + pos];
 }
 
 
@@ -139,17 +139,16 @@ graph_del_edge(graph_s* gp, uint32_t v1, uint32_t v2) {
         uint32_t* found = bsearch(&k, (gp->adjacency) + v1 * (gp->num_vertices), graph_degree(gp, v1), sizeof(uint32_t), intcmp);
         assert(found != NULL);
         log_debug("graph_del_edge. deleting %d", *found);
-        *found = gp->adjacency[v1 * (gp->num_vertices) + graph_degree(gp, v1) - 1];
-        gp->adjacency[v1 * (gp->num_vertices) + graph_degree(gp, v1) - 1] = -1;
-        gp->degrees[v1] -= 1;
+        *found = (gp->adjacency)[v1 * (gp->num_vertices) + graph_degree(gp, v1) - 1];
+        (gp->adjacency)[v1 * (gp->num_vertices) + graph_degree(gp, v1) - 1] = -1;
+        (gp->degrees)[v1] -= 1;
 
         k = v1;
         found = bsearch(&k, (gp->adjacency) + v2 * (gp->num_vertices), graph_degree(gp, v2), sizeof(uint32_t), intcmp);
         assert(found != NULL);
         log_debug("graph_del_edge. deleting %d", *found);
-        *found = gp->adjacency[v2 * (gp->num_vertices) + graph_degree(gp, v2) - 1];
-        gp->adjacency[v2 * (gp->num_vertices) + graph_degree(gp, v2) - 1] = -1;
-        gp->degrees[v2] -= 1;
+        *found = (gp->adjacency)[v2 * (gp->num_vertices) + graph_degree(gp, v2) - 1];
+        (gp->degrees)[v2] -= 1;
 
         graph_fix_edges(gp, v1);
         graph_fix_edges(gp, v2);
@@ -163,18 +162,18 @@ graph_del_edge_unsafe(graph_s* gp, uint32_t v1, uint32_t v2) {
         for (uint32_t pos = 0; pos < graph_degree(gp, v1); pos++)
                 if ((gp->adjacency)[v1 * (gp->num_vertices) + pos] == v2) {
                         log_debug("graph_del_edge_unsafe: removed %d %d", v1, v2);
-                        gp->adjacency[v1 * (gp->num_vertices) + pos] = gp->adjacency[v1 * (gp->num_vertices) + graph_degree(gp, v1) - 1];
-                        gp->adjacency[v1 * (gp->num_vertices) + graph_degree(gp, v1) - 1] = -1;
-                        gp->degrees[v1] -= 1;
+                        (gp->adjacency)[v1 * (gp->num_vertices) + pos] = (gp->adjacency)[v1 * (gp->num_vertices) + graph_degree(gp, v1) - 1];
+                        (gp->adjacency)[v1 * (gp->num_vertices) + graph_degree(gp, v1) - 1] = -1;
+                        (gp->degrees)[v1] -= 1;
                         break;
                 }
 
         for (uint32_t pos = 0; pos < graph_degree(gp, v2); pos++)
                 if ((gp->adjacency)[v2 * (gp->num_vertices) + pos] == v1) {
                         log_debug("graph_del_edge_unsafe: removed %d %d", v1, v2);
-                        gp->adjacency[v2 * (gp->num_vertices) + pos] = gp->adjacency[v2 * (gp->num_vertices) + graph_degree(gp, v2) - 1];
-                        gp->adjacency[v2 * (gp->num_vertices) + graph_degree(gp, v2) - 1] = -1;
-                        gp->degrees[v2] -= 1;
+                        (gp->adjacency)[v2 * (gp->num_vertices) + pos] = (gp->adjacency)[v2 * (gp->num_vertices) + graph_degree(gp, v2) - 1];
+                        (gp->adjacency)[v2 * (gp->num_vertices) + graph_degree(gp, v2) - 1] = -1;
+                        (gp->degrees)[v2] -= 1;
                         break;
                 }
         graph_pp(gp);
@@ -307,8 +306,8 @@ graph_copy(graph_s* dst, graph_s* src) {
         check_graph(src);
         graph_pp(src);
         dst->num_vertices = src->num_vertices;
-        memcpy(dst->adjacency, src->adjacency, src->num_vertices * src->num_vertices * sizeof((src->adjacency)[0]));
-        memcpy(dst->degrees, src->degrees, src->num_vertices * sizeof((src->degrees)[0]));
+        memcpy(dst->adjacency, src->adjacency, (src->num_vertices) * (src->num_vertices) * sizeof((src->adjacency)[0]));
+        memcpy(dst->degrees, src->degrees, (src->num_vertices) * sizeof((src->degrees)[0]));
         log_debug("graph_copy: copied");
         if (graph_cmp(src, dst) != 0)
                 log_debug("Graphs differ: %d", graph_cmp(src, dst));
