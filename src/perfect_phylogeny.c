@@ -588,10 +588,11 @@ check_state(const state_s* stp) {
         for (uint32_t v = 0; v < stp->red_black->num_vertices; v++)
                 if ((stp->connected_components)[v] > max_conn)
                         max_conn = (stp->connected_components)[v];
+
         bool colors[max_conn + 1];
         memset(colors, 0, (max_conn + 1) * sizeof(bool));
         for (uint32_t v = 0; v < stp->red_black->num_vertices; v++)
-                colors[(stp->connected_components)[v]] = true;
+                colors[stp->connected_components[v]] = true;
         for (uint32_t c = 0; c <= max_conn; c++)
                 if (!colors[c]) {
                         err = false;

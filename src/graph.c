@@ -72,6 +72,8 @@ graph_new(uint32_t num_vertices) {
         return gp;
 }
 
+
+
 void
 graph_add_edge(graph_s* gp, uint32_t v1, uint32_t v2) {
         log_debug("graph_add_edge %d %d", v1, v2);
@@ -81,6 +83,7 @@ graph_add_edge(graph_s* gp, uint32_t v1, uint32_t v2) {
         graph_fix_edges(gp, v2);
         graph_check(gp);
 }
+
 
 void
 graph_add_edge_unsafe(graph_s* gp, uint32_t v1, uint32_t v2) {
@@ -201,7 +204,7 @@ graph_reachable(const graph_s* gp, uint32_t v, bool* reached) {
         memset(reached, 0, n * sizeof(bool));
         border[0] = v;
         reached[v] = true;
-        for(; border_size > 0; ) {
+        while (border_size > 0) {
                 uint32_t new_border_size = 0;
                 for (uint32_t vx = 0; vx < border_size; vx++) {
                         uint32_t v1 = border[vx];
