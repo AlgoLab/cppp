@@ -87,10 +87,10 @@ void
 graph_del_edge_unsafe(graph_s* gp, uint32_t v1, uint32_t v2);
 
 bool
-graph_get_edge(graph_s* gp, uint32_t v1, uint32_t v2);
+graph_get_edge(const graph_s* gp, uint32_t v1, uint32_t v2);
 
 uint32_t
-graph_get_edge_pos(graph_s* gp, uint32_t v1, uint32_t pos);
+graph_get_edge_pos(const graph_s* gp, uint32_t v1, uint32_t pos);
 
 /**
    \brief removes all edges of a graph
@@ -120,19 +120,19 @@ graph_fix_graph(graph_s* gp);
    is reachable from v
 */
 void
-graph_reachable(graph_s* gp, uint32_t v, bool* reached);
+graph_reachable(const graph_s* gp, uint32_t v, bool* reached);
 
 void
-graph_pp(graph_s* gp);
+graph_pp(const graph_s* gp);
 
 void
-graph_copy(graph_s* dst, graph_s* src);
+graph_copy(graph_s* dst, const graph_s* src);
 
 /**
    \brief computes the degree of vertex \c v
 */
 uint32_t
-graph_degree(graph_s* gp, uint32_t v);
+graph_degree(const graph_s* gp, uint32_t v);
 
 /**
    \brief computes the connected components of a graph
@@ -144,25 +144,9 @@ graph_degree(graph_s* gp, uint32_t v);
 uint32_t *
 connected_components(graph_s* gp);
 
-/**
-   \brief test if a vertex is adjacent to all vertices that it can
-   reach, ie it is the central vertex of a star and no other vertex is
-   at distance larger than 1.
-*/
-
-
-bool
-small_world_1(graph_s* gp, uint32_t v);
-
 
 /**
    \brief check if two graphs are the same.
    return a nonzero code if they differ
 */
 uint32_t graph_cmp(const graph_s *gp1, const graph_s *gp2);
-
-
-
-// TODO
-// Test if a bitmap really helps or not
-// Test if a adjacency list is better

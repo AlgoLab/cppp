@@ -29,7 +29,8 @@
    Pretty print a state.
    Mainly used for debug
 */
-void log_state(const state_s* stp) {
+void
+log_state(const state_s* stp) {
 #ifdef DEBUG
         log_debug("log_state");
         fprintf(stderr, "=======================================\n");

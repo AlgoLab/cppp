@@ -58,9 +58,7 @@ insertion_sort(uint32_t* arr, uint32_t n) {
         }
 }
 
-static bool
-check_graph(graph_s *gp) {
-        bool res = true;
+graph_check(const graph_s *gp) {
         assert(gp != NULL);
 #ifdef DEBUG
         if (gp->degrees == NULL)
@@ -119,18 +117,18 @@ graph_add_edge_unsafe(graph_s* gp, uint32_t v1, uint32_t v2) {
 }
 
 bool
-graph_get_edge(graph_s* gp, uint32_t v1, uint32_t v2) {
-        void* found = bsearch(&v2, (gp->adjacency) + v1 * (gp->num_vertices), graph_degree(gp, v1), sizeof(uint32_t), intcmp);
-        return (found != NULL);
+graph_get_edge(const graph_s* gp, uint32_t v1, uint32_t v2) {
+        return (gp->adjacency[v1 * (gp->num_vertices) + v2]);
 }
 
 /**
    \brief returns the (pos+1)-th vertex that is adjacent to v1
 */
 uint32_t
-graph_get_edge_pos(graph_s* gp, uint32_t v1, uint32_t pos) {
-        assert(pos < graph_degree(gp, v1));
-        return (gp->adjacency)[v1 * (gp->num_vertices) + pos];
+graph_get_edge_pos(const graph_s* gp, uint32_t v, uint32_t pos) {
+        assert(pos < graph_degree(gp, v));
+        graph_check(gp);
+        return (gp->adjacency_lists)[v * (gp->num_vertices) + pos];
 }
 
 
@@ -231,7 +229,7 @@ graph_nuke_edges(graph_s* gp) {
 */
 
 void
-graph_reachable(graph_s* gp, uint32_t v, bool* reached) {
+graph_reachable(const graph_s* gp, uint32_t v, bool* reached) {
         assert(gp != NULL);
         assert(reached != NULL);
         log_debug("graph_reachable: graph_s=%p, v=%d, reached=%p", gp, v, reached);
@@ -310,7 +308,7 @@ connected_components(graph_s* gp) {
 
 
 void
-graph_pp(graph_s* gp) {
+graph_pp(const graph_s* gp) {
 #ifdef DEBUG
         assert(gp != NULL);
         log_debug("graph_pp");
@@ -328,7 +326,7 @@ graph_pp(graph_s* gp) {
 
 
 void
-graph_copy(graph_s* dst, graph_s* src) {
+graph_copy(graph_s* dst, const graph_s* src) {
         assert(dst != NULL);
         log_debug("graph_copy");
         check_graph(src);
@@ -347,18 +345,11 @@ graph_copy(graph_s* dst, graph_s* src) {
 }
 
 uint32_t
-graph_degree(graph_s* gp, uint32_t v) {
+graph_degree(const graph_s* gp, uint32_t v) {
         assert(v < gp->num_vertices);
         return (gp->degrees)[v];
 }
 
-bool
-small_world_1(graph_s* gp, uint32_t v) {
-        for (uint32_t w = 0; w < gp->num_vertices; w++)
-                if (graph_get_edge(gp, v, w) && graph_degree(gp, w) > 1)
-                        return false;
-        return true;
-}
 
 uint32_t graph_cmp(const graph_s *gp1, const graph_s *gp2) {
         if (gp1->num_vertices != gp2->num_vertices)
