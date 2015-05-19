@@ -93,8 +93,7 @@ graph_add_edge(graph_s* gp, uint32_t v1, uint32_t v2) {
         log_debug("graph_add_edge %d %d", v1, v2);
         graph_check(gp);
         graph_add_edge_unsafe(gp, v1, v2);
-        graph_fix_edges(gp, v1);
-        graph_fix_edges(gp, v2);
+        graph_fix_graph(gp);
         graph_check(gp);
 }
 
@@ -104,11 +103,14 @@ graph_add_edge_unsafe(graph_s* gp, uint32_t v1, uint32_t v2) {
         graph_check(gp);
         graph_pp(gp);
         log_debug("graph_add_edge_unsafe %d %d", v1, v2);
+        gp->adjacency[v1 * (gp->num_vertices) + v2] = 1;
+        gp->adjacency[v2 * (gp->num_vertices) + v1] = 1;
 
-        gp->adjacency[v1 * (gp->num_vertices) + graph_degree(gp, v1)] = v2;
-        gp->adjacency[v2 * (gp->num_vertices) + graph_degree(gp, v2)] = v1;
         gp->degrees[v1] += 1;
         gp->degrees[v2] += 1;
+        gp->dirty_lists[v1] = true;
+        gp->dirty_lists[v2] = true;
+        gp->dirty = true;
         graph_check(gp);
 }
 
@@ -244,6 +246,8 @@ connected_components(graph_s* gp) {
         log_debug("connected_components: graph_s=%p", gp);
         graph_check(gp);
         graph_pp(gp);
+        if (gp->dirty)
+                graph_fix_graph(gp);
         uint32_t* components = xmalloc((gp->num_vertices) * sizeof(uint32_t));
         memset(components, 0, (gp->num_vertices) * sizeof(uint32_t));
         assert(components != NULL);
@@ -321,9 +325,13 @@ graph_copy(graph_s* dst, const graph_s* src) {
         graph_check(src);
         graph_pp(src);
         dst->num_vertices = src->num_vertices;
+        dst->dirty = src->dirty;
         memcpy(dst->adjacency, src->adjacency, (src->num_vertices) * (src->num_vertices) * sizeof((src->adjacency)[0]));
+        memcpy(dst->adjacency_lists, src->adjacency_lists, (src->num_vertices) * (src->num_vertices) * sizeof((src->adjacency_lists)[0]));
         memcpy(dst->degrees, src->degrees, (src->num_vertices) * sizeof((src->degrees)[0]));
+        memcpy(dst->dirty_lists, src->dirty_lists, (src->num_vertices) * sizeof((src->dirty_lists)[0]));
         log_debug("graph_copy: copied");
+
         if (graph_cmp(src, dst) != 0)
                 log_debug("Graphs differ: %d", graph_cmp(src, dst));
         log_debug("graph_copy: dst");
