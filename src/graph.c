@@ -239,8 +239,8 @@ connected_components(graph_s* gp) {
         log_debug("connected_components");
         log_debug("connected_components: graph_s=%p", gp);
         graph_pp(gp);
-        uint32_t* components = GC_MALLOC(gp->num_vertices * sizeof(uint32_t));
-        memset(components, 0, gp->num_vertices * sizeof(uint32_t));
+        uint32_t* components = xmalloc((gp->num_vertices) * sizeof(uint32_t));
+        memset(components, 0, (gp->num_vertices) * sizeof(uint32_t));
         assert(components != NULL);
         bool visited[gp->num_vertices];
         memset(visited, 0, gp->num_vertices * sizeof(bool));

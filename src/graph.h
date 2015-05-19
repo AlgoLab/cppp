@@ -43,6 +43,7 @@
 #include <inttypes.h>
 #include <gc.h>
 #include "logging.h"
+#include "memory.h"
 #include <omp.h>
 /**
    \struct graph_s
