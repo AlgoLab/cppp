@@ -312,6 +312,12 @@ graph_copy(graph_s* dst, graph_s* src) {
         dst->num_vertices = src->num_vertices;
         memcpy(dst->adjacency, src->adjacency, src->num_vertices * src->num_vertices * sizeof((src->adjacency)[0]));
         memcpy(dst->degrees, src->degrees, src->num_vertices * sizeof((src->degrees)[0]));
+        log_debug("graph_copy: copied");
+        if (graph_cmp(src, dst) != 0)
+                log_debug("Graphs differ: %d", graph_cmp(src, dst));
+        log_debug("graph_copy: dst");
+        graph_pp(dst);
+        assert(graph_cmp(src, dst) == 0);
         assert(check_graph(dst));
         log_debug("graph_copy: end");
 }
