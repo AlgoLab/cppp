@@ -52,9 +52,9 @@
 */
 
 typedef struct graph_s {
-        uint32_t num_vertices;
         uint32_t *degrees;
         uint32_t *adjacency;
+        uint32_t num_vertices;
 } graph_s;
 
 /**
