@@ -477,10 +477,10 @@ void init_state(state_s *stp, uint32_t nspecies, uint32_t nchars) {
         stp->current_states = GC_MALLOC_ATOMIC(nchars * sizeof(uint32_t));
         assert(stp->current_states != NULL);
         memset(stp->current_states, 0, nchars);
-        stp->species = GC_MALLOC(nspecies * sizeof(bool));
+        stp->species = GC_MALLOC_ATOMIC(nspecies * sizeof(bool));
         assert(stp->species != NULL);
         memset(stp->species, 1, nspecies);
-        stp->characters = GC_MALLOC(nchars * sizeof(bool));
+        stp->characters = GC_MALLOC_ATOMIC(nchars * sizeof(bool));
         assert(stp->characters != NULL);
         memset(stp->characters, 1, nchars);
         stp->colors = GC_MALLOC_ATOMIC(nchars * sizeof(uint8_t));
@@ -495,7 +495,7 @@ void init_state(state_s *stp, uint32_t nspecies, uint32_t nchars) {
         assert(stp->character_queue != NULL);
         stp->connected_components = GC_MALLOC_ATOMIC((nchars + nspecies) * sizeof(uint32_t));
         assert(stp->connected_components != NULL);
-        stp->current_component = GC_MALLOC(nchars * sizeof(bool));
+        stp->current_component = GC_MALLOC_ATOMIC(nchars * sizeof(bool));
         assert(stp->current_component != NULL);
         stp->operation = 0;
         for (uint32_t i=0; i < stp->num_characters_orig; i++) {

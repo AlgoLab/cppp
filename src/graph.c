@@ -89,12 +89,8 @@ graph_new(uint32_t num_vertices) {
         graph_s* gp = GC_MALLOC(sizeof(graph_s));
         assert(gp != NULL);
         gp->num_vertices = num_vertices;
-        gp->adjacency = GC_MALLOC(num_vertices * num_vertices * sizeof(uint32_t));
-        memset(gp->adjacency, -1, num_vertices * num_vertices * sizeof(uint32_t));
-        assert(gp->adjacency != NULL);
-        gp->degrees = GC_MALLOC(num_vertices * sizeof(uint32_t));
-        assert(gp->degrees != NULL);
-        memset(gp->degrees, 0, num_vertices * sizeof((gp->degrees)[0]));
+        gp->adjacency = xmalloc(num_vertices * num_vertices * sizeof(uint32_t));
+        gp->degrees = xmalloc(num_vertices * sizeof(uint32_t));
         return gp;
 }
 
