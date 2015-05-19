@@ -192,8 +192,7 @@ graph_fix_edges(graph_s* gp, uint32_t v) {
 
 void
 graph_nuke_edges(graph_s* gp) {
-        memset(gp->adjacency, 0, gp->num_vertices * gp->num_vertices * sizeof((gp->adjacency)[0]));
-        memset(gp->degrees, 0, gp->num_vertices * sizeof((gp->degrees)[0]));
+        memset(gp->degrees, 0, (gp->num_vertices) * sizeof((gp->degrees)[0]));
 }
 
 /**
