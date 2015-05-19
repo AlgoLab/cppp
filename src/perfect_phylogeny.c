@@ -301,7 +301,7 @@ realize_character(state_s* dst, const state_s* src) {
                         if (src->current_component[v])
                                 if (graph_get_edge(src->red_black, c, v) && c != v) {
                                         graph_del_edge(dst->red_black, c, v);
-					to_fix[v] = true;
+                                        to_fix[v] = true;
                                 } else {
                                         dst->operation = 0;
                                         log_debug("realize_character: end. REALIZATION IMPOSSIBLE");
@@ -467,7 +467,8 @@ get_conflict_graph(const state_s *inst) {
 }
 
 
-void init_state(state_s *stp, uint32_t nspecies, uint32_t nchars) {
+void
+init_state(state_s *stp, uint32_t nspecies, uint32_t nchars) {
         assert(stp != NULL);
         stp->num_characters_orig = nchars;
         stp->num_species_orig = nspecies;
@@ -487,8 +488,6 @@ void init_state(state_s *stp, uint32_t nspecies, uint32_t nchars) {
         assert(stp->colors != NULL);
         memset(stp->colors, BLACK, nchars);
 
-        stp->red_black = graph_new(nspecies + nchars);
-        stp->conflict = graph_new(nchars);
         stp->tried_characters = GC_MALLOC_ATOMIC(nchars * sizeof(uint32_t));
         assert(stp->tried_characters != NULL);
         stp->character_queue = GC_MALLOC_ATOMIC(nchars * sizeof(uint32_t));
@@ -498,6 +497,9 @@ void init_state(state_s *stp, uint32_t nspecies, uint32_t nchars) {
         stp->current_component = GC_MALLOC_ATOMIC(nchars * sizeof(bool));
         assert(stp->current_component != NULL);
         stp->operation = 0;
+
+        stp->red_black = graph_new(nspecies + nchars);
+        stp->conflict = graph_new(nchars);
         for (uint32_t i=0; i < stp->num_characters_orig; i++) {
                 stp->tried_characters[i] = -1;
                 stp->character_queue[i] = -1;
@@ -635,7 +637,7 @@ smallest_component(state_s* stp) {
                 }
 
         log_debug("smallest_component: %d smallest_size: %d", smallest_component, smallest_size);
-        for (uint32_t w = 0; w < stp->num_species_orig + stp->num_characters_orig; w++)
+        for (uint32_t w = 0; w < stp->red_black->num_vertices; w++)
                 stp->current_component[w] = (stp->connected_components[w] == smallest_component);
         uint32_t p = 0;
         uint32_t maximum_char = 0;
