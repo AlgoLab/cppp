@@ -77,10 +77,6 @@ next_character(state_s *stp) {
 static void
 init_node(state_s *stp, strategy_fn get_characters_to_realize) {
         log_debug("init_node");
-        stp->tried_characters = GC_MALLOC_ATOMIC(stp->num_characters_orig * sizeof(uint32_t));
-        assert(stp->tried_characters != NULL);
-        stp->character_queue = GC_MALLOC_ATOMIC(stp->num_characters_orig * sizeof(uint32_t));
-        assert(stp->character_queue != NULL);
         stp->tried_characters_size = 0;
         smallest_component(stp);
         log_state(stp);
