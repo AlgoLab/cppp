@@ -70,46 +70,47 @@ graph_new(uint32_t n) {
         gp->adjacency = xmalloc(n * n * sizeof(bool));
         memset(gp->adjacency, 0, n * n * sizeof(bool));
         gp->degrees = xmalloc(n * sizeof(uint32_t));
-        memset(gp->degrees, 0, n * n * sizeof(uint32_t));
+        memset(gp->degrees, 0, n * sizeof(uint32_t));
         gp->adjacency_lists = xmalloc(n * n * sizeof(uint32_t));
         memset(gp->adjacency_lists, 0, n * n * sizeof(uint32_t));
         gp->dirty_lists = xmalloc(n * sizeof(bool));
-        memset(gp->dirty_lists, 0, n * n * sizeof(bool));
-        graph_check(gp);
-        return gp;
+        memset(gp->dirty_lists, 0, n * sizeof(bool));
+
+	graph_check(gp);
+	return gp;
 }
 
 
 
 void
 graph_add_edge(graph_s* gp, uint32_t v1, uint32_t v2) {
-        log_debug("graph_add_edge %d %d", v1, v2);
-        graph_check(gp);
-        graph_add_edge_unsafe(gp, v1, v2);
-        graph_fix_graph(gp);
-        graph_check(gp);
+	log_debug("graph_add_edge %d %d", v1, v2);
+	graph_check(gp);
+	graph_add_edge_unsafe(gp, v1, v2);
+	graph_fix_graph(gp);
+	graph_check(gp);
 }
 
 
 void
 graph_add_edge_unsafe(graph_s* gp, uint32_t v1, uint32_t v2) {
-        graph_check(gp);
-        graph_pp(gp);
-        log_debug("graph_add_edge_unsafe %d %d", v1, v2);
-        gp->adjacency[v1 * (gp->num_vertices) + v2] = 1;
-        gp->adjacency[v2 * (gp->num_vertices) + v1] = 1;
+	graph_check(gp);
+	graph_pp(gp);
+	log_debug("graph_add_edge_unsafe %d %d", v1, v2);
+	gp->adjacency[v1 * (gp->num_vertices) + v2] = true;
+	gp->adjacency[v2 * (gp->num_vertices) + v1] = true;
 
-        gp->degrees[v1] += 1;
-        gp->degrees[v2] += 1;
-        gp->dirty_lists[v1] = true;
-        gp->dirty_lists[v2] = true;
-        gp->dirty = true;
-        graph_check(gp);
+	(gp->degrees)[v1] += 1;
+	(gp->degrees)[v2] += 1;
+	gp->dirty_lists[v1] = true;
+	gp->dirty_lists[v2] = true;
+	gp->dirty = true;
+	graph_check(gp);
 }
 
 bool
 graph_get_edge(const graph_s* gp, uint32_t v1, uint32_t v2) {
-        return (gp->adjacency[v1 * (gp->num_vertices) + v2]);
+	return (gp->adjacency[v1 * (gp->num_vertices) + v2]);
 }
 
 /**
