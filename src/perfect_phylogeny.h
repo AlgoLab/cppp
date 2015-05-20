@@ -139,7 +139,7 @@ resize_state(state_s *stp, uint32_t nspecies, uint32_t nchars);
 
    \return \c true if all check have been passed
 */
-bool check_state(const state_s* stp);
+void check_state(const state_s* stp);
 
 /**
    \brief simplify the current instance, if possible

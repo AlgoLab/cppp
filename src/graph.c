@@ -76,41 +76,41 @@ graph_new(uint32_t n) {
         gp->dirty_lists = xmalloc(n * sizeof(bool));
         memset(gp->dirty_lists, 0, n * sizeof(bool));
 
-	graph_check(gp);
-	return gp;
+        graph_check(gp);
+        return gp;
 }
 
 
 
 void
 graph_add_edge(graph_s* gp, uint32_t v1, uint32_t v2) {
-	log_debug("graph_add_edge %d %d", v1, v2);
-	graph_check(gp);
-	graph_add_edge_unsafe(gp, v1, v2);
-	graph_fix_graph(gp);
-	graph_check(gp);
+        log_debug("graph_add_edge %d %d", v1, v2);
+        graph_check(gp);
+        graph_add_edge_unsafe(gp, v1, v2);
+        graph_fix_graph(gp);
+        graph_check(gp);
 }
 
 
 void
 graph_add_edge_unsafe(graph_s* gp, uint32_t v1, uint32_t v2) {
-	graph_check(gp);
-	graph_pp(gp);
-	log_debug("graph_add_edge_unsafe %d %d", v1, v2);
-	gp->adjacency[v1 * (gp->num_vertices) + v2] = true;
-	gp->adjacency[v2 * (gp->num_vertices) + v1] = true;
+        graph_check(gp);
+        graph_pp(gp);
+        log_debug("graph_add_edge_unsafe %d %d", v1, v2);
+        gp->adjacency[v1 * (gp->num_vertices) + v2] = true;
+        gp->adjacency[v2 * (gp->num_vertices) + v1] = true;
 
-	(gp->degrees)[v1] += 1;
-	(gp->degrees)[v2] += 1;
-	gp->dirty_lists[v1] = true;
-	gp->dirty_lists[v2] = true;
-	gp->dirty = true;
-	graph_check(gp);
+        (gp->degrees)[v1] += 1;
+        (gp->degrees)[v2] += 1;
+        gp->dirty_lists[v1] = true;
+        gp->dirty_lists[v2] = true;
+        gp->dirty = true;
+        graph_check(gp);
 }
 
 bool
 graph_get_edge(const graph_s* gp, uint32_t v1, uint32_t v2) {
-	return (gp->adjacency[v1 * (gp->num_vertices) + v2]);
+        return (gp->adjacency[v1 * (gp->num_vertices) + v2]);
 }
 
 /**
@@ -137,12 +137,13 @@ void
 graph_del_edge_unsafe(graph_s* gp, uint32_t v1, uint32_t v2) {
         log_debug("graph_del_edge_unsafe %d %d", v1, v2);
         graph_check(gp);
+        assert(graph_get_edge(gp, v1, v2));
         graph_pp(gp);
 
-        gp->adjacency[v1 * (gp->num_vertices) + v2] = 0;
-        gp->adjacency[v2 * (gp->num_vertices) + v1] = 0;
-        gp->degrees[v1] -= 1;
-        gp->degrees[v2] -= 1;
+        gp->adjacency[v1 * (gp->num_vertices) + v2] = false;
+        gp->adjacency[v2 * (gp->num_vertices) + v1] = false;
+        (gp->degrees)[v1] -= 1;
+        (gp->degrees)[v2] -= 1;
         gp->dirty_lists[v1] = true;
         gp->dirty_lists[v2] = true;
         gp->dirty = true;
@@ -172,7 +173,7 @@ graph_fix_edges(graph_s* gp, uint32_t v) {
         log_debug("graph_fix_edges %d", v);
         graph_check(gp);
         graph_pp(gp);
-        if (!gp->dirty_lists[v])
+        if (!((gp->dirty_lists)[v]))
                 return;
         if (graph_degree(gp, v) > 0) {
                 uint32_t pos = 0;
@@ -233,18 +234,17 @@ graph_reachable(const graph_s* gp, uint32_t v, bool* reached) {
         log_debug("graph_reachable: end");
 }
 
-uint32_t *
-connected_components(graph_s* gp) {
+void
+connected_components(graph_s* gp, uint32_t* components) {
         assert(gp!=NULL);
+        assert(components != NULL);
         log_debug("connected_components");
         log_debug("connected_components: graph_s=%p", gp);
         graph_check(gp);
         graph_pp(gp);
         if (gp->dirty)
                 graph_fix_graph(gp);
-        uint32_t* components = xmalloc((gp->num_vertices) * sizeof(uint32_t));
         memset(components, 0, (gp->num_vertices) * sizeof(uint32_t));
-        assert(components != NULL);
         bool visited[gp->num_vertices];
         memset(visited, 0, gp->num_vertices * sizeof(bool));
 
@@ -280,7 +280,6 @@ connected_components(graph_s* gp) {
         }
         log_array_uint32_t("component",components, gp->num_vertices);
         log_debug("connected_components: end");
-        return components;
 }
 
 
@@ -355,7 +354,7 @@ uint32_t graph_cmp(const graph_s *gp1, const graph_s *gp2) {
                 return 2;
 
         for (uint32_t v = 0; v < gp1->num_vertices; v++)
-                for (uint32_t w = 0; w < gp1->degrees[v]; w++)
+                for (uint32_t w = 0; w < (gp1->degrees)[v]; w++)
                         if (gp1->adjacency_lists[w] != gp2->adjacency_lists[w])
                                 return 3;
 
