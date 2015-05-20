@@ -142,12 +142,19 @@ graph_degree(const graph_s* gp, uint32_t v);
    encoding the connected component it belongs to.
 */
 
-uint32_t *
-connected_components(graph_s* gp);
-
+void
+connected_components(graph_s* gp, uint32_t* components);
 
 /**
    \brief check if two graphs are the same.
    return a nonzero code if they differ
 */
 uint32_t graph_cmp(const graph_s *gp1, const graph_s *gp2);
+
+/**
+   \brief check if a graph is internally consistent
+
+   Exits with an error code in case of a problem.
+*/
+void
+graph_check(const graph_s *gp);

@@ -715,7 +715,7 @@ update_conflict_graph(state_s* stp) {
 void
 update_connected_components(state_s* stp) {
         log_debug("update_connected_components. stp=%p", stp);
-        stp->connected_components = connected_components(stp->red_black);
+        connected_components(stp->red_black, stp->connected_components);
         log_array_uint32_t("stp->connected_components", stp->connected_components, stp->red_black->num_vertices);
         log_debug("update_connected_components: end");
 }
