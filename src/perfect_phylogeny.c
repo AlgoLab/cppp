@@ -479,35 +479,35 @@ get_conflict_graph(const state_s *inst) {
 
 
 void
-init_state(state_s *stp, uint32_t nspecies, uint32_t nchars) {
-        log_debug("init_state n=%d m=%d", nspecies, nchars);
+init_state(state_s *stp, uint32_t n, uint32_t m) {
+        log_debug("init_state n=%d m=%d", n, m);
         assert(stp != NULL);
-        stp->num_characters_orig = nchars;
-        stp->num_species_orig = nspecies;
-        stp->num_characters = nchars;
-        stp->num_species = nspecies;
+        stp->num_characters_orig = m;
+        stp->num_species_orig = n;
+        stp->num_characters = m;
+        stp->num_species = n;
         stp->realize = 0;
-        stp->current_states = xmalloc(nchars * sizeof(uint32_t));
-        stp->species = xmalloc(nspecies * sizeof(bool));
-        stp->characters = xmalloc(nchars * sizeof(bool));
-        stp->colors = xmalloc(nchars * sizeof(uint8_t));
+        stp->current_states = xmalloc(m * sizeof(uint32_t));
+        stp->species = xmalloc(n * sizeof(bool));
+        stp->characters = xmalloc(m * sizeof(bool));
+        stp->colors = xmalloc(m * sizeof(uint8_t));
 
-        stp->tried_characters = xmalloc(nchars * sizeof(uint32_t));
-        stp->character_queue = xmalloc(nchars * sizeof(uint32_t));
-        stp->connected_components = xmalloc((nchars + nspecies) * sizeof(uint32_t));
-        stp->current_component = xmalloc((nchars + nspecies) * sizeof(bool));
+        stp->tried_characters = xmalloc(m * sizeof(uint32_t));
+        stp->character_queue = xmalloc(m * sizeof(uint32_t));
+        stp->connected_components = xmalloc((m + n) * sizeof(uint32_t));
+        stp->current_component = xmalloc((m + n) * sizeof(bool));
         stp->operation = 0;
 
-        stp->red_black = graph_new(nspecies + nchars);
+        stp->red_black = graph_new(n + m);
         assert(stp->red_black != NULL);
-        stp->conflict = graph_new(nchars);
-        assert(stp->red_black != NULL);
+        stp->conflict = graph_new(m);
+        assert(stp->conflict != NULL);
 
-        for (uint32_t i=0; i < stp->num_species_orig; i++) {
+        for (uint32_t i=0; i < n; i++) {
                 stp->species[i] = 1;
         }
 
-        for (uint32_t i=0; i < stp->num_characters_orig; i++) {
+        for (uint32_t i=0; i < m; i++) {
                 stp->tried_characters[i] = -1;
                 stp->character_queue[i] = -1;
                 stp->current_states[i] = 0;
