@@ -51,14 +51,21 @@ int main(int argc, char **argv) {
 */
                 uint32_t max_depth = temp.num_species + 2 * temp.num_characters + 1;
                 state_s states[max_depth];
+                for (uint32_t level=0; level <= max_depth; level++) {
                         log_debug("State #%d = %p", level, states + level);
+                        check_state(&temp);
                         init_state(states + level, temp.num_species, temp.num_characters);
+                        check_state(&temp);
                         log_debug("State #%d = %p", level, states + level);
                         log_debug("Initialized level %d", level);
                         log_state(states + level);
+                        check_state(&temp);
                         check_state(states + level);
+                        log_debug("check temp");
+                        check_state(&temp);
                 }
                 log_debug("States initialized");
+                check_state(&temp);
 
                 copy_state(states + 0, &temp);
                 if (outf == NULL)

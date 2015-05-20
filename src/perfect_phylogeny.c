@@ -186,10 +186,8 @@ void
 copy_state(state_s* dst, const state_s* src) {
         assert(dst != NULL);
         log_debug("copy_state: input");
-        if (!check_state(src)) {
-                fprintf(stderr, "check_state failed. error %d\n", check_state(src));
-                exit(EXIT_FAILURE);
-        }
+        check_state(src);
+
         dst->realize = src->realize;
         dst->num_species = src->num_species;
         dst->num_characters = src->num_characters;
@@ -222,7 +220,7 @@ copy_state(state_s* dst, const state_s* src) {
         dst->backtrack_level = src->backtrack_level;
         assert(state_cmp(src, dst) == 0);
         log_debug("copy_state: return");
-        assert(check_state(dst));
+        check_state(dst);
         log_debug("Checking copy_state: %d", state_cmp(dst, src));
 }
 
@@ -247,7 +245,7 @@ realize_character(state_s* dst, const state_s* src) {
         assert (dst != NULL);
         assert (src != dst);
         log_debug("realize_character: dst=%p, src=%p character=%d", dst, src, src->realize);
-        assert(check_state(src));
+        check_state(src);
         log_state(src);
         copy_state(dst, src);
         assert(state_cmp(src, dst) == 0);
@@ -256,13 +254,13 @@ realize_character(state_s* dst, const state_s* src) {
         uint32_t n = src->num_species_orig;
 
         log_debug("Trying to realize CHAR %d", character);
-        assert(check_state(dst));
+        check_state(dst);
         uint32_t c = src->num_species_orig + character;
         assert(src->current_component[c]);
         int color = src->colors[character];
         log_array_bool("src->current_component: ", src->current_component, src->red_black->num_vertices);
         log_debug("realize_character: check dst");
-        assert(check_state(dst));
+        check_state(dst);
 
         if (color == BLACK) {
                 log_debug("realize_character %d (vertex %d): color %d = BLACK", character, c, color);
@@ -305,7 +303,7 @@ realize_character(state_s* dst, const state_s* src) {
 
         dst->realize = character;
         log_debug("realize_character: before cleanup");
-        assert(check_state(dst));
+        check_state(dst);
         cleanup(dst);
         log_state(dst);
         log_debug("realize_character: call update_connected_components");
@@ -317,7 +315,7 @@ realize_character(state_s* dst, const state_s* src) {
         log_debug("realize_character: color %d", color);
         log_debug("realize_character: outcome %d (1=>activated, 2=>freed)", dst->operation);
         log_debug("realize_character: return");
-        assert(check_state(dst));
+        check_state(dst);
         return true;
 }
 
@@ -406,10 +404,10 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp) {
                         assert(matrix_get_value(stp, s, c) == 0 && !graph_get_edge(stp->red_black, s, c + stp->num_species) ||
                                matrix_get_value(stp, s, c) == 1 && graph_get_edge(stp->red_black, s, c + stp->num_species));
         update_connected_components(stp);
-        assert(check_state(stp));
+        check_state(stp);
         log_state(stp);
         cleanup(stp);
-        assert(check_state(stp));
+        check_state(stp);
         log_debug("read_instance_from_filename: call update_connected_components");
         update_connected_components(stp);
         log_state(stp);
@@ -524,21 +522,21 @@ init_state(state_s *stp, uint32_t nspecies, uint32_t nchars) {
         update_connected_components(stp);
         log_debug("init_state: completed");
         log_state(stp);
-        assert(check_state(stp));
+        check_state(stp);
 }
 
-bool
+void
 check_state(const state_s* stp) {
-        uint32_t err = true;
+        uint32_t err = 0;
 #ifdef DEBUG
         log_debug("check_state");
         log_state(stp);
         if (stp->num_species == -1 || stp->num_species > stp->num_species_orig) {
-                err = false;
+                err = 1;
                 log_debug("check_state error: Line %d (%d != %d)", __LINE__, stp->num_species, stp->num_species_orig);
         }
         if (stp->num_characters == -1 || stp->num_characters > stp->num_characters_orig) {
-                err = false;
+                err = 2;
                 log_debug("check_state error: Line %d (%d != %d)", __LINE__, stp->num_characters, stp->num_characters_orig);
         }
 
@@ -548,7 +546,7 @@ check_state(const state_s* stp) {
                         count++;
         }
         if (count != stp->num_species) {
-                err = false;
+                err = 3;
                 log_debug("check_state error: Line %d (%d != %d)", __LINE__, stp->num_species, count);
         }
 
@@ -558,7 +556,7 @@ check_state(const state_s* stp) {
                         count++;
         }
         if (count != stp->num_characters) {
-                err = false;
+                err = 4;
                 log_debug("check_state error: Line %d (%d != %d)", __LINE__, stp->num_characters, count);
         }
 
@@ -568,7 +566,7 @@ check_state(const state_s* stp) {
                         count++;
         }
         if (count != stp->num_characters) {
-                err = false;
+                err = 5;
                 log_debug("Line %d (%d != %d)", __LINE__, stp->num_characters, count);
         }
 
@@ -584,12 +582,17 @@ check_state(const state_s* stp) {
                 colors[stp->connected_components[v]] = true;
         for (uint32_t c = 0; c <= max_conn; c++)
                 if (!colors[c]) {
-                        err = false;
+                        err = 6;
                         log_debug("Line %d %d %d", __LINE__, c, colors[c]);
                 }
         assert(stp->red_black != NULL);
 #endif
-        return err;
+        log_debug("check_graph code: %d", err);
+        if (err > 0)
+                log_state(stp);
+        assert(err == 0);
+        graph_check(stp->red_black);
+        graph_check(stp->conflict);
 }
 
 uint32_t

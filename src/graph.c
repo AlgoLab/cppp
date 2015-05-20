@@ -26,12 +26,7 @@
 #include "graph.h"
 
 
-/**
-   \brief check if a graph is internally consistent
-
-   Exits with an error code in case of a problem.
-*/
-static void
+void
 graph_check(const graph_s *gp) {
         assert(gp != NULL);
         unsigned int err = 0;
@@ -49,8 +44,6 @@ graph_check(const graph_s *gp) {
         if (err == 0)
                 for (uint32_t v=0; v < n; v++) {
                         uint32_t deg = 0;
-                        if (gp->degrees[v] > n)
-                                err = 3;
                         for (uint32_t v2=0; v2 < n; v2++) {
                                 if (graph_get_edge(gp, v, v2) != graph_get_edge(gp, v, v2))
                                         err = 4;
@@ -61,10 +54,10 @@ graph_check(const graph_s *gp) {
                                 err = 5;
                 }
 #endif
-        if (err > 0) {
+        log_debug("check_graph code: %d", err);
+        if (err > 0)
                 graph_pp(gp);
-                error(88, 0, "FATAL: graph_check failed. Error code %d\n", err);
-        }
+        assert(err == 0);
 }
 
 
