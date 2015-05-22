@@ -5,7 +5,7 @@ void *
 xmalloc(unsigned n)
 {
         void *p;
-        p = GC_MALLOC_ATOMIC(n);
+        p = GC_MALLOC(n);
         if (p != NULL)
                 return p;
         fprintf(stderr, "insufficient memory\n");

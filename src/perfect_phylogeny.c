@@ -509,14 +509,14 @@ init_state(state_s *stp, uint32_t n, uint32_t m) {
         assert(stp->conflict != NULL);
 
         for (uint32_t i=0; i < n; i++) {
-                stp->species[i] = 1;
+                stp->species[i] = true;
         }
 
         for (uint32_t i=0; i < m; i++) {
                 stp->tried_characters[i] = -1;
                 stp->character_queue[i] = -1;
                 stp->current_states[i] = 0;
-                stp->characters[i] = 1;
+                stp->characters[i] = true;
                 stp->colors[i] = BLACK;
         }
         stp->character_queue_size = 0;
@@ -623,9 +623,9 @@ void
 delete_character(state_s *stp, uint32_t c) {
         log_debug("Deleting character %d", c);
         assert(c < stp->num_characters_orig);
-        assert(stp->characters[c] > 0);
+        assert(stp->characters[c]);
         assert(stp->colors[c] > 0);
-        stp->characters[c] = 0;
+        stp->characters[c] = false;
         stp->current_states[c] = -1;
         (stp->num_characters)--;
 }
@@ -635,7 +635,7 @@ delete_species(state_s *stp, uint32_t s) {
         log_debug("Deleting species %d", s);
         assert(s < stp->num_species_orig);
         assert(stp->species[s] > 0);
-        stp->species[s] = 0;
+        stp->species[s] = false;
         (stp->num_species)--;
 }
 
@@ -662,7 +662,7 @@ smallest_component(state_s* stp) {
 */
         uint32_t card[stp->red_black->num_vertices];
         memset(card, 0, stp->red_black->num_vertices * sizeof(card[0]));
-        for (uint32_t w = 0; w < stp->num_species_orig + stp->num_characters_orig; w++)
+        for (uint32_t w = 0; w < stp->red_black->num_vertices; w++)
                 card[stp->connected_components[w]] += 1;
         uint32_t smallest_component = stp->red_black->num_vertices + 1;
         uint32_t smallest_size = stp->red_black->num_vertices + 1;

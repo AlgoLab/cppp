@@ -64,8 +64,7 @@ graph_check(const graph_s *gp) {
 graph_s*
 graph_new(uint32_t n) {
         log_debug("graph_new (n=%d)", n);
-        graph_s* gp = GC_MALLOC(sizeof(graph_s));
-        assert(gp != NULL);
+        graph_s* gp = xmalloc(sizeof(graph_s));
         gp->num_vertices = n;
         gp->adjacency = xmalloc(n * n * sizeof(bool));
         memset(gp->adjacency, 0, n * n * sizeof(bool));
