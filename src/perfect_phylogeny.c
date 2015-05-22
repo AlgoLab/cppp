@@ -137,45 +137,53 @@ state_cmp(const state_s *stp1, const state_s *stp2) {
                 return 9;
         if (memcmp(stp1->characters, stp2->characters, (stp2->num_characters_orig) * sizeof((stp1->characters)[0])) != 0)
                 return 10;
-        if (stp1->character_queue == NULL || stp2->character_queue == NULL)
+        if (stp1->character_queue_size > 0 && stp1->character_queue == NULL)
+                return 12;
+        if (stp2->character_queue_size > 0 && stp2->character_queue == NULL)
                 return 13;
-        if (memcmp(stp1->character_queue, stp2->character_queue, (stp1->num_characters_orig) * sizeof((stp1->character_queue)[0])) != 0)
+        if (stp1->character_queue_size > 0 && stp2->character_queue_size > 0 &&
+            memcmp(stp1->character_queue, stp2->character_queue, (stp1->num_characters_orig) * sizeof((stp1->character_queue)[0])) != 0)
                 return 14;
-        if (stp1->tried_characters == NULL || stp2->tried_characters == NULL)
-                return 15;
-        if (memcmp(stp1->tried_characters, stp2->tried_characters, (stp1->num_characters_orig) * sizeof((stp1->tried_characters)[0])) != 0)
-                return 16;
-        if (stp1->characters == NULL || stp2->characters == NULL)
-                return 17;
-        if (memcmp(stp1->colors, stp2->colors, (stp1->num_characters_orig) * sizeof((stp1->colors)[0])) != 0)
-                return 18;
 
-        if ((stp2->num_characters_orig) + (stp2->num_species_orig) != stp2->red_black->num_vertices)
-                return 19;
-        if (stp1->connected_components == NULL || stp2->connected_components == NULL)
-                return 20;
-        if (memcmp(stp1->connected_components, stp2->connected_components, ((stp1->num_characters_orig) + (stp1->num_species_orig)) * sizeof((stp1->connected_components)[0])) != 0)
-                return 21;
-        if (stp1->current_component == NULL || stp2->current_component == NULL)
-                return 22;
-        if (memcmp(stp2->current_component, stp2->current_component, ((stp2->num_characters_orig) + (stp2->num_species_orig)) * sizeof((stp2->current_component)[0])) != 0)
-                return 23;
+	if (stp1->tried_characters_size > 0 && stp1->tried_characters == NULL)
+		return 61;
+	if (stp2->tried_characters_size > 0 && stp2->tried_characters == NULL)
+		return 62;
+	if (stp1->tried_characters_size > 0 && stp2->tried_characters_size > 0 &&
+	    memcmp(stp1->tried_characters, stp2->tried_characters, (stp1->num_characters_orig) * sizeof((stp1->tried_characters)[0])) != 0)
+		return 63;
 
-        if (stp1->matrix == NULL || stp2->matrix == NULL)
-                return 22;
-        if (memcmp(stp1->matrix, stp2->matrix, ((stp2->num_characters) * (stp2->num_species)) * sizeof((stp1->matrix)[0])) != 0)
-                return 23;
+	if (stp1->characters == NULL || stp2->characters == NULL)
+		return 17;
+	if (memcmp(stp1->colors, stp2->colors, (stp1->num_characters_orig) * sizeof((stp1->colors)[0])) != 0)
+		return 18;
 
-        if (stp1->red_black == NULL || stp2->red_black == NULL)
-                return 50;
-        if (graph_cmp(stp1->red_black, stp2->red_black) != 0)
-                return 51;
-        if (stp1->conflict == NULL || stp2->conflict == NULL)
-                return 52;
-        if (graph_cmp(stp1->conflict, stp2->conflict) != 0)
-                return 53;
+	if ((stp2->num_characters_orig) + (stp2->num_species_orig) != stp2->red_black->num_vertices)
+		return 19;
+	if (stp1->connected_components == NULL || stp2->connected_components == NULL)
+		return 20;
+	if (memcmp(stp1->connected_components, stp2->connected_components, ((stp1->num_characters_orig) + (stp1->num_species_orig)) * sizeof((stp1->connected_components)[0])) != 0)
+		return 21;
+	if (stp1->current_component == NULL || stp2->current_component == NULL)
+		return 22;
+	if (memcmp(stp2->current_component, stp2->current_component, ((stp2->num_characters_orig) + (stp2->num_species_orig)) * sizeof((stp2->current_component)[0])) != 0)
+		return 23;
 
-        return 0;
+	if (stp1->matrix == NULL || stp2->matrix == NULL)
+		return 22;
+	if (memcmp(stp1->matrix, stp2->matrix, ((stp2->num_characters) * (stp2->num_species)) * sizeof((stp1->matrix)[0])) != 0)
+		return 23;
+
+	if (stp1->red_black == NULL || stp2->red_black == NULL)
+		return 50;
+	if (graph_cmp(stp1->red_black, stp2->red_black) != 0)
+		return 51;
+	if (stp1->conflict == NULL || stp2->conflict == NULL)
+		return 52;
+	if (graph_cmp(stp1->conflict, stp2->conflict) != 0)
+		return 53;
+
+	return 0;
 }
 
 void
@@ -206,10 +214,8 @@ copy_state(state_s* dst, const state_s* src) {
         memcpy(dst->connected_components, src->connected_components, src->red_black->num_vertices * sizeof(src->connected_components[0]));
         memcpy(dst->current_component, src->current_component, src->red_black->num_vertices * sizeof(src->current_component[0]));
 
-        memcpy(dst->character_queue, src->character_queue, src->num_characters_orig * sizeof(src->character_queue[0]));
-        memcpy(dst->tried_characters, src->tried_characters, src->num_characters_orig * sizeof(src->tried_characters[0]));
-        dst->tried_characters_size = src->tried_characters_size;
-        dst->character_queue_size = src->character_queue_size;
+        dst->tried_characters_size = 0;
+        dst->character_queue_size = 0;
 
         dst->backtrack_level = src->backtrack_level;
         assert(state_cmp(src, dst) == 0);
