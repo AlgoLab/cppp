@@ -44,13 +44,17 @@ log_state(const state_s* stp) {
         fprintf(stderr, "      |current|          |      \n");
         fprintf(stderr, "  c   |states |characters|colors\n");
         fprintf(stderr, "------|-------|----------|------\n");
-        log_array_bool("stp->characters", stp->characters, stp->num_characters_orig);
+        for (size_t i = 0; i < stp->num_characters_orig; i++)
+                fprintf(stderr, "%6d|%7d|%10d|%6d\n", i, stp->current_states[i], stp->characters[i], stp->colors[i]);
         fprintf(stderr, "------|-------|----------|------\n");
 
         fprintf(stderr, "------|-------\n");
         fprintf(stderr, "  s   |species\n");
         fprintf(stderr, "------|-------\n");
-        log_array_bool("stp->species", stp->species, stp->num_species_orig);
+        for (size_t i = 0; i < stp->num_species_orig; i++) {
+                fprintf(stderr, "%6d|%7d\n", i, stp->species[i]);
+        }
+
         fprintf(stderr, "------|-------\n");
 
         fprintf(stderr, "  operation: %d\n", stp->operation);
@@ -253,27 +257,28 @@ realize_character(state_s* dst, const state_s* src) {
         assert(src->characters[character]);
         uint32_t n = src->num_species_orig;
 
-        log_debug("Trying to realize CHAR %d", character);
+        log_debug("realize_character: Trying to realize CHAR %d", character);
         check_state(dst);
-        uint32_t c = src->num_species_orig + character;
-        assert(src->current_component[c]);
-        int color = src->colors[character];
-        log_array_bool("src->current_component: ", src->current_component, src->red_black->num_vertices);
+        uint32_t character_vertex = src->num_species_orig + character;
+        assert(src->current_component[character_vertex]);
+        uint32_t color = src->colors[character];
+        log_array_bool("realize_character: src->current_component: ", src->current_component, src->red_black->num_vertices);
         log_debug("realize_character: check dst");
+        log_debug("realize_character: color %d. Cases BLACK=>%d RED=>%d", color, (color == BLACK), (color == RED));
         check_state(dst);
 
         if (color == BLACK) {
-                log_debug("realize_character %d (vertex %d): color %d = BLACK", character, c, color);
+                log_debug("realize_character: %d (vertex %d): color %d = BLACK", character, character_vertex, color);
 /*
   for each species s in the same connected component as c, delete the
   edge (s,c) if it exists and create the edge (s,c) if it does not exist
 */
                 for (uint32_t v=0; v<n; v++)
                         if (src->current_component[v])
-                                if (graph_get_edge(src->red_black, c, v) && c != v)
-                                        graph_del_edge_unsafe(dst->red_black, c, v);
+                                if (graph_get_edge(src->red_black, character_vertex, v) && character_vertex != v)
+                                        graph_del_edge_unsafe(dst->red_black, character_vertex, v);
                                 else
-                                        graph_add_edge_unsafe(dst->red_black, c, v);
+                                        graph_add_edge_unsafe(dst->red_black, character_vertex, v);
 
                 dst->operation = 1;
                 dst->colors[character] = RED;
@@ -583,13 +588,19 @@ check_state(const state_s* stp) {
         for (uint32_t c = 0; c <= max_conn; c++)
                 if (!colors[c]) {
                         err = 6;
-                        log_debug("Line %d %d %d", __LINE__, c, colors[c]);
+                        log_debug("Line %d %d %d", __LINE__, c, component_id[c]);
                 }
         assert(stp->red_black != NULL);
+
+        if ((stp->num_characters_orig) + (stp->num_species_orig) != stp->red_black->num_vertices) {
+                err = 7;
+                log_debug("Line %d (%d + %d != %d)", __LINE__, stp->num_characters_orig, stp->num_species_orig, stp->red_black->num_vertices);
+        }
+
 #endif
-        log_debug("check_graph code: %d", err);
         if (err > 0)
                 log_state(stp);
+        log_debug("check_graph code: %d", err);
         assert(err == 0);
         graph_check(stp->red_black);
         graph_check(stp->conflict);

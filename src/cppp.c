@@ -54,9 +54,11 @@ int main(int argc, char **argv) {
                 for (uint32_t level=0; level <= max_depth; level++) {
                         log_debug("State #%d = %p", level, states + level);
                         check_state(&temp);
-                        init_state(states + level, temp.num_species, temp.num_characters);
+                        log_debug("State #%d (max %d) = %p", level, maxdepth, states + level);
+                        init_state(states + level, temp.num_species_orig, temp.num_characters_orig);
+                        log_debug("State #%d (max %d) = %p", level, maxdepth, states + level);
                         check_state(&temp);
-                        log_debug("State #%d = %p", level, states + level);
+                        log_debug("State #%d (max %d) = %p", level, maxdepth, states + level);
                         log_debug("Initialized level %d", level);
                         log_state(states + level);
                         check_state(&temp);
