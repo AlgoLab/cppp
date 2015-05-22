@@ -98,13 +98,13 @@ void log_state_graphs(const state_s* stp) {
 */
 
 static uint32_t
-matrix_get_value(state_s *stp, uint32_t species, uint32_t character) {
-        return stp->matrix[character + stp->num_characters * species];
+matrix_get_value(state_s *stp, uint32_t s, uint32_t c) {
+        return stp->matrix[c + stp->num_characters * s];
 }
 
 static void
-matrix_set_value(state_s *stp, uint32_t species, uint32_t character, uint32_t value) {
-        stp->matrix[character + stp->num_characters * species] = value;
+matrix_set_value(state_s *stp, uint32_t s, uint32_t c, uint32_t value) {
+        stp->matrix[c + stp->num_characters * s] = value;
 }
 
 
