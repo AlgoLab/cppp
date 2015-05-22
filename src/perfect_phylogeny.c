@@ -131,7 +131,7 @@ state_cmp(const state_s *stp1, const state_s *stp2) {
 
         if (stp1->current_states == NULL || stp2->current_states == NULL)
                 return 5;
-        if (memcmp(stp1->current_states, stp2->current_states, (stp2->num_species_orig) * sizeof((stp1->current_states)[0])) != 0)
+        if (memcmp(stp1->current_states, stp2->current_states, (stp2->num_characters_orig) * sizeof((stp1->current_states)[0])) != 0)
                 return 6;
         if (stp1->species == NULL || stp2->species == NULL)
                 return 7;
@@ -143,30 +143,30 @@ state_cmp(const state_s *stp1, const state_s *stp2) {
                 return 10;
         if (stp1->current_states == NULL || stp2->current_states == NULL)
                 return 11;
-        if (memcmp(stp1->current_states, stp2->current_states, (stp2->num_species_orig) * sizeof((stp1->current_states)[0])) != 0)
+        if (memcmp(stp1->current_states, stp2->current_states, (stp2->num_characters_orig) * sizeof((stp1->current_states)[0])) != 0)
                 return 12;
         if (stp1->character_queue == NULL || stp2->character_queue == NULL)
                 return 13;
-        if (memcmp(stp1->character_queue, stp2->character_queue, (stp2->num_characters_orig) * sizeof((stp1->character_queue)[0])) != 0)
+        if (memcmp(stp1->character_queue, stp2->character_queue, (stp1->num_characters_orig) * sizeof((stp1->character_queue)[0])) != 0)
                 return 14;
         if (stp1->tried_characters == NULL || stp2->tried_characters == NULL)
                 return 15;
-        if (memcmp(stp1->tried_characters, stp2->tried_characters, (stp2->num_characters_orig) * sizeof((stp1->tried_characters)[0])) != 0)
+        if (memcmp(stp1->tried_characters, stp2->tried_characters, (stp1->num_characters_orig) * sizeof((stp1->tried_characters)[0])) != 0)
                 return 16;
         if (stp1->characters == NULL || stp2->characters == NULL)
                 return 17;
-        if (memcmp(stp1->colors, stp2->colors, (stp2->num_characters_orig) * sizeof((stp1->colors)[0])) != 0)
+        if (memcmp(stp1->colors, stp2->colors, (stp1->num_characters_orig) * sizeof((stp1->colors)[0])) != 0)
                 return 18;
 
-        if ((stp2->num_characters) + (stp2->num_species) != stp2->red_black->num_vertices)
+        if ((stp2->num_characters_orig) + (stp2->num_species_orig) != stp2->red_black->num_vertices)
                 return 19;
         if (stp1->connected_components == NULL || stp2->connected_components == NULL)
                 return 20;
-        if (memcmp(stp1->connected_components, stp2->connected_components, ((stp2->num_characters) + (stp2->num_species)) * sizeof((stp1->connected_components)[0])) != 0)
+        if (memcmp(stp1->connected_components, stp2->connected_components, ((stp1->num_characters_orig) + (stp1->num_species_orig)) * sizeof((stp1->connected_components)[0])) != 0)
                 return 21;
         if (stp1->current_component == NULL || stp2->current_component == NULL)
                 return 22;
-        if (memcmp(stp1->current_component, stp2->current_component, ((stp2->num_characters) + (stp2->num_species)) * sizeof((stp1->current_component)[0])) != 0)
+        if (memcmp(stp2->current_component, stp2->current_component, ((stp2->num_characters_orig) + (stp2->num_species_orig)) * sizeof((stp2->current_component)[0])) != 0)
                 return 23;
 
         if (stp1->matrix == NULL || stp2->matrix == NULL)
