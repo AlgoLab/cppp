@@ -419,15 +419,8 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp) {
         log_debug("read_instance_from_filename: update_conflict_graph");
         update_conflict_graph(stp);
 
-        memset(stp->current_states, 0, stp->num_species * sizeof((stp->current_states)[0]));
-        memset(stp->species, 1, stp->num_species * sizeof((stp->species)[0]));
-
-        memset(stp->characters, 1, stp->num_species * sizeof((stp->characters)[0]));
-        memset(stp->colors, 0, stp->num_species * sizeof((stp->colors)[0]));
-        memset(stp->connected_components, 0, stp->num_characters * sizeof((stp->connected_components)[0]));
-        memset(stp->tried_characters, 0, stp->num_characters * sizeof((stp->tried_characters)[0]));
-        memset(stp->character_queue, 0, stp->num_characters * sizeof((stp->character_queue)[0]));
-
+        memset(stp->tried_characters, 0, stp->num_characters_orig * sizeof((stp->tried_characters)[0]));
+        memset(stp->character_queue, 0, stp->num_characters_orig * sizeof((stp->character_queue)[0]));
         stp->tried_characters_size = 0;
         stp->character_queue_size = 0;
         stp->operation = 0;
