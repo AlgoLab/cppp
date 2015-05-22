@@ -56,8 +56,6 @@ typedef struct graph_s {
         uint32_t *degrees;
         bool *adjacency;
         uint32_t *adjacency_lists;
-        bool *dirty_lists;
-        bool dirty;
         uint32_t num_vertices;
 } graph_s;
 
@@ -79,13 +77,7 @@ void
 graph_add_edge(graph_s* gp, uint32_t v1, uint32_t v2);
 
 void
-graph_add_edge_unsafe(graph_s* gp, uint32_t v1, uint32_t v2);
-
-void
 graph_del_edge(graph_s* gp, uint32_t v1, uint32_t v2);
-
-void
-graph_del_edge_unsafe(graph_s* gp, uint32_t v1, uint32_t v2);
 
 bool
 graph_get_edge(const graph_s* gp, uint32_t v1, uint32_t v2);
@@ -99,27 +91,6 @@ graph_get_edge_pos(const graph_s* gp, uint32_t v1, uint32_t pos);
 void
 graph_nuke_edges(graph_s* gp);
 
-/**
-   Updates the correct \c adjacency_lists of all dirty vertices of a
-   graph
-*/
-void
-graph_fix_edges(graph_s* gp, uint32_t v1);
-
-/**
-   Updates the correct \c adjacency_lists of a single dirty vertex of a
-   graph
-*/
-void
-graph_fix_graph(graph_s* gp);
-/**
-   \brief stores in \c reached all vertices that are in same connected
-   component of \c gp as \c v
-
-   It assumes that \c reached is an array of booleans that can store a
-   bit for each vertex. The i-th bit will be set iff the i-th vertex
-   is reachable from v
-*/
 void
 graph_reachable(const graph_s* gp, uint32_t v, bool* reached);
 

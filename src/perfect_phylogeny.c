@@ -276,9 +276,9 @@ realize_character(state_s* dst, const state_s* src) {
                 for (uint32_t v=0; v<n; v++)
                         if (src->current_component[v])
                                 if (graph_get_edge(src->red_black, character_vertex, v) && character_vertex != v)
-                                        graph_del_edge_unsafe(dst->red_black, character_vertex, v);
+                                        graph_del_edge(dst->red_black, character_vertex, v);
                                 else
-                                        graph_add_edge_unsafe(dst->red_black, character_vertex, v);
+                                        graph_add_edge(dst->red_black, character_vertex, v);
 
                 dst->operation = 1;
                 dst->colors[character] = RED;
@@ -298,7 +298,7 @@ realize_character(state_s* dst, const state_s* src) {
                 for (uint32_t v=0; v<n; v++)
                         if (src->current_component[v])
                                 if (graph_get_edge(src->red_black, character_vertex, v) && character_vertex != v)
-                                        graph_del_edge_unsafe(dst->red_black, character_vertex, v);
+                                        graph_del_edge(dst->red_black, character_vertex, v);
                                 else {
                                         dst->operation = 0;
                                         log_debug("realize_character: end. REALIZATION IMPOSSIBLE");
@@ -397,8 +397,7 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp) {
         for(uint32_t s=0; s < stp->num_species; s++)
                 for(uint32_t c=0; c < stp->num_characters; c++)
                         if (matrix_get_value(stp, s, c) == 1)
-                                graph_add_edge_unsafe(stp->red_black, s, c + stp->num_species);
-        graph_fix_graph(stp->red_black);
+                                graph_add_edge(stp->red_black, s, c + stp->num_species);
 #ifdef DEBUG
         log_debug("MATRIX");
         graph_pp(stp->red_black);
@@ -709,9 +708,8 @@ update_conflict_graph(state_s* stp) {
                         for(uint32_t s=0; s < stp->num_species; s++)
                                 states[matrix_get_value(stp, s, c1)][matrix_get_value(stp, s, c2)] = 1;
                         if(states[0][0] + states[0][1] + states[1][0] + states[1][1] == 4)
-                                graph_add_edge_unsafe(stp->conflict, c1, c2);
+                                graph_add_edge(stp->conflict, c1, c2);
                 }
-        graph_fix_graph(stp->conflict);
         log_debug("update_conflict_graph: end");
         graph_pp(stp->conflict);
 }
