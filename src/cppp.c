@@ -49,10 +49,10 @@ int main(int argc, char **argv) {
 
    Therefore each partial solution con contain at most 2m+n states.
 */
-                uint32_t max_depth = temp.num_species + 2 * temp.num_characters + 1;
-                state_s states[max_depth];
-                for (uint32_t level=0; level <= max_depth; level++) {
-                        log_debug("State #%d = %p", level, states + level);
+                uint32_t maxdepth = temp.num_species_orig + 2 * temp.num_characters_orig + 1;
+                state_s states[maxdepth + 1];
+                for (uint32_t level = 0; level <= maxdepth; level++) {
+                        log_debug("State #%d (max %d) = %p", level, maxdepth, states + level);
                         check_state(&temp);
                         log_debug("State #%d (max %d) = %p", level, maxdepth, states + level);
                         init_state(states + level, temp.num_species_orig, temp.num_characters_orig);
