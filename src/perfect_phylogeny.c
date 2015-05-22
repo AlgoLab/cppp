@@ -297,8 +297,8 @@ realize_character(state_s* dst, const state_s* src) {
 */
                 for (uint32_t v=0; v<n; v++)
                         if (src->current_component[v])
-                                if (graph_get_edge(src->red_black, c, v) && c != v)
-                                        graph_del_edge_unsafe(dst->red_black, c, v);
+                                if (graph_get_edge(src->red_black, character_vertex, v) && character_vertex != v)
+                                        graph_del_edge_unsafe(dst->red_black, character_vertex, v);
                                 else {
                                         dst->operation = 0;
                                         log_debug("realize_character: end. REALIZATION IMPOSSIBLE");
@@ -581,12 +581,12 @@ check_state(const state_s* stp) {
                 if ((stp->connected_components)[v] > max_conn)
                         max_conn = (stp->connected_components)[v];
 
-        bool colors[max_conn + 1];
-        memset(colors, 0, (max_conn + 1) * sizeof(bool));
+        bool component_id[max_conn + 1];
+        memset(component_id, 0, (max_conn + 1) * sizeof(bool));
         for (uint32_t v = 0; v < stp->red_black->num_vertices; v++)
-                colors[stp->connected_components[v]] = true;
+                component_id[stp->connected_components[v]] = true;
         for (uint32_t c = 0; c <= max_conn; c++)
-                if (!colors[c]) {
+                if (!component_id[c]) {
                         err = 6;
                         log_debug("Line %d %d %d", __LINE__, c, component_id[c]);
                 }
