@@ -69,8 +69,6 @@
    The \c matrix field can be \c NULL, if we are not interested in the matrix
    any more.
 
-   The \c current_states gives the current state for each original species.
-
    \c current_component contains the current connected component of
    the red-black graph. It is used to solve separately each connected
    component by a careful managing of the backtracking
@@ -92,7 +90,6 @@
 typedef struct state_s {
         graph_s *red_black;
         graph_s *conflict;
-        uint32_t *current_states;
         bool *species;
         bool *characters;
         uint32_t *connected_components;

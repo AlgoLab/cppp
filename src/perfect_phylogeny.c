@@ -40,12 +40,12 @@ log_state(const state_s* stp) {
         fprintf(stderr, "  num_species_orig: %d\n", stp->num_species_orig);
         fprintf(stderr, "  num_characters_orig: %d\n", stp->num_characters_orig);
 
-        fprintf(stderr, "------|-------|----------|------\n");
-        fprintf(stderr, "      |current|          |      \n");
-        fprintf(stderr, "  c   |states |characters|colors\n");
-        fprintf(stderr, "------|-------|----------|------\n");
+        fprintf(stderr, "------|----------|------\n");
+        fprintf(stderr, "      |          |      \n");
+        fprintf(stderr, "  c   |characters|colors\n");
+        fprintf(stderr, "------|----------|------\n");
         for (size_t i = 0; i < stp->num_characters_orig; i++)
-                fprintf(stderr, "%6d|%7d|%10d|%6d\n", i, stp->current_states[i], stp->characters[i], stp->colors[i]);
+                fprintf(stderr, "%6d|%10d|%6d\n", i,stp->characters[i], stp->colors[i]);
         fprintf(stderr, "------|-------|----------|------\n");
 
         fprintf(stderr, "------|-------\n");
@@ -129,10 +129,6 @@ state_cmp(const state_s *stp1, const state_s *stp2) {
         if (stp1->backtrack_level != stp2->backtrack_level)
                 return 45;
 
-        if (stp1->current_states == NULL || stp2->current_states == NULL)
-                return 5;
-        if (memcmp(stp1->current_states, stp2->current_states, (stp2->num_characters_orig) * sizeof((stp1->current_states)[0])) != 0)
-                return 6;
         if (stp1->species == NULL || stp2->species == NULL)
                 return 7;
         if (memcmp(stp1->species, stp2->species, (stp2->num_species_orig) * sizeof((stp1->species)[0])) != 0)
@@ -141,10 +137,6 @@ state_cmp(const state_s *stp1, const state_s *stp2) {
                 return 9;
         if (memcmp(stp1->characters, stp2->characters, (stp2->num_characters_orig) * sizeof((stp1->characters)[0])) != 0)
                 return 10;
-        if (stp1->current_states == NULL || stp2->current_states == NULL)
-                return 11;
-        if (memcmp(stp1->current_states, stp2->current_states, (stp2->num_characters_orig) * sizeof((stp1->current_states)[0])) != 0)
-                return 12;
         if (stp1->character_queue == NULL || stp2->character_queue == NULL)
                 return 13;
         if (memcmp(stp1->character_queue, stp2->character_queue, (stp1->num_characters_orig) * sizeof((stp1->character_queue)[0])) != 0)
@@ -200,11 +192,9 @@ copy_state(state_s* dst, const state_s* src) {
         dst->matrix = src->matrix;
         assert(dst != NULL);
 
-        assert(dst->current_states != NULL);
         assert(dst->characters != NULL);
         assert(dst->colors != NULL);
         assert(dst->species != NULL);
-        memcpy(dst->current_states, src->current_states, src->num_characters_orig * sizeof(src->current_states[0]));
         memcpy(dst->characters, src->characters, src->num_characters_orig * sizeof(src->characters[0]));
         memcpy(dst->colors, src->colors, src->num_characters_orig * sizeof(src->colors[0]));
         memcpy(dst->species, src->species, src->num_species_orig * sizeof(src->species[0]));
@@ -282,7 +272,6 @@ realize_character(state_s* dst, const state_s* src) {
 
                 dst->operation = 1;
                 dst->colors[character] = RED;
-                dst->current_states[character] = 1;
         }
         if (color == RED) {
                 log_debug("realize_character: color %d = RED", color);
@@ -484,7 +473,6 @@ init_state(state_s *stp, uint32_t n, uint32_t m) {
         stp->num_characters = m;
         stp->num_species = n;
         stp->realize = 0;
-        stp->current_states = xmalloc(m * sizeof(uint32_t));
         stp->species = xmalloc(n * sizeof(bool));
         stp->characters = xmalloc(m * sizeof(bool));
         stp->colors = xmalloc(m * sizeof(uint8_t));
@@ -507,7 +495,6 @@ init_state(state_s *stp, uint32_t n, uint32_t m) {
         for (uint32_t i=0; i < m; i++) {
                 stp->tried_characters[i] = -1;
                 stp->character_queue[i] = -1;
-                stp->current_states[i] = 0;
                 stp->characters[i] = true;
                 stp->colors[i] = BLACK;
         }
@@ -557,11 +544,6 @@ check_state(const state_s* stp) {
                 log_debug("check_state error: Line %d (%d != %d)", __LINE__, stp->num_characters, count);
         }
 
-        count = 0;
-        for (uint32_t c = 0; c < stp->num_characters_orig; c++) {
-                if (stp->current_states[c] != -1)
-                        count++;
-        }
         if (count != stp->num_characters) {
                 err = 5;
                 log_debug("Line %d (%d != %d)", __LINE__, stp->num_characters, count);
@@ -618,7 +600,6 @@ delete_character(state_s *stp, uint32_t c) {
         assert(stp->characters[c]);
         assert(stp->colors[c] > 0);
         stp->characters[c] = false;
-        stp->current_states[c] = -1;
         (stp->num_characters)--;
 }
 
