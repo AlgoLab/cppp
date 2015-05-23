@@ -198,6 +198,7 @@ exhaustive_search(state_s *states, strategy_fn strategy, uint32_t max_depth) {
         (states + 0)->backtrack_level = -1;
         for(uint32_t level = 0; level != -1; level = next_node(states, level, strategy)) {
                 log_debug("exhaustive_search: level %d", level);
+                log_state(states + level);
                 assert(level <= max_depth);
                 if ((states + level)->num_species == 0) {
                         log_debug("exhaustive_search: solution found");

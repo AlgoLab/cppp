@@ -246,7 +246,6 @@ realize_character(state_s* dst, const state_s* src) {
         assert (src != dst);
         log_debug("realize_character: dst=%p, src=%p character=%d", dst, src, src->realize);
         check_state(src);
-        log_state(src);
         copy_state(dst, src);
         assert(state_cmp(src, dst) == 0);
         uint32_t character = src->realize;
@@ -264,7 +263,7 @@ realize_character(state_s* dst, const state_s* src) {
         check_state(dst);
 
         if (color == BLACK) {
-                log_debug("realize_character: %d (vertex %d): color %d = BLACK", character, character_vertex, color);
+                log_debug("realize_character: %d (vertex %d). inactive color %d = BLACK", character, character_vertex, color);
 /*
   for each species s in the same connected component as c, delete the
   edge (s,c) if it exists and create the edge (s,c) if it does not exist
@@ -280,9 +279,7 @@ realize_character(state_s* dst, const state_s* src) {
                 dst->colors[character] = RED;
         }
         if (color == RED) {
-                log_debug("realize_character: color %d = RED", color);
-                dst->operation = 2;
-                dst->colors[character] = RED + 1;
+                log_debug("realize_character: %d (vertex %d). active. color %d = RED", character, character_vertex, color);
 /*
   if there is a species in the same connected component as c, but that
   it is not adjacent to c, then the realization is impossible.
@@ -292,9 +289,11 @@ realize_character(state_s* dst, const state_s* src) {
 */
                 for (uint32_t v=0; v<n; v++)
                         if (src->current_component[v])
-                                if (graph_get_edge(src->red_black, character_vertex, v) && character_vertex != v)
+                                if (graph_get_edge(src->red_black, character_vertex, v) && character_vertex != v) {
+                                        dst->operation = 2;
+                                        dst->colors[character] = RED + 1;
                                         graph_del_edge(dst->red_black, character_vertex, v);
-                                else {
+                                } else {
                                         dst->operation = 0;
                                         log_debug("realize_character: end. REALIZATION IMPOSSIBLE");
                                         return false;
@@ -305,13 +304,13 @@ realize_character(state_s* dst, const state_s* src) {
         log_debug("realize_character: before cleanup");
         check_state(dst);
         cleanup(dst);
-        log_state(dst);
+        check_state(dst);
         log_debug("realize_character: call update_connected_components");
         update_connected_components(dst);
-        log_state(dst);
+        check_state(dst);
         log_debug("realize_character: update_conflict_graph");
         update_conflict_graph(dst);
-        log_state(dst);
+        check_state(dst);
         log_debug("realize_character: color %d", color);
         log_debug("realize_character: outcome %d (1=>activated, 2=>freed)", dst->operation);
         log_debug("realize_character: return");
@@ -404,12 +403,11 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp) {
                                matrix_get_value(stp, s, c) == 1 && graph_get_edge(stp->red_black, s, c + stp->num_species));
         update_connected_components(stp);
         check_state(stp);
-        log_state(stp);
         cleanup(stp);
         check_state(stp);
         log_debug("read_instance_from_filename: call update_connected_components");
         update_connected_components(stp);
-        log_state(stp);
+        check_state(stp);
         log_debug("read_instance_from_filename: update_conflict_graph");
         update_conflict_graph(stp);
 
@@ -511,7 +509,6 @@ init_state(state_s *stp, uint32_t n, uint32_t m) {
         log_debug("init_state: before update_connected_components");
         update_connected_components(stp);
         log_debug("init_state: completed");
-        log_state(stp);
         check_state(stp);
 }
 
@@ -519,8 +516,6 @@ void
 check_state(const state_s* stp) {
         uint32_t err = 0;
 #ifdef DEBUG
-        log_debug("check_state");
-        log_state(stp);
         if (stp->num_species == -1 || stp->num_species > stp->num_species_orig) {
                 err = 1;
                 log_debug("check_state error: Line %d (%d != %d)", __LINE__, stp->num_species, stp->num_species_orig);
@@ -578,9 +573,10 @@ check_state(const state_s* stp) {
         }
 
 #endif
-        if (err > 0)
+        if (err > 0) {
                 log_state(stp);
-        log_debug("check_graph code: %d", err);
+                log_debug("check_graph code: %d", err);
+        }
         assert(err == 0);
         graph_check(stp->red_black);
         graph_check(stp->conflict);

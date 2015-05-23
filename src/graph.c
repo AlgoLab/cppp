@@ -72,9 +72,10 @@ graph_check(const graph_s *gp) {
 
 
 #endif
-        log_debug("check_graph code: %d", err);
-        if (err > 0)
+        if (err > 0) {
                 graph_pp(gp);
+                log_debug("check_graph code: %d", err);
+        }
         assert(err == 0);
 }
 
@@ -136,7 +137,7 @@ graph_del_edge(graph_s* gp, uint32_t v1, uint32_t v2) {
         while ((gp->adjacency_lists)[v1 * (gp->num_vertices) + pos] != v2)
                 pos += 1;
         assert(pos < graph_degree(gp, v1));
-        (gp->adjacency_lists)[v1 * (gp->num_vertices) + pos] = (gp->adjacency_lists)[v1 * (gp->num_vertices) + graph_degree(gp ,v1) - 1];
+        (gp->adjacency_lists)[v1 * (gp->num_vertices) + pos] = (gp->adjacency_lists)[v1 * (gp->num_vertices) + graph_degree(gp, v1) - 1];
 
         pos = 0;
         while ((gp->adjacency_lists)[v2 * (gp->num_vertices) + pos] != v1)
