@@ -286,3 +286,12 @@ smallest_component(state_s* stp);
 */
 void
 update_conflict_graph(state_s* stp);
+
+/**
+   \brief analyzes the array of states and computes the resulting tree
+   in Newick format
+
+   \return a string with the tree
+*/
+char*
+newick(state_s* states);

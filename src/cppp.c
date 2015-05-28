@@ -65,9 +65,7 @@ int main(int argc, char **argv) {
                         error(6, 0, "Input file ended prematurely\n");
                 if (exhaustive_search(states, alphabetic, states[0].num_species + 2 * states[0].num_characters)) {
                         log_debug("Writing solution");
-                        for (uint32_t level=0; (states + level)->num_species > 0; level++)
-                                fprintf(outf, "%d ", (states + level)->realize);
-                        fprintf(outf, "\n");
+                        fprintf(outf, "%s\n", newick(states));
                 } else
                         fprintf(outf, "Not found\n");
                 log_debug("Instance solved");
