@@ -107,7 +107,7 @@ matrix_set_value(state_s *stp, uint32_t s, uint32_t c, uint32_t value) {
         stp->matrix[c + stp->num_characters * s] = value;
 }
 
-
+#ifdef DEBUG
 static uint32_t
 state_cmp(const state_s *stp1, const state_s *stp2) {
         if (stp1->num_characters != stp2->num_characters)
@@ -185,6 +185,7 @@ state_cmp(const state_s *stp1, const state_s *stp2) {
 
         return 0;
 }
+#endif
 
 void
 copy_state(state_s* dst, const state_s* src) {
@@ -708,7 +709,8 @@ update_connected_components(state_s* stp) {
 // From 21st Century C
 #define Sasprintf(write_to, ...) {                              \
                 char *tmp_string_for_extend = (write_to);       \
-                asprintf(&(write_to), __VA_ARGS__);             \
+                if (-1 == asprintf(&(write_to), __VA_ARGS__))   \
+                        exit(1);                                \
                 free(tmp_string_for_extend);                    \
         }
 
@@ -721,27 +723,27 @@ newick_levels(state_s* states, uint32_t first, uint32_t last) {
                 return result;
         }
         state_s* cur = states + first;
-        // check if all red-black graphs in the states [first:last]
-        // are subgraph of the current connected component of the
-        // first state.
-        // In that case, we are solving a single connected component
-        // of the red-black graph.
+// check if all red-black graphs in the states [first:last]
+// are subgraph of the current connected component of the
+// first state.
+// In that case, we are solving a single connected component
+// of the red-black graph.
         if (bool_array_includes(cur->current_component, (states + last)->current_component, cur->red_black->num_vertices)) {
-                // A single connected component
+// A single connected component
                 log_debug("newick_levels: 1 component. %d %d", first, last);
                 char sign = (cur->operation == 1) ? '+' : '-';
                 if (first == last) {
-                        // we are in a leaf of the tree
+// we are in a leaf of the tree
                         Sasprintf(result, ":C%04u%c", cur->realize, sign);
                 } else {
                         Sasprintf(result, "(%s:C%04u%c)", newick_levels(states, first + 1, last), cur->realize, sign);
                 }
         } else {
-                // More connected components: recurse on each single
-                // component, and the results will be separated by
-                // commas
-                // cur_first: first index of the current component
-                // cur_last: last index of the current component
+// More connected components: recurse on each single
+// component, and the results will be separated by
+// commas
+// cur_first: first index of the current component
+// cur_last: last index of the current component
                 uint32_t cur_first = first;
                 if (cur_first < last) {
                         uint32_t cur_last = cur_first + 1;
@@ -753,18 +755,15 @@ newick_levels(state_s* states, uint32_t first, uint32_t last) {
                         cur_last -= 1;
                         log_debug("newick_levels: more components. %d:%d (%d:%d)", cur_first, cur_last, first, last);
                         if (cur_last >= last) {
-                                log_debug("final");
                                 Sasprintf(result, "%s", newick_levels(states, cur_first, cur_last));
                         } else {
-                                log_debug("not final");
                                 char* tmp1 = NULL;
-                                asprintf(&tmp1, "%s", newick_levels(states, cur_last + 1, last));
+                                Sasprintf(tmp1, "%s", newick_levels(states, cur_last + 1, last));
                                 char* tmp2 = NULL;
-                                asprintf(&tmp2, "%s", newick_levels(states, cur_first, cur_last));
-                                log_debug("tmp1: %s", tmp1);
-                                log_debug("tmp2: %s", tmp2);
+                                Sasprintf(tmp2, "%s", newick_levels(states, cur_first, cur_last));
                                 Sasprintf(result, "%s,%s", tmp1, tmp2);
-                                log_debug("tmp1+tmp2 %s", result);
+                                free(tmp1);
+                                free(tmp2);
                         }
                 }
                 log_debug("newick_levels: completed more components. %d:%d", first, last);
@@ -780,16 +779,13 @@ char*
 newick(state_s* states) {
         uint32_t final_level = 0;
         log_debug("dump_states");
-        fprintf(stderr, "level| char | current_component\n");
         while ((states + final_level)->num_species > 0) {
-                fprintf(stderr, "%4d | %4d |", final_level, (states + final_level)->realize);
-                for (unsigned int i = 0; i < (states + final_level)->red_black->num_vertices; i++)
-                        fprintf(stderr, " %d", (states + final_level)->current_component[i]);
-                fprintf(stderr, "\n");
+                log_debug("%4d | %4d ", final_level, (states + final_level)->realize);
+                log_array_bool("Component.",  (states + final_level)->current_component, (states + final_level)->red_black->num_vertices);
                 final_level += 1;
         }
         char* tmp = NULL;
-        asprintf(&tmp, "%s;", newick_levels(states, 0, final_level -1));
+        Sasprintf(tmp, "%s;", newick_levels(states, 0, final_level -1));
         log_debug("newick: tmp %s", tmp);
         char* result = GC_MALLOC((strlen(tmp) + 1) * sizeof(char));
         strncpy(result, tmp, strlen(tmp) + 1);
