@@ -237,7 +237,7 @@ read_instance_from_filename(instances_schema_s* global_props, state_s* stp);
    \return \c true if the realization has been successful
 
 */
-bool realize_character(state_s* dst, const state_s* src);
+bool realize_character(state_s* dst, state_s* src);
 
 /**
    \brief updates the connected components of the red-black graph of

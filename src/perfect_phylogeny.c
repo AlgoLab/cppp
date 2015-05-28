@@ -240,7 +240,7 @@ copy_state(state_s* dst, const state_s* src) {
 
 */
 bool
-realize_character(state_s* dst, const state_s* src) {
+realize_character(state_s* dst, state_s* src) {
         assert (src != NULL);
         assert (dst != NULL);
         assert (src != dst);
@@ -275,7 +275,7 @@ realize_character(state_s* dst, const state_s* src) {
                                 else
                                         graph_add_edge(dst->red_black, character_vertex, v);
 
-                dst->operation = 1;
+                src->operation = 1;
                 dst->colors[character] = RED;
         }
         if (color == RED) {
@@ -290,11 +290,11 @@ realize_character(state_s* dst, const state_s* src) {
                 for (uint32_t v=0; v<n; v++)
                         if (src->current_component[v])
                                 if (graph_get_edge(src->red_black, character_vertex, v) && character_vertex != v) {
-                                        dst->operation = 2;
+                                        src->operation = 2;
                                         dst->colors[character] = RED + 1;
                                         graph_del_edge(dst->red_black, character_vertex, v);
                                 } else {
-                                        dst->operation = 0;
+                                        src->operation = 0;
                                         log_debug("realize_character: end. REALIZATION IMPOSSIBLE");
                                         return false;
                                 }
