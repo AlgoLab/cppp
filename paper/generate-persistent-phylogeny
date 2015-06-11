@@ -30,10 +30,12 @@ class OptparseExample
     # We set default values here.
     options = OpenStruct.new
     options.library = []
-    options.inplace = false
     options.encoding = "utf8"
     options.transfer_type = :auto
-    options.verbose = false
+    options.maximal = false
+    options.distinct = false
+    options.perfect = false
+    options.replicates = 1
 
     opt_parser = OptionParser.new do |opts|
       opts.banner = "Usage: generate-persistent-phylogeny [options]"
@@ -58,6 +60,24 @@ class OptparseExample
       opts.on("-p", "--mspath PATH",
               "path to the ms executable") do |mspath|
         options.mspath = mspath
+      end
+
+      # Mandatory argument.
+      opts.on("-x", "--maximal",
+              "computes a matrix with only maximal characters. The output matrix might have fewer than the specified number of characters.") do |maximal|
+        options.maximal = true
+      end
+
+      # Mandatory argument.
+      opts.on("-t", "--distinct",
+              "computes a matrix with only distinct characters. The output matrix might have fewer than the specified number of characters.") do |distinct|
+        options.maximal = true
+      end
+
+      # Mandatory argument.
+      opts.on("-f", "--perfect",
+              "computes a matrix admitting a perfect phylogeny.") do |perfect|
+        options.perfect = true
       end
 
       # Mandatory argument.
@@ -101,22 +121,160 @@ end
 options.replicates.times do |replicate|
   tmp = Tempfile.new('msfile')
   system("#{options.mspath} #{options.species} 1 -s #{2 * options.characters} -r 0.0 5000 > #{tmp.path}");
+
+  # Read the data and put them into matrix, n, m
   rows = File.readlines(tmp)
+  ematrix = Hash.new()
+  row_id = 0
+  m = 0
   rows.each do |row|
     next unless (row =~ /^[01]+$/)
     states = row.split('')
-    result = Array.new()
-    while (not states.empty?)
-      a = states.shift
-      b = states.shift
-      if (a == '1' and b == '0')
-        result.push(1)
-      else
-        result.push(0)
+    if m == 0
+      m = row.length / 2
+    end
+    states.each_with_index do |item, col_id|
+      ematrix[[row_id,col_id]] = item.to_i
+    end
+    row_id += 1
+  end
+  n = row_id
+
+  if options.debug
+    puts "Input"
+    n.times do |s|
+      (m * 2).times do |c|
+        print "#{ematrix[[s,c]]} "
       end
+      puts ""
+    end
+  end
+
+
+  # If only perfect phylogenies are desired, zero the columns corresponding to negated characters
+  if options.perfect
+    m.times do |c|
+      n.times do |s|
+        ematrix[[s,2*c]] = 0
+      end
+    end
+  end
+
+if options.debug
+    puts "Perfect"
+    n.times do |s|
+      (m * 2).times do |c|
+        print "#{ematrix[[s,c]]} "
+      end
+      puts ""
+    end
+  end
+
+  # Transform the extended matrix into a standard matrix
+  matrix = Hash.new()
+  m.times do |c|
+    n.times do |s|
+      if ematrix[[s,2*c]] == 1 and ematrix[[s,2*c+1]] == 0
+        matrix[[s,c]] = 1
+      else
+        matrix[[s,c]] = 0
+      end
+    end
+  end
+
+  if options.debug
+    puts "Matrix"
+    n.times do |s|
+      m.times do |c|
+        print "#{matrix[[s,c]]} "
+      end
+      puts ""
+    end
+  end
+
+
+  # If necessary, remove all columns that are not maximal
+  if options.maximal
+    x = 0
+    while x < m
+      # Test if column x is maximal
+      maximal = true
+      m.times do |d|
+        included = true
+        next if x == d
+        n.times do |s|
+          if matrix[[s,x]] > matrix[[s,d]]
+            included = false
+          end
+        end
+        if included
+          maximal = false
+        end
+      end
+
+      # if column x is not maximal, swap the last column with x
+      # then decrement the number of columns
+      unless maximal
+        m -= 1
+        n.times do |s|
+          matrix[[s,x]] = matrix[[s,m]]
+        end
+        x -= 1
+      end
+      x += 1
+    end
+  end
+
+  if options.debug
+    puts "Maximal"
+    n.times do |s|
+      m.times do |c|
+        print "#{matrix[[s,c]]} "
+      end
+      puts ""
+    end
+  end
+
+
+  # If necessary, remove all columns that are not distinct
+  if options.distinct
+    x = 0
+    while x < m
+      duplicate = true
+      m.times do |d|
+        n.times do |s|
+          if matrix[[s,x]] != matrix[[s,d]]
+            duplicate = false
+          end
+        end
+      end
+
+      # if column x is a duplicate, swap the last column with x
+      # then decrement the number of columns
+      if duplicate
+        m -= 1
+        n.times do |s|
+          matrix[[s,x]] = matrix[[s,m]]
+        end
+      end
+      x += 1
+    end
+  end
+
+
+  # Print the matrix
+  if options.debug
+    puts "-----------------------------------------"
+  end
+  n.times do |s|
+    result = Array.new()
+    m.times do |c|
+      result.push(matrix[[s,c]])
     end
     puts result.join(" ")
   end
+
+  # Separate different instances with an empty line
   if (replicate < options.replicates)
     puts ""
   end
