@@ -94,6 +94,10 @@ options = OptparseExample.parse(ARGV)
 
 puts "#{options.species} #{options.characters}"
 puts ""
+if options.debug
+  puts options.to_s
+end
+
 options.replicates.times do |replicate|
   tmp = Tempfile.new('msfile')
   system("#{options.mspath} #{options.species} 1 -s #{2 * options.characters} -r 0.0 5000 > #{tmp.path}");
