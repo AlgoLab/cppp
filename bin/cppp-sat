@@ -1,0 +1,323 @@
+#!/usr/bin/env ruby
+# coding: utf-8
+
+# Copyright 2015
+# Gianluca Della Vedova <http://gianluca.dellavedova.org>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This program receives a matrix (option -m) and determines if the input matrix
+# admits a constrained persistent phylogeny.
+# The matrix has a species for each row and a character for each column.
+# Each entry M[s,c] can be:
+# 0: species s does not possess character c
+# 1: species s possesses character c
+# 2: species s does not possess character c, and neither any ancestor of s possesses c
+#
+# The program returns 0 and produces an extended matrix if the instance has a
+# constrained persistent phylogeny.
+# Otherwise it returns 1 and gives no output
+#
+# The program converts the input into a satisfiability (SAT) instance, then
+# it invokes a SAT solver.
+
+require 'fileutils'
+require 'optparse'
+require 'optparse/time'
+require 'ostruct'
+require 'pp'
+require 'matrix'
+require 'set'
+require 'parslet'
+include Parslet
+require 'pry'
+
+class OptparseExample
+  def self.parse(args)
+    # The options specified on the command line will be collected in *options*.
+    # We set default values here.
+    options = OpenStruct.new
+    options.library = []
+    options.inplace = false
+    options.encoding = "utf8"
+    options.transfer_type = :auto
+    options.verbose = false
+
+    opt_parser = OptionParser.new do |opts|
+      opts.banner = "Usage: cppp-sat [options]"
+
+      opts.separator ""
+      opts.separator "Specific options:"
+
+      # Mandatory argument.
+      opts.on("-d", "--debug") do
+        options.debug = true
+      end
+      
+      
+      # Mandatory argument.
+      opts.on("-m", "--matrix MATRIX_FILENAME",
+              "Input matrix") do |matrix|
+        options.matrix = matrix
+      end
+
+      # Mandatory argument.
+      opts.on("-o", "--output MATRIX_FILENAME",
+              "output_filename") do |output|
+        options.output = output
+      end
+
+      # No argument, shows at tail.  This will print an options summary.
+      # Try it and see!
+      opts.on_tail("-h", "--help", "Show this message") do
+        puts opts
+        exit
+      end
+    end
+    opt_parser.parse!(args)
+    options
+  end
+end
+
+def unsigned(str)
+  str.gsub("[\+\-]$", "")
+  str
+end
+
+options = OptparseExample.parse(ARGV)
+
+
+#binding.pry
+
+# Read input matrix
+# Simply skip all rows that contain a character different from 0,1,2 and spaces
+m = Array.new
+
+rows = File.readlines(options.matrix)
+rows.map {|r| r.chomp}.map {|r| r.gsub(" ","")}.select { |x| /^[012]+$/ =~ x }.each do |row|
+  m.push(row.split('').map{|i| i.to_i})
+end
+num_characters = m[0].size
+num_species = m.size
+characters = num_characters.times
+signed_characters = characters.map { |c| c.to_s + '+' } + characters.map { |c| c.to_s + '-' }
+
+extended_matrix = Array.new
+
+
+if options.debug
+  puts "Matrix: #{num_species} species, #{num_characters} characters."
+  puts "#{m}"
+end
+
+#
+# Variables
+#
+# Y[s,c] the character c is persistent for the species s.
+#     It is defined only for entries M[s,c] = 0
+#     Is is represented as the hash y with keys the characters and values the set of species
+#     such that M[s,c] = 0
+# B[p*,q*,x] The pair of signed characters p*,q* express the state x (which is one of 00,01,10,11
+# 
+
+
+# Find all variables y[s] and their numeric id stored in vars[c][s]
+y = Hash.new()
+vars = Hash.new()
+id = 1
+
+puts "y variables:" if options.debug
+characters.each do |c|
+  y[c] = Set.new num_species.times.select { |s| m[s][c] == 0 }
+  vars[c] = Hash.new
+  y[c].each do |x|
+    vars[c][x] = id
+    puts "Variable #{id}: Y(#{c},#{x})" if options.debug
+    id += 1
+  end
+end
+
+
+# Find all variables B(c1,c2,x,y)
+varsb = Hash.new
+characters.each do |c1|
+  [c1.to_s + '+', c1.to_s + '-'].each do |x1|
+    varsb[x1] = Hash.new
+    characters.each do |c2|
+      next unless c1 < c2
+      [c2.to_s + '+', c2.to_s + '-'].each do |x2|
+        varsb[x1][x2] = Array.new 
+        #        puts "Variable #{id}: B(#{x1},#{x2},00)"   if options.debug
+        puts "Variable #{id}: B(#{x1},#{x2},01)" if options.debug
+        puts "Variable #{id+1}: B(#{x1},#{x2},10)" if options.debug
+        puts "Variable #{id+2}: B(#{x1},#{x2},11)" if options.debug
+        varsb[x1][x2][0] = [-1, id]
+        varsb[x1][x2][1] = [id+1, id+2]
+        id += 3
+      end
+    end
+  end
+end
+
+def posc(c)
+  return c.to_s + '+'
+end
+
+def negc(c)
+  return c.to_s + '-'
+end
+
+def dpush(arr, clause, comment, debug)
+  if debug
+    puts comment
+    puts clause
+  end
+  arr.push("#{clause} 0")
+end
+
+#
+# Compute the clauses
+#
+clauses = Array.new
+# For each pair of characters, check whether they are compatible
+# varsb[c1][c2][x][y] is the numeric identifier of the variable B[c1,c2,x,y]
+characters.each do |c1|
+  characters.each do |c2|
+    next unless (c1 < c2)
+    # Find which states are realized by the matrix
+    # Since the root is all zeroes, the state 00 is always induced by the matrix
+    states = {0 => {0 => true , 1 => false},
+              1 => {0 => false, 1 => false}}
+    num_species.times do |s|
+      next if (y[c1].include?(s) or y[c2].include?(s))
+      # Each cell of the matrix contains 1 or 2 (the latter values means that it cannot become a 1)
+      states[2 - m[s][c1]][2 - m[s][c2]] = true
+    end
+    
+    # If the variable B[c1,c2,x,y] is true, then output the corresponding clause
+    if states[0][1]
+      dpush(clauses, "#{varsb[posc(c1)][posc(c2)][0][1]}", "Clause B(#{posc(c1)},#{posc(c2)},01) is true", options.debug)
+      dpush(clauses, "#{varsb[negc(c1)][posc(c2)][0][1]}", "Clause B(#{negc(c1)},#{posc(c2)},01) is true", options.debug)
+    end
+    if states[1][1]
+      dpush(clauses, "#{varsb[posc(c1)][posc(c2)][1][1]}", "Clause B(#{posc(c1)},#{posc(c2)},11) is true", options.debug)
+      dpush(clauses, "#{varsb[posc(c1)][negc(c2)][1][0]}", "Clause B(#{posc(c1)},#{negc(c2)},10) is true", options.debug)
+      dpush(clauses, "#{varsb[negc(c1)][posc(c2)][0][1]}", "Clause B(#{negc(c1)},#{posc(c2)},01) is true", options.debug)
+    end
+    if states[1][0]
+      dpush(clauses, "#{varsb[posc(c1)][posc(c2)][1][0]}", "Clause B(#{posc(c1)},#{posc(c2)},10) is true", options.debug)
+      dpush(clauses, "#{varsb[posc(c1)][negc(c2)][1][0]}", "Clause B(#{posc(c1)},#{negc(c2)},10) is true", options.debug)
+    end
+    
+    # For each 0 in c1 or c2, build the implication on the possible states of the pair (c1,c2)
+    # More precisely,
+    # Y[s,c1] => B[c1,c2,1,0] or B[c1,c2,1,1] if M[s,c2] = 0
+    # Y[s,c1] => B[c1,c2,1,2-M[s,c2]] if M[s,c2] != 0 
+    # not Y[s,c1] => B[c1,c2,0,1] if M[s,c2] = 1
+    # Notice that B[c1,c2,0,0] is always true, so some cases can be skipped
+    y[c1].each do |s|
+      if m[s][c2] == 0
+        dpush(clauses, "-#{vars[c1][s]}   #{varsb[posc(c1)][posc(c2)][1][0]} #{varsb[posc(c1)][posc(c2)][1][1]}",
+              "Clause    Y(#{c1},#{s}) => B(#{posc(c1)},#{posc(c2)},10) or   B(#{posc(c1)},#{posc(c2)},11)", options.debug)
+        dpush(clauses, "-#{vars[c1][s]}   #{varsb[posc(c1)][negc(c2)][1][0]} #{varsb[posc(c1)][negc(c2)][1][1]}",
+              "Clause    Y(#{c1},#{s}) => B(#{posc(c1)},#{negc(c2)},10) or   B(#{posc(c1)},#{negc(c2)},11)", options.debug)
+        dpush(clauses, "-#{vars[c1][s]}   #{varsb[negc(c1)][posc(c2)][1][0]} #{varsb[negc(c1)][posc(c2)][1][1]}",
+              "Clause    Y(#{c1},#{s}) => B(#{negc(c1)},#{posc(c2)},10) or   B(#{negc(c1)},#{posc(c2)},11)", options.debug)
+        dpush(clauses, "-#{vars[c1][s]}   #{varsb[negc(c1)][negc(c2)][1][0]} #{varsb[negc(c1)][negc(c2)][1][1]}",
+              "Clause    Y(#{c1},#{s}) => B(#{negc(c1)},#{negc(c2)},10) or   B(#{negc(c1)},#{negc(c2)},11)", options.debug)
+        # There is no need to encode not Y(c1,s) => B(c1,c2,00) or B(c1,c2,01)
+        # Since  B(c1,c2,00) is always true
+      end
+      if m[s][c2] == 1
+        dpush(clauses, " #{vars[c1][s]}   #{varsb[posc(c1)][posc(c2)][1][1]}",
+              "Clause notY(#{c1},#{s}) => B(#{posc(c1)},#{posc(c2)},11)", options.debug)
+        dpush(clauses, " #{vars[c1][s]}   #{varsb[posc(c1)][posc(c2)][0][1]}",
+              "Clause notY(#{c1},#{s}) => B(#{posc(c1)},#{posc(c2)},01)", options.debug)
+        dpush(clauses, " #{vars[c1][s]}   #{varsb[posc(c1)][negc(c2)][1][0]}",
+              "Clause notY(#{c1},#{s}) => B(#{posc(c1)},#{negc(c2)},10)", options.debug)
+        
+        dpush(clauses, "-#{vars[c1][s]}   #{varsb[negc(c1)][posc(c2)][1][1]}",
+              "Clause    Y(#{c1},#{s}) => B(#{negc(c1)},#{posc(c2)},11)", options.debug)
+        dpush(clauses, "-#{vars[c1][s]}   #{varsb[negc(c1)][posc(c2)][0][1]}",
+              "Clause    Y(#{c1},#{s}) => B(#{negc(c1)},#{posc(c2)},01)", options.debug)
+        dpush(clauses, "-#{vars[c1][s]}   #{varsb[negc(c1)][negc(c2)][1][0]}",
+              "Clause    Y(#{c1},#{s}) => B(#{negc(c1)},#{negc(c2)},10)", options.debug)
+      end
+      if m[s][c2] == 2
+        dpush(clauses, " #{vars[c1][s]}   #{varsb[posc(c1)][posc(c2)][1][0]}",
+              "Clause notY(#{c1},#{s}) => B(#{posc(c1)},#{posc(c2)},10)", options.debug)
+        dpush(clauses, " #{vars[c1][s]}   #{varsb[posc(c1)][negc(c2)][1][0]}",
+              "Clause    Y(#{c1},#{s}) => B(#{posc(c1)},#{negc(c2)},10)", options.debug)
+        dpush(clauses, " #{vars[c1][s]}   #{varsb[negc(c1)][posc(c2)][1][0]}",
+              "Clause    Y(#{c1},#{s}) => B(#{negc(c1)},#{posc(c2)},10)", options.debug)
+        dpush(clauses, " #{vars[c1][s]}   #{varsb[negc(c1)][negc(c2)][1][0]}",
+              "Clause    Y(#{c1},#{s}) => B(#{negc(c1)},#{negc(c2)},10)", options.debug)
+        # There is no need to encode not Y(c1,s) => B(c1,c2,00) since B(c1,c2,00) is always true
+      end
+    end
+    # Symmetric cases on c1, c2
+    y[c2].each do |s|
+      if m[s][c1] == 0
+        dpush(clauses, "-#{vars[c2][s]}   #{varsb[posc(c1)][posc(c2)][0][1]} #{varsb[posc(c1)][posc(c2)][1][1]}",
+              "Clause    Y(#{c2},#{s}) => B(#{posc(c1)},#{posc(c2)},01) or   B(#{posc(c1)},#{posc(c2)},11)", options.debug)
+        dpush(clauses, "-#{vars[c2][s]}   #{varsb[posc(c1)][negc(c2)][0][1]} #{varsb[posc(c1)][negc(c2)][1][1]}",
+              "Clause    Y(#{c2},#{s}) => B(#{posc(c1)},#{negc(c2)},01) or   B(#{posc(c1)},#{negc(c2)},11)", options.debug)
+        dpush(clauses, "-#{vars[c2][s]}   #{varsb[negc(c1)][posc(c2)][0][1]} #{varsb[negc(c1)][posc(c2)][1][1]}",
+              "Clause    Y(#{c2},#{s}) => B(#{negc(c1)},#{posc(c2)},01) or   B(#{negc(c1)},#{posc(c2)},11)", options.debug)
+        dpush(clauses, "-#{vars[c2][s]}   #{varsb[negc(c1)][negc(c2)][0][1]} #{varsb[negc(c1)][negc(c2)][1][1]}",
+              "Clause    Y(#{c2},#{s}) => B(#{negc(c1)},#{negc(c2)},01) or   B(#{negc(c1)},#{negc(c2)},11)", options.debug)
+      end
+      if m[s][c1] == 1
+        dpush(clauses, " #{vars[c2][s]}   #{varsb[posc(c1)][posc(c2)][1][1]}",
+              "Clause notY(#{c2},#{s}) => B(#{posc(c1)},#{posc(c2)},11)", options.debug)
+        dpush(clauses, " #{vars[c2][s]}   #{varsb[posc(c1)][posc(c2)][1][0]}",
+              "Clause notY(#{c2},#{s}) => B(#{posc(c1)},#{posc(c2)},10)", options.debug)
+        dpush(clauses, " #{vars[c2][s]}   #{varsb[posc(c1)][negc(c2)][0][1]}",
+              "Clause notY(#{c2},#{s}) => B(#{posc(c1)},#{negc(c2)},01)", options.debug)
+        
+        dpush(clauses, "-#{vars[c2][s]}   #{varsb[negc(c1)][posc(c2)][1][1]}",
+              "Clause    Y(#{c2},#{s}) => B(#{negc(c1)},#{posc(c2)},11)", options.debug)
+        dpush(clauses, "-#{vars[c2][s]}   #{varsb[negc(c1)][posc(c2)][1][0]}",
+              "Clause    Y(#{c2},#{s}) => B(#{negc(c1)},#{posc(c2)},10)", options.debug)
+        dpush(clauses, "-#{vars[c2][s]}   #{varsb[negc(c1)][negc(c2)][0][1]}",
+              "Clause    Y(#{c2},#{s}) => B(#{negc(c1)},#{negc(c2)},01)", options.debug)
+      end
+      if m[s][c1] == 2
+        dpush(clauses, " #{vars[c2][s]}   #{varsb[posc(c1)][posc(c2)][0][1]}",
+              "Clause notY(#{c2},#{s}) => B(#{posc(c1)},#{posc(c2)},01)", options.debug)
+        dpush(clauses, " #{vars[c2][s]}   #{varsb[posc(c1)][negc(c2)][0][1]}",
+              "Clause    Y(#{c2},#{s}) => B(#{posc(c1)},#{negc(c2)},01)", options.debug)
+        dpush(clauses, " #{vars[c2][s]}   #{varsb[negc(c1)][posc(c2)][0][1]}",
+              "Clause    Y(#{c2},#{s}) => B(#{negc(c1)},#{posc(c2)},01)", options.debug)
+        dpush(clauses, " #{vars[c2][s]}   #{varsb[negc(c1)][negc(c2)][0][1]}",
+              "Clause    Y(#{c2},#{s}) => B(#{negc(c1)},#{negc(c2)},01)", options.debug)
+      end
+    end
+
+    
+    # compute the or-clause that encodes that at least a state is not realized by the pair of characters (c1,c2)
+    [c1.to_s + '+', c1.to_s + '-'].each do |c1|
+      [c2.to_s + '+', c2.to_s + '-'].each do |c2|
+        dpush(clauses, "-#{varsb[c1][c2][1][0]} -#{varsb[c1][c2][0][1]} -#{varsb[c1][c2][1][1]}",
+              "Clause  characters #{c1} and #{c2} are compatible", options.debug)
+      end
+    end
+  end
+end
+
+
+
+puts "p cnf #{id - 1} #{clauses.size}"
+clauses.each { |clause| puts "#{clause}" }
+
