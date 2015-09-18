@@ -247,28 +247,28 @@ characters.each do |c1|
         # Since  B(c1,c2,00) is always true
       end
       if m[s][c2] == 1
-        dpush(clauses, " #{vars[c1][s]}   #{varsb[posc(c1)][posc(c2)][1][1]}",
-              "Clause notY(#{c1},#{s}) => B(#{posc(c1)},#{posc(c2)},11)", options.debug)
         dpush(clauses, " #{vars[c1][s]}   #{varsb[posc(c1)][posc(c2)][0][1]}",
               "Clause notY(#{c1},#{s}) => B(#{posc(c1)},#{posc(c2)},01)", options.debug)
-        dpush(clauses, " #{vars[c1][s]}   #{varsb[posc(c1)][negc(c2)][1][0]}",
-              "Clause notY(#{c1},#{s}) => B(#{posc(c1)},#{negc(c2)},10)", options.debug)
+        dpush(clauses, " #{vars[c1][s]}   #{varsb[negc(c1)][posc(c2)][0][1]}",
+              "Clause notY(#{c1},#{s}) => B(#{negc(c1)},#{posc(c2)},01)", options.debug)
         
+        dpush(clauses, "-#{vars[c1][s]}   #{varsb[posc(c1)][posc(c2)][1][1]}",
+              "Clause    Y(#{c1},#{s}) => B(#{posc(c1)},#{posc(c2)},11)", options.debug)
+        dpush(clauses, "-#{vars[c1][s]}   #{varsb[posc(c1)][negc(c2)][1][0]}",
+              "Clause    Y(#{c1},#{s}) => B(#{posc(c1)},#{negc(c2)},10)", options.debug)
         dpush(clauses, "-#{vars[c1][s]}   #{varsb[negc(c1)][posc(c2)][1][1]}",
               "Clause    Y(#{c1},#{s}) => B(#{negc(c1)},#{posc(c2)},11)", options.debug)
-        dpush(clauses, "-#{vars[c1][s]}   #{varsb[negc(c1)][posc(c2)][0][1]}",
-              "Clause    Y(#{c1},#{s}) => B(#{negc(c1)},#{posc(c2)},01)", options.debug)
         dpush(clauses, "-#{vars[c1][s]}   #{varsb[negc(c1)][negc(c2)][1][0]}",
               "Clause    Y(#{c1},#{s}) => B(#{negc(c1)},#{negc(c2)},10)", options.debug)
       end
       if m[s][c2] == 2
-        dpush(clauses, " #{vars[c1][s]}   #{varsb[posc(c1)][posc(c2)][1][0]}",
-              "Clause notY(#{c1},#{s}) => B(#{posc(c1)},#{posc(c2)},10)", options.debug)
-        dpush(clauses, " #{vars[c1][s]}   #{varsb[posc(c1)][negc(c2)][1][0]}",
+        dpush(clauses, "-#{vars[c1][s]}   #{varsb[posc(c1)][posc(c2)][1][0]}",
+              "Clause    Y(#{c1},#{s}) => B(#{posc(c1)},#{posc(c2)},10)", options.debug)
+        dpush(clauses, "-#{vars[c1][s]}   #{varsb[posc(c1)][negc(c2)][1][0]}",
               "Clause    Y(#{c1},#{s}) => B(#{posc(c1)},#{negc(c2)},10)", options.debug)
-        dpush(clauses, " #{vars[c1][s]}   #{varsb[negc(c1)][posc(c2)][1][0]}",
+        dpush(clauses, "-#{vars[c1][s]}   #{varsb[negc(c1)][posc(c2)][1][0]}",
               "Clause    Y(#{c1},#{s}) => B(#{negc(c1)},#{posc(c2)},10)", options.debug)
-        dpush(clauses, " #{vars[c1][s]}   #{varsb[negc(c1)][negc(c2)][1][0]}",
+        dpush(clauses, "-#{vars[c1][s]}   #{varsb[negc(c1)][negc(c2)][1][0]}",
               "Clause    Y(#{c1},#{s}) => B(#{negc(c1)},#{negc(c2)},10)", options.debug)
         # There is no need to encode not Y(c1,s) => B(c1,c2,00) since B(c1,c2,00) is always true
       end
@@ -286,17 +286,17 @@ characters.each do |c1|
               "Clause    Y(#{c2},#{s}) => B(#{negc(c1)},#{negc(c2)},01) or   B(#{negc(c1)},#{negc(c2)},11)", options.debug)
       end
       if m[s][c1] == 1
-        dpush(clauses, " #{vars[c2][s]}   #{varsb[posc(c1)][posc(c2)][1][1]}",
-              "Clause notY(#{c2},#{s}) => B(#{posc(c1)},#{posc(c2)},11)", options.debug)
         dpush(clauses, " #{vars[c2][s]}   #{varsb[posc(c1)][posc(c2)][1][0]}",
               "Clause notY(#{c2},#{s}) => B(#{posc(c1)},#{posc(c2)},10)", options.debug)
-        dpush(clauses, " #{vars[c2][s]}   #{varsb[posc(c1)][negc(c2)][0][1]}",
-              "Clause notY(#{c2},#{s}) => B(#{posc(c1)},#{negc(c2)},01)", options.debug)
+        dpush(clauses, " #{vars[c2][s]}   #{varsb[posc(c1)][negc(c2)][1][0]}",
+              "Clause notY(#{c2},#{s}) => B(#{posc(c1)},#{negc(c2)},10)", options.debug)
         
-        dpush(clauses, "-#{vars[c2][s]}   #{varsb[negc(c1)][posc(c2)][1][1]}",
-              "Clause    Y(#{c2},#{s}) => B(#{negc(c1)},#{posc(c2)},11)", options.debug)
-        dpush(clauses, "-#{vars[c2][s]}   #{varsb[negc(c1)][posc(c2)][1][0]}",
-              "Clause    Y(#{c2},#{s}) => B(#{negc(c1)},#{posc(c2)},10)", options.debug)
+        dpush(clauses, "-#{vars[c2][s]}   #{varsb[posc(c1)][posc(c2)][1][1]}",
+              "Clause    Y(#{c2},#{s}) => B(#{posc(c1)},#{posc(c2)},11)", options.debug)
+        dpush(clauses, "-#{vars[c2][s]}   #{varsb[posc(c1)][negc(c2)][1][1]}",
+              "Clause    Y(#{c2},#{s}) => B(#{posc(c1)},#{negc(c2)},11)", options.debug)
+        dpush(clauses, "-#{vars[c2][s]}   #{varsb[negc(c1)][posc(c2)][0][1]}",
+              "Clause    Y(#{c2},#{s}) => B(#{negc(c1)},#{posc(c2)},01)", options.debug)
         dpush(clauses, "-#{vars[c2][s]}   #{varsb[negc(c1)][negc(c2)][0][1]}",
               "Clause    Y(#{c2},#{s}) => B(#{negc(c1)},#{negc(c2)},01)", options.debug)
       end
@@ -364,8 +364,7 @@ else
       end
     end
   end
-  extfile = options.matrix + '.extended'
-  File.open(extfile, 'w') do |file|
+  File.open(options.output, 'w') do |file|
     extended_matrix.each { |row| file.write "#{row.join(" ")}\n" }
   end
 end
