@@ -364,8 +364,7 @@ else
       end
     end
   end
-  extfile = options.matrix + '.extended'
-  File.open(extfile, 'w') do |file|
+  File.open(options.output, 'w') do |file|
     extended_matrix.each { |row| file.write "#{row.join(" ")}\n" }
   end
 end
