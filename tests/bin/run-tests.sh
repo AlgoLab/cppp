@@ -15,7 +15,6 @@ do
 
     # Remove empty diffs
     test -s "${regdir}/diffs/${f}" || rm -f "${regdir}/diffs/${f}"
-    bin/cppp-sat -o "$o".sat "${regdir}/input/${f}"
 done
 touch "${regdir}/diffs"/placeholder
 cat "${regdir}/diffs/"*
