@@ -37,10 +37,7 @@ require 'optparse'
 require 'optparse/time'
 require 'ostruct'
 require 'pp'
-require 'matrix'
 require 'set'
-require 'parslet'
-include Parslet
 require 'pry'
 
 class OptparseExample
@@ -65,6 +62,11 @@ class OptparseExample
         options.debug = true
       end
       
+      # Mandatory argument.
+      opts.on("-c", "--cryptominisat SAT_SOLVER_PATH",
+              "SAT solver pathname") do |satpath|
+        options.satpath = satpath
+      end
       
       # Mandatory argument.
       opts.on("-m", "--matrix MATRIX_FILENAME",
@@ -113,12 +115,17 @@ num_species = m.size
 characters = num_characters.times
 signed_characters = characters.map { |c| c.to_s + '+' } + characters.map { |c| c.to_s + '-' }
 
-extended_matrix = Array.new
-
+extended_matrix = m.map do |row|
+  t = Array.new 
+  row.map { |x| t.push((x == 1 ? 1 : 0), 0) }
+  t
+end
 
 if options.debug
   puts "Matrix: #{num_species} species, #{num_characters} characters."
-  puts "#{m}"
+  m.each { |row| puts "#{row.join(" ")}" }
+  puts "Extended matrix: #{num_species} species, #{num_characters} characters."
+  extended_matrix.each { |row| puts "#{row.join(" ")}" }
 end
 
 #
@@ -136,7 +143,6 @@ end
 y = Hash.new()
 vars = Hash.new()
 id = 1
-
 puts "y variables:" if options.debug
 characters.each do |c|
   y[c] = Set.new num_species.times.select { |s| m[s][c] == 0 }
@@ -147,6 +153,7 @@ characters.each do |c|
     id += 1
   end
 end
+first_b = id
 
 
 # Find all variables B(c1,c2,x,y)
@@ -183,7 +190,7 @@ def dpush(arr, clause, comment, debug)
     puts comment
     puts clause
   end
-  arr.push("#{clause} 0")
+  arr.push("#{clause} 0 ")
 end
 
 #
@@ -317,7 +324,48 @@ characters.each do |c1|
 end
 
 
+satfile = options.matrix + '.sat'
+File.open(satfile, 'w') do |file|
+  file.write "p cnf #{id - 1} #{clauses.size}\n"
+  clauses.each { |clause| file.write "#{clause}\n" }
+end
+  
+output = `#{options.satpath} #{satfile}`.split("\n")
+result = output.select { |row| row =~/^s/ }[0]
 
-puts "p cnf #{id - 1} #{clauses.size}"
-clauses.each { |clause| puts "#{clause}" }
-
+if result =~ /UNSATISFIABLE/
+  puts "Not found"
+else
+  truth = Hash.new
+  # Parse the solution to output the extended matrix
+  result = output.select { |row| row =~/^v/ }.each do |row1|
+    row1.gsub("^v ", "").split(" ").map { |x| x.to_i }.select { |i| i != 0 }.each do |signed_var|
+      var = signed_var.abs
+      truth[var] = (signed_var > 0)
+    end
+  end
+  if options.debug
+    puts "Vars #{vars.to_s}"
+    puts "Truths #{truth.to_s}"
+    puts "Characters #{characters.to_s}"
+  end
+  
+  characters.each do |c|
+    vars[c].keys.each do |s|
+      if options.debug
+        puts "Var #{vars[c][s]}, s=#{s}, c=#{c} is #{truth[vars[c][s]]}"
+      end
+      if truth[vars[c][s]]
+        if options.debug
+          puts "Persistent char #{vars[c][s]}, s=#{s}, c=#{c} is #{truth[vars[c][s]]}"
+        end
+        extended_matrix[s][2 * c] = 1
+        extended_matrix[s][2 * c + 1] = 1
+      end
+    end
+  end
+  extfile = options.matrix + '.extended'
+  File.open(extfile, 'w') do |file|
+    extended_matrix.each { |row| file.write "#{row.join(" ")}\n" }
+  end
+end

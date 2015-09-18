@@ -79,8 +79,12 @@ REG_TESTS_DIR := tests/regression
 REG_TESTS_OK   := $(wildcard $(REG_TESTS_DIR)/ok/*)
 REG_TESTS_DIFF := $(REG_TESTS_OK:$(REG_TESTS_DIR)/ok/%=$(REG_TESTS_DIR)/output/%.diff)
 
-tests: test
-test: dist $(REG_TESTS_OK)
+thirdparty/cryptominisat/build/cryptominisat4_simple:
+	test -d thirdparty/cryptominisat/build || mkdir thirdparty/cryptominisat/build
+	cd thirdparty/cryptominisat/build && cmake .. && make -j4
+
+tests: test 
+test: dist $(REG_TESTS_OK) thirdparty/cryptominisat/build/cryptominisat4_simple
 	tests/bin/run-tests.sh
 
 
