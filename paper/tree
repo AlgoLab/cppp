@@ -117,7 +117,7 @@ class LabeledMatrix
 
   def initialize(arr, persistent_chars)
     @persistent = persistent_chars
-    m = arr.map { |r| r.chomp }
+    m = arr.map { |r| r.chomp.gsub(" ","") }
     @c_labels = Array.new
     if m[0][0] == "\#"
       # The first line contains the optional list of characters, separated
