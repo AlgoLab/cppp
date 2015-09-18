@@ -102,7 +102,7 @@ class LabeledMatrix
 
   def c_label(num)
     if @persistent
-      sign = num % 1
+      sign = num % 2
       root = (num - sign) / 2 + 1
       if sign == 0
         return "C%04d+" % root
@@ -127,7 +127,6 @@ class LabeledMatrix
     end
     @c_num = m[0].length
     @s_num = m.length
-
     @matrix = Hash.new()
     m[0].split('').each_with_index { |x, idx| @matrix[c_label(idx)] = String.new("") }
     m.map do |row|
