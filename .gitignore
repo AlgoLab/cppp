@@ -68,3 +68,13 @@ docs/*
 /cmdline.c
 /cmdline.h
 /tests/regression/diffs/
+/paper/test/4gamete.extended-matrix
+/paper/test/4gamete.matrix
+/paper/test/4gamete.sat
+/paper/test/badboy34.cnf
+/paper/test/extract_all_rows.rb
+/paper/test/g460.sat
+/paper/test/no-species-driven.matrix
+/paper/seedms
+/src/cmdline.c
+/src/cmdline.h
