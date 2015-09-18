@@ -52,7 +52,7 @@ class OptparseExample
     options.verbose = false
 
     opt_parser = OptionParser.new do |opts|
-      opts.banner = "Usage: convert.rb [options]"
+      opts.banner = "Usage: check_tree [options]"
 
       opts.separator ""
       opts.separator "Specific options:"

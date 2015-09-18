@@ -37,7 +37,7 @@ class OptparseExample
     options.verbose = false
 
     opt_parser = OptionParser.new do |opts|
-      opts.banner = "Usage: convert.rb [options]"
+      opts.banner = "Usage: tree [options]"
 
       opts.separator ""
       opts.separator "Specific options:"
@@ -227,7 +227,6 @@ def build_tree(matrix, characters)
   end.join(',')
   return "\(#{inner}\)"
 end
-
 
 
 m = LabeledMatrix.new(File.readlines(options.matrix), options.persistent)
