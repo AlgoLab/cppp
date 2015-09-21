@@ -420,18 +420,21 @@ File.open(options.matrix + ".extended", 'w') do |file|
 end
 
 if options.debug
-  puts "#{Time.new.to_s} Checking solution"
+  puts "#{Time.new.to_s} Checking solution. Extended matrix"
+  extended_matrix.each { |row| puts "#{row.join("")}" }
 end
-extended_matrix.each { |row| puts "#{row.join("")}" }
+
 extended_matrix[0].size.times do |c1|
   extended_matrix[0].size.times do |c2|
     next unless c1 < c2
     states = {0 => {0 => true , 1 => false},
               1 => {0 => false, 1 => false}}
     extended_matrix.each { |row| states[row[c1]][row[c2]] = true }
-    puts "Compatible #{c1},#{c2}: #{states[0][1].to_s} #{states[1][0].to_s} #{states[1][1].to_s}"
+    if options.debug
+      puts "Compatible #{c1},#{c2}: #{states[0][1].to_s} #{states[1][0].to_s} #{states[1][1].to_s}"
+    end
     if states[0][1] and states[1][0] and states[1][1]
-      puts "Error: characters #{c1},#{c2} are not compatible"
+      puts "Error: characters #{c1},#{c2} are not compatible" 
       exit
     end
   end
