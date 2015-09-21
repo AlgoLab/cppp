@@ -65,7 +65,7 @@ ${LIB_DIR}/%.o: $(LIB_DIR)/%.c
 
 clean: clean-test
 	@echo "Cleaning..."
-	rm -rf  ${OBJ_DIR} ${BIN_DIR} $(SRC_DIR)/*.d $(SRC_DIR)/cmdline.[ch] callgrind.out.*
+	rm -rf  ${OBJ_DIR} ${P} $(SRC_DIR)/*.d $(SRC_DIR)/cmdline.[ch] callgrind.out.*
 
 clean-test:
 	@echo "Cleaning tests..."
