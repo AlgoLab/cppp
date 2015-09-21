@@ -366,68 +366,77 @@ File.open(satfile, 'w') do |file|
   file.puts "p cnf #{id - 1} #{clauses.size}"
   clauses.each { |clause| file.puts "#{clause}" }
 end
+system "gzip -f #{satfile}"
 
 if options.debug
-  puts "#{Time.new.to_s} #{options.satpath} #{satfile}"  
+  puts "#{Time.new.to_s} #{options.satpath} #{satfile}.gz"  
 end
 
-output = `#{options.satpath} #{satfile}`.split("\n")
+output = `#{options.satpath} #{satfile}.gz`.split("\n")
 if options.debug
   puts "#{Time.new.to_s} SAT instance solved"  
 end
 result = output.select { |row| row =~/^s/ }[0]
 
 if result =~ /UNSATISFIABLE/
-  puts "Not found"
-else
-  truth = Hash.new
-  # Parse the solution to output the extended matrix
-  result = output.select { |row| row =~/^v/ }.each do |row1|
-    row1.gsub("^v ", "").split(" ").map { |x| x.to_i }.select { |i| i != 0 }.each do |signed_var|
-      var = signed_var.abs
-      truth[var] = (signed_var > 0)
+  File.open(options.output, 'w') do |f|
+    f.puts "Not found"
+  end
+  exit
+end
+
+truth = Hash.new
+# Parse the solution to output the extended matrix
+result = output.select { |row| row =~/^v/ }.each do |row1|
+  row1.gsub("^v ", "").split(" ").map { |x| x.to_i }.select { |i| i != 0 }.each do |signed_var|
+    var = signed_var.abs
+    truth[var] = (signed_var > 0)
+  end
+end
+if options.debug
+  puts "====================================================================="
+  puts "SAT solution"
+  puts "Vars #{vars.to_s}"
+  puts "Truths #{truth.to_s}"
+  puts "Characters #{characters.to_s}"
+end
+
+characters.each do |c|
+  vars[c].keys.each do |s|
+    if options.debug
+      puts "Var #{vars[c][s]}, s=#{s}, c=#{c} is #{truth[vars[c][s]]}"
     end
-  end
-  if options.debug
-    puts "====================================================================="
-    puts "SAT solution"
-    puts "Vars #{vars.to_s}"
-    puts "Truths #{truth.to_s}"
-    puts "Characters #{characters.to_s}"
-  end
-  
-  characters.each do |c|
-    vars[c].keys.each do |s|
+    if truth[vars[c][s]]
       if options.debug
-        puts "Var #{vars[c][s]}, s=#{s}, c=#{c} is #{truth[vars[c][s]]}"
+        puts "Persistent char #{vars[c][s]}, s=#{s}, c=#{c} is #{truth[vars[c][s]]}"
       end
-      if truth[vars[c][s]]
-        if options.debug
-          puts "Persistent char #{vars[c][s]}, s=#{s}, c=#{c} is #{truth[vars[c][s]]}"
-        end
-        extended_matrix[s][2 * c] = 1
-        extended_matrix[s][2 * c + 1] = 1
-      end
+      extended_matrix[s][2 * c] = 1
+      extended_matrix[s][2 * c + 1] = 1
     end
   end
-  File.open(options.matrix + ".extended", 'w') do |file|
-    extended_matrix.each { |row| file.write "#{row.join(" ")}\n" }
-  end
+end
+File.open(options.matrix + ".extended", 'w') do |file|
+  extended_matrix.each { |row| file.write "#{row.join(" ")}\n" }
 end
 
 if options.debug
   puts "#{Time.new.to_s} Checking solution"
-  extended_matrix.each { |row| puts "#{row.join("")}" }
-  extended_matrix[0].size.times do |c1|
-    extended_matrix[0].size.times do |c2|
-      next unless c1 < c2
-      states = {0 => {0 => true , 1 => false},
-                1 => {0 => false, 1 => false}}
-      extended_matrix.each { |row| states[row[c1]][row[c2]] = true }
-      puts "Compatible #{c1},#{c2}: #{states[0][1].to_s} #{states[1][0].to_s} #{states[1][1].to_s}"
-      puts "Incompatible #{c1},#{c2}" if states[0][1] and states[1][0] and states[1][1]
+end
+extended_matrix.each { |row| puts "#{row.join("")}" }
+extended_matrix[0].size.times do |c1|
+  extended_matrix[0].size.times do |c2|
+    next unless c1 < c2
+    states = {0 => {0 => true , 1 => false},
+              1 => {0 => false, 1 => false}}
+    extended_matrix.each { |row| states[row[c1]][row[c2]] = true }
+    puts "Compatible #{c1},#{c2}: #{states[0][1].to_s} #{states[1][0].to_s} #{states[1][1].to_s}"
+    if states[0][1] and states[1][0] and states[1][1]
+      puts "Error: characters #{c1},#{c2} are not compatible"
+      exit
     end
   end
+end
+if options.debug
   puts "#{Time.new.to_s} Computing tree with #{options.treepath} -pm #{options.matrix}.extended > #{options.output}"  
 end
 system "#{options.treepath} -pm #{options.matrix}.extended > #{options.output}"
