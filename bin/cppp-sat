@@ -53,7 +53,7 @@ class OptparseExample
 
     opt_parser = OptionParser.new do |opts|
       opts.banner = "Usage: cppp-sat [options]"
-
+      
       opts.separator ""
       opts.separator "Specific options:"
 
@@ -66,6 +66,12 @@ class OptparseExample
       opts.on("-c", "--cryptominisat SAT_SOLVER_PATH",
               "SAT solver pathname") do |satpath|
         options.satpath = satpath
+      end
+      
+      # Mandatory argument.
+      opts.on("-t", "--tree TREE_COMPUTER_PATH",
+              "pathname of a program that computes a persistent phylogeny from the extended matrix") do |treepath|
+        options.treepath = treepath
       end
       
       # Mandatory argument.
@@ -122,6 +128,7 @@ extended_matrix = m.map do |row|
 end
 
 if options.debug
+  puts "#{Time.new.to_s} start"  
   puts "Matrix: #{num_species} species, #{num_characters} characters."
   m.each { |row| puts "#{row.join(" ")}" }
   puts "Extended matrix: #{num_species} species, #{num_characters} characters."
@@ -176,6 +183,11 @@ characters.each do |c1|
     end
   end
 end
+
+if options.debug
+  puts "#{Time.new.to_s} Variables computed"  
+end
+
 
 def posc(c)
   return c.to_s + '+'
@@ -235,16 +247,37 @@ characters.each do |c1|
     # Notice that B[c1,c2,0,0] is always true, so some cases can be skipped
     y[c1].each do |s|
       if m[s][c2] == 0
-        dpush(clauses, "-#{vars[c1][s]}   #{varsb[posc(c1)][posc(c2)][1][0]} #{varsb[posc(c1)][posc(c2)][1][1]}",
-              "Clause    Y(#{c1},#{s}) => B(#{posc(c1)},#{posc(c2)},10) or   B(#{posc(c1)},#{posc(c2)},11)", options.debug)
-        dpush(clauses, "-#{vars[c1][s]}   #{varsb[posc(c1)][negc(c2)][1][0]} #{varsb[posc(c1)][negc(c2)][1][1]}",
-              "Clause    Y(#{c1},#{s}) => B(#{posc(c1)},#{negc(c2)},10) or   B(#{posc(c1)},#{negc(c2)},11)", options.debug)
-        dpush(clauses, "-#{vars[c1][s]}   #{varsb[negc(c1)][posc(c2)][1][0]} #{varsb[negc(c1)][posc(c2)][1][1]}",
-              "Clause    Y(#{c1},#{s}) => B(#{negc(c1)},#{posc(c2)},10) or   B(#{negc(c1)},#{posc(c2)},11)", options.debug)
-        dpush(clauses, "-#{vars[c1][s]}   #{varsb[negc(c1)][negc(c2)][1][0]} #{varsb[negc(c1)][negc(c2)][1][1]}",
-              "Clause    Y(#{c1},#{s}) => B(#{negc(c1)},#{negc(c2)},10) or   B(#{negc(c1)},#{negc(c2)},11)", options.debug)
-        # There is no need to encode not Y(c1,s) => B(c1,c2,00) or B(c1,c2,01)
-        # Since  B(c1,c2,00) is always true
+        # If both c1 and c2 are persistent, then the state is necessarily (1,1)
+        dpush(clauses, "-#{vars[c1][s]} -#{vars[c2][s]} #{varsb[posc(c1)][posc(c2)][1][1]}",
+              "Clause    Y(#{c1},#{s}) and Y(#{c2},#{s}) => B(#{posc(c1)},#{posc(c2)},11)", options.debug)
+        dpush(clauses, "-#{vars[c1][s]} -#{vars[c2][s]} #{varsb[posc(c1)][negc(c2)][1][1]}",
+              "Clause    Y(#{c1},#{s}) and Y(#{c2},#{s}) => B(#{posc(c1)},#{negc(c2)},11)", options.debug)
+        dpush(clauses, "-#{vars[c1][s]} -#{vars[c2][s]} #{varsb[negc(c1)][posc(c2)][1][1]}",
+              "Clause    Y(#{c1},#{s}) and Y(#{c2},#{s}) => B(#{negc(c1)},#{posc(c2)},11)", options.debug)
+        dpush(clauses, "-#{vars[c1][s]} -#{vars[c2][s]} #{varsb[negc(c1)][negc(c2)][1][1]}",
+              "Clause    Y(#{c1},#{s}) and Y(#{c2},#{s}) => B(#{negc(c1)},#{negc(c2)},11)", options.debug)
+
+        # If c1 is persistent but c2 is not, then the state is necessarily (1,0)
+        dpush(clauses, "-#{vars[c1][s]} #{vars[c2][s]} #{varsb[posc(c1)][posc(c2)][1][0]}",
+              "Clause    Y(#{c1},#{s}) and not Y(#{c2},#{s}) => B(#{posc(c1)},#{posc(c2)},10)", options.debug)
+        dpush(clauses, "-#{vars[c1][s]} #{vars[c2][s]} #{varsb[posc(c1)][negc(c2)][1][0]}",
+              "Clause    Y(#{c1},#{s}) and not Y(#{c2},#{s}) => B(#{posc(c1)},#{negc(c2)},10)", options.debug)
+        dpush(clauses, "-#{vars[c1][s]} #{vars[c2][s]} #{varsb[negc(c1)][posc(c2)][1][0]}",
+              "Clause    Y(#{c1},#{s}) and not Y(#{c2},#{s}) => B(#{negc(c1)},#{posc(c2)},10)", options.debug)
+        dpush(clauses, "-#{vars[c1][s]} #{vars[c2][s]} #{varsb[negc(c1)][negc(c2)][1][0]}",
+              "Clause    Y(#{c1},#{s}) and not Y(#{c2},#{s}) => B(#{negc(c1)},#{negc(c2)},10)", options.debug)
+
+        # If c2 is persistent but c1 is not, then the state is necessarily (0,1)
+        dpush(clauses, "#{vars[c1][s]} -#{vars[c2][s]} #{varsb[posc(c1)][posc(c2)][0][1]}",
+              "Clause    not Y(#{c1},#{s}) and Y(#{c2},#{s}) => B(#{posc(c1)},#{posc(c2)},01)", options.debug)
+        dpush(clauses, "#{vars[c1][s]} -#{vars[c2][s]} #{varsb[posc(c1)][negc(c2)][0][1]}",
+              "Clause    not Y(#{c1},#{s}) and Y(#{c2},#{s}) => B(#{posc(c1)},#{negc(c2)},01)", options.debug)
+        dpush(clauses, "#{vars[c1][s]} -#{vars[c2][s]} #{varsb[negc(c1)][posc(c2)][0][1]}",
+              "Clause    not Y(#{c1},#{s}) and Y(#{c2},#{s}) => B(#{negc(c1)},#{posc(c2)},01)", options.debug)
+        dpush(clauses, "#{vars[c1][s]} -#{vars[c2][s]} #{varsb[negc(c1)][negc(c2)][0][1]}",
+              "Clause    not Y(#{c1},#{s}) and Y(#{c2},#{s}) => B(#{negc(c1)},#{negc(c2)},01)", options.debug)
+
+        # If none of c1, c2 is persistent, then the state is necessarily (0,1) which is not represented
       end
       if m[s][c2] == 1
         dpush(clauses, " #{vars[c1][s]}   #{varsb[posc(c1)][posc(c2)][0][1]}",
@@ -323,14 +356,25 @@ characters.each do |c1|
   end
 end
 
+if options.debug
+  puts "#{Time.new.to_s} Output SAT formula"  
+end
+
 
 satfile = options.matrix + '.sat'
 File.open(satfile, 'w') do |file|
-  file.write "p cnf #{id - 1} #{clauses.size}\n"
-  clauses.each { |clause| file.write "#{clause}\n" }
+  file.puts "p cnf #{id - 1} #{clauses.size}"
+  clauses.each { |clause| file.puts "#{clause}" }
 end
-  
+
+if options.debug
+  puts "#{Time.new.to_s} #{options.satpath} #{satfile}"  
+end
+
 output = `#{options.satpath} #{satfile}`.split("\n")
+if options.debug
+  puts "#{Time.new.to_s} SAT instance solved"  
+end
 result = output.select { |row| row =~/^s/ }[0]
 
 if result =~ /UNSATISFIABLE/
@@ -345,6 +389,8 @@ else
     end
   end
   if options.debug
+    puts "====================================================================="
+    puts "SAT solution"
     puts "Vars #{vars.to_s}"
     puts "Truths #{truth.to_s}"
     puts "Characters #{characters.to_s}"
@@ -364,7 +410,24 @@ else
       end
     end
   end
-  File.open(options.output, 'w') do |file|
+  File.open(options.matrix + ".extended", 'w') do |file|
     extended_matrix.each { |row| file.write "#{row.join(" ")}\n" }
   end
 end
+
+if options.debug
+  puts "#{Time.new.to_s} Checking solution"
+  extended_matrix.each { |row| puts "#{row.join("")}" }
+  extended_matrix[0].size.times do |c1|
+    extended_matrix[0].size.times do |c2|
+      next unless c1 < c2
+      states = {0 => {0 => true , 1 => false},
+                1 => {0 => false, 1 => false}}
+      extended_matrix.each { |row| states[row[c1]][row[c2]] = true }
+      puts "Compatible #{c1},#{c2}: #{states[0][1].to_s} #{states[1][0].to_s} #{states[1][1].to_s}"
+      puts "Incompatible #{c1},#{c2}" if states[0][1] and states[1][0] and states[1][1]
+    end
+  end
+  puts "#{Time.new.to_s} Computing tree with #{options.treepath} -pm #{options.matrix}.extended > #{options.output}"  
+end
+system "#{options.treepath} -pm #{options.matrix}.extended > #{options.output}"
