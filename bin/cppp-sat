@@ -361,7 +361,7 @@ if options.debug
 end
 
 
-satfile = options.matrix + '.sat'
+satfile = #{options.output} + '.sat'
 File.open(satfile, 'w') do |file|
   file.puts "p cnf #{id - 1} #{clauses.size}"
   clauses.each { |clause| file.puts "#{clause}" }
