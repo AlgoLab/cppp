@@ -6,7 +6,7 @@ n = 0
 m = 0
 lines = Array.new
 lines = File.readlines(msfile)
-n = lines.size
+n = lines.size - 1
 m = lines[0].size
 
 
