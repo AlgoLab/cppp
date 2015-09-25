@@ -6,8 +6,8 @@ n = 0
 m = 0
 lines = Array.new
 lines = File.readlines(msfile)
-n = lines.size - 1
-m = lines[0].size
+n = lines.size
+m = lines[0].size - 1
 
 
 puts "#{n} #{m}"
