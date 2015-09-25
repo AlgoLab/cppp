@@ -113,6 +113,8 @@ options = OptparseExample.parse(ARGV)
 m = Array.new
 
 rows = File.readlines(options.matrix)
+# Skip the first row, if it is an header
+rows.shift unless (rows[0] =~ /(\d\s)^3/)
 rows.map {|r| r.chomp}.map {|r| r.gsub(" ","")}.select { |x| /^[012]+$/ =~ x }.each do |row|
   m.push(row.split('').map{|i| i.to_i})
 end
@@ -361,7 +363,7 @@ if options.debug
 end
 
 
-satfile = #{options.output} + '.sat'
+satfile = options.output + '.sat'
 File.open(satfile, 'w') do |file|
   file.puts "p cnf #{id - 1} #{clauses.size}"
   clauses.each { |clause| file.puts "#{clause}" }
