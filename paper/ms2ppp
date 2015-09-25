@@ -13,5 +13,5 @@ m = lines[0].size
 puts "#{n} #{m}"
 puts " "
 lines.each do |line|
-  puts line.split(' ').join(' ') 
+  puts line.split('').join(' ') 
 end
