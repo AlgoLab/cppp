@@ -5,24 +5,13 @@ msfile = ARGV[0]
 n = 0
 m = 0
 lines = Array.new
-File.foreach(msfile) do |line|
-  (num, row) = line.split(' ')
-  m = row.length
-  n += num.to_i
-  orig = row.split('').map{|x| x.to_i}
-  lines.push(orig.join(' '))
-
-  (num.to_i - 1).times do |i|
-    elements = Array.new(orig)
-    pos = rand(m)
-    elements[pos] = 1 - elements[pos]
-    lines.push(elements.join(' '))
-  end
-end
+lines = File.readlines(msfile)
+n = lines.size
+m = lines[0].size
 
 
 puts "#{n} #{m}"
 puts " "
 lines.each do |line|
-  puts line
+  puts line.split(' ').join(' ') 
 end
