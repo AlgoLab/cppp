@@ -39,7 +39,7 @@ require 'ostruct'
 require 'pp'
 require 'set'
 require 'pry'
-
+ 
 class OptparseExample
   def self.parse(args)
     # The options specified on the command line will be collected in *options*.
