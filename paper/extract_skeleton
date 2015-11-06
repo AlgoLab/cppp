@@ -1,0 +1,209 @@
+#!/usr/bin/env ruby
+# coding: utf-8
+
+# Copyright 2015
+# Gianluca Della Vedova <http://gianluca.dellavedova.org>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This program receives a matrix (option -m) and extracts a submatrix where all characters are maximal,
+# and the associated red-black graph is connected.
+# The program extracts the first maximal character c_m including the first character c_1
+# Then iteratively it computes the set C such that:
+# 1. C contains only maximal characters
+# 2. no character outside of C overlaps some character of C
+# 3. c_m\n C
+#
+# Finally, only the species possessing some character of C are output.
+# The output is printed to the standard output
+require 'fileutils'
+require 'optparse'
+require 'optparse/time'
+require 'ostruct'
+require 'pp'
+require 'matrix'
+require 'set'
+require 'pry'
+
+class OptparseExample
+  def self.parse(args)
+    # The options specified on the command line will be collected in *options*.
+    # We set default values here.
+    options = OpenStruct.new
+    options.library = []
+    options.inplace = false
+    options.encoding = "utf8"
+    options.transfer_type = :auto
+    options.verbose = false
+
+    opt_parser = OptionParser.new do |opts|
+      opts.banner = "Usage: check_tree [options]"
+
+      opts.separator ""
+      opts.separator "Specific options:"
+
+      # Mandatory argument.
+      opts.on("-d", "--debug") do
+        options.debug = true
+      end
+
+
+      # Mandatory argument.
+      opts.on("-m", "--matrix MATRIX_FILENAME",
+              "Input matrix") do |matrix|
+        options.matrix = matrix
+      end
+
+
+      # No argument, shows at tail.  This will print an options summary.
+      # Try it and see!
+      opts.on_tail("-h", "--help", "Show this message") do
+        puts opts
+        exit
+      end
+    end
+    opt_parser.parse!(args)
+    options
+  end
+end
+
+options = OptparseExample.parse(ARGV)
+
+class LabeledMatrix
+  attr_reader :s_labels, :c_labels, :matrix
+  # :matrix is the hash of columns, where the keys are the character names and each value
+  # is a column that is represented as a string
+  # The column ordering is the lexicographic order of the strings
+
+  def pp
+    puts @s_labels.length
+    puts "#{@s_labels}"
+    puts @c_labels.length
+    puts "#{@c_labels}"
+
+    puts #{"@matrix}"
+    delimiter = @c_labels.map { |c| '_' }.join('')
+    @c_labels[0].length.times do |i|
+      puts '      ' + @c_labels.map { |c| c[i] }.join('')
+    end
+    puts "______#{delimiter}"
+    @s_labels.map do |s|
+      puts "#{s}:#{@c_labels.map { |c| @matrix[s][c] }.join('')}"
+    end
+    puts "______#{delimiter}"
+  end
+
+  def s_label(num)
+    return "s%04d" % num
+  end
+
+  def c_label(num)
+      return "C%04d" % (num + 1)
+  end
+
+  def initialize(arr)
+    m = arr.map { |r| r.chomp }
+    if m[0][0] == "\#"
+      # The first line contains the optional list of characters, separated
+      # by ,;
+      header = m[0][1..-1]
+      @c_labels = header.split(/[,;]/)
+    end
+
+    @c_labels = m[0].split('').map.with_index { |x, i| c_label(i) }
+    @s_labels = m.map.with_index { |x, i| s_label(i) }
+
+    @matrix = Hash.new()
+    @s_labels.map { |s| @matrix[s] = Hash.new() }
+    m.map.with_index do |row, idr|
+      s = s_labels[idr]
+      row.chomp.split('').map.with_index { |x, idx| @matrix[s][c_label(idx)] = x.to_i }
+    end
+  end
+
+  # Convert a column into a string of 0 and 1
+  def col2string(col)
+    @s_labels.inject(String.new) { |res, s| res << @matrix[s][col].to_s }
+  end
+
+  def remove_null
+    @c_labels.delete_if { |c| @s_labels.index { |s| @matrix[s][c] > 0 }.nil? }
+  end
+
+  def species(character)
+  # Output the list of species that have the input character
+    return @s_labels.select { |s| @matrix[s][character] == 1 }
+  end
+
+  def characters(species)
+  # Find the characters that the input species possesses
+    active = @c_labels.select { |c| @matrix[species][c] == 1 }
+    #  Remove all eventual negative characters
+    active.delete_if { |k| k =~ /\-/ }
+  end
+
+  # Returns true if the character c1 includes c2
+  def includes?(c1, c2)
+    return species(c1).to_set < species(c2).to_set
+  end
+
+  def maximal?(character)
+    species_set = species(character).to_set
+    @c_labels.each do |c|
+      return false if species(c).to_set.proper_superset?(species_set)
+    end
+    return true
+  end
+
+  # Returns true if the two characters c1 and c2 overlap
+  def overlap?(c1, c2)
+    s1 = species(c1).to_set
+    s2 = species(c2).to_set
+    s1.intersect?(s2) and not s1.subset?(s2) and not s1.superset?(s2)
+  end
+  
+  def maximals()
+  @c_labels.select { |c| maximal?(c) }
+end
+end
+
+
+m = LabeledMatrix.new(File.readlines(options.matrix))
+
+if options.debug
+  puts "Matrix:"
+  m.pp
+end
+# compute the set of characters of each species in the matrix
+
+all_maximals = m.maximals
+skeleton = Set.new [all_maximals[0]]
+maximals_set = all_maximals.to_set
+
+while (true)
+  to_add = skeleton.inject(Set.new) { |result, sk| result.union(maximals_set.subtract(skeleton).select { |cm| m.overlap?(sk,cm) }) }
+  skeleton.merge(to_add)
+  break if to_add.empty?
+end
+
+
+species = skeleton.inject(Set.new) { |union, c| union.union(m.species(c)) }
+
+puts "==============================================================" if options.debug
+puts "#{species.size} #{skeleton.size}"
+puts ""
+#binding.pry
+for s in species do
+  puts skeleton.map { |c| m.species(c).to_set.include?(s) ? 1 : 0 }.join(' ')
+end
