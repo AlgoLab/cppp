@@ -1,0 +1,120 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+require 'optparse'
+require 'optparse/time'
+
+#programs = [ "cppp", "cppp-sat" ] #, "cppp-new" ]
+programs = [ ] #, "cppp-new" ]
+timeout = 300 #in seconds
+
+
+class OptparseExample
+  def self.parse(args)
+    # The options specified on the command line will be collected in *options*.
+    # We set default values here.
+    options = OpenStruct.new
+    options.library = []
+    options.inplace = false
+    options.encoding = "utf8"
+    options.transfer_type = :auto
+    options.verbose = false
+
+    opt_parser = OptionParser.new do |opts|
+      opts.banner = "Usage: run_experiment [options]"
+      opts.separator ""
+      opts.separator "Specific options:"
+
+
+      opts.on("-n", "--num_species") do |num_species|
+        options.num_species = num_species
+      end
+
+      opts.on("-m", "--num_character_case") do |x|
+        options.num_character_case = x
+      end
+
+      opts.on("-u", "--mutation_rate") do |x|
+        options.mutation_rate = x
+      end
+
+      opts.on("-r", "--recombination_rate") do |x|
+        options.recombination_rate = x
+      end
+
+      opts.on("-i", "--instance") do |x|
+        options.instance = x
+      end
+
+      opts.on("-c", "--constraints") do |x|
+        options.constraints = x
+      end
+
+      # No argument, shows at tail.  This will print an options summary.
+      # Try it and see!
+      opts.on_tail("-h", "--help", "Show this message") do
+        puts opts
+        exit
+      end
+    end
+    opt_parser.parse!(args)
+    options
+  end
+end
+
+options = OptparseExample.parse(ARGV)
+
+
+
+
+def system_log(cmd)
+  puts "#{Time.new.to_s}: #{cmd}"
+  system (cmd)
+end
+
+#
+# Check if all rows and columns of a matrix are distinct
+#
+def full_matrix(rows)
+  n = rows.size
+  m = rows[0].size
+  uniq_rows = Set.new(rows)
+  uniq.cols = Set.new(m.map {|j| rows.map { |r| r[j] } })
+  return (uniq.cols == m and uniq.rows == n)
+end
+
+n = options.num_species
+m = options.num_character_case * species / 4
+mutation_rate = options.mutation_rate
+recombination_rate = options.recombination_rate
+i = options.instance
+constr = options.constraint
+
+basename = "#{n}/#{m}/#{mutation_rate}/#{recombination_rate}/#{i}/#{constr}"
+dir = "data/#{basename}"
+system_log("mkdir -p #{dir}") unless Dir.exists?(dir)
+dataname = "data/#{basename}/data"
+unless File.exists?("#{dataname}")
+  system_log "touch #{dataname}"
+  system_log "bin/ms #{n} 1 -s #{m} -t #{4 * mutation_rate * m } -r #{4 * m * n * recombination_rate } #{m}  | tail -n +8 > #{dataname}.ms"
+  system_log "bin/ms2ppp #{dataname}.ms > #{dataname}"
+end
+
+programs.each do |prog|
+  dir = "#{prog}/#{basename}"
+  system_log("mkdir -p #{dir}") unless Dir.exists?(dir)
+  outname = dir + '/' + dir.gsub("/", "-")
+              
+  unless File.exists?("#{outname}.out")
+    system_log "touch #{outname}.out"
+    time_cmd = "/usr/bin/time -f \"%e\" -o #{outname}.log timeout -s 9 #{timeout}s"
+    case prog
+    when "cppp"
+      system_log "#{time_cmd} bin/#{prog} #{dataname} > #{outname}.out"
+    when "cppp-new"
+      system_log "#{time_cmd} bin/#{prog} #{dataname} -o #{outname}.out"
+    when "cppp-sat"
+      system_log "#{time_cmd} bin/#{prog} -m #{dataname} -o #{outname}.out -c bin/cryptominisat4 -t bin/tree"
+    end
+  end
+end
