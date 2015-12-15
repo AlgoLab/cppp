@@ -197,15 +197,8 @@ while (true)
   break if to_add.empty?
 end
 
-# Find duplicated characters
-dupes = Set.new
-skeleton.each do |sk|
-  skeleton.each do |sk2|
-    dupes << sk2 if sk < sk2 and m.species(sk) == m.species(sk2)
-  end
-end
 
-species = skeleton.subtract(dupes).inject(Set.new) { |union, c| union.union(m.species(c)) }
+species = skeleton.inject(Set.new) { |union, c| union.union(m.species(c)) }
 
 puts "==============================================================" if options.debug
 puts "#{species.size} #{skeleton.size}"
