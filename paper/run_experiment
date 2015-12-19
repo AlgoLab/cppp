@@ -54,7 +54,7 @@ class OptparseExample
       end
     end
     opt_parser.parse(args)
-#    binding.pry
+    #    binding.pry
     options
   end
 end
@@ -86,7 +86,7 @@ m = options.num_character_case * n / 4
 mutation_rate = options.mutation_rate
 recombination_rate = options.recombination_rate
 i = options.instance
-constr = options.constraint
+constr = options.constraints
 
 basename = "#{n}/#{m}/#{mutation_rate}/#{recombination_rate}/#{i}/#{constr}"
 dir = "data/#{basename}"
