@@ -59,6 +59,7 @@ class OptparseExample
   end
 end
 
+puts "#{ARGV}"
 options = OptparseExample.parse(ARGV)
 
 
