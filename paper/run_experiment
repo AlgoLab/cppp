@@ -91,7 +91,8 @@ constr = options.constraints
 basename = "#{n}/#{m}/#{mutation_rate}/#{recombination_rate}/#{i}/#{constr}"
 dir = "data/#{basename}"
 system_log("mkdir -p #{dir}") unless Dir.exists?(dir)
-dataname = "data/#{basename}/data"
+masterdir = "#{dir}/.."
+dataname = "#{masterdir}/data"
 unless File.exists?("#{dataname}")
   system_log "touch #{dataname}"
   system_log "bin/ms #{n} 1 -s #{m} -t #{4 * mutation_rate * m } -r #{4 * m * n * recombination_rate } #{m}  | tail -n +8 > #{dataname}.ms"
