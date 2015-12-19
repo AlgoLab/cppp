@@ -3,10 +3,13 @@
 require 'fileutils'
 require 'optparse'
 require 'optparse/time'
-
-#programs = [ "cppp", "cppp-sat" ] #, "cppp-new" ]
-programs = [ ] #, "cppp-new" ]
-timeout = 300 #in seconds
+require 'ostruct'
+require 'pp'
+require 'matrix'
+require 'set'
+require 'parslet'
+include Parslet
+require 'pry'
 
 
 class OptparseExample
@@ -14,57 +17,49 @@ class OptparseExample
     # The options specified on the command line will be collected in *options*.
     # We set default values here.
     options = OpenStruct.new
-    options.library = []
-    options.inplace = false
-    options.encoding = "utf8"
-    options.transfer_type = :auto
-    options.verbose = false
-
+    
     opt_parser = OptionParser.new do |opts|
       opts.banner = "Usage: run_experiment [options]"
       opts.separator ""
       opts.separator "Specific options:"
-
-
-      opts.on("-n", "--num_species") do |num_species|
+      
+      
+      opts.on("-n", "--num_species=NUM", OptionParser::DecimalNumeric,  "NUM") do |num_species|
         options.num_species = num_species
       end
-
-      opts.on("-m", "--num_character_case") do |x|
+      
+      opts.on("-m", "--num_character_case=NUM", OptionParser::DecimalNumeric, "NUM") do |x|
         options.num_character_case = x
       end
-
-      opts.on("-u", "--mutation_rate") do |x|
+      
+      opts.on("-u", "--mutation_rate=NUM", OptionParser::DecimalNumeric, "NUM") do |x|
         options.mutation_rate = x
       end
-
-      opts.on("-r", "--recombination_rate") do |x|
+      
+      opts.on("-r", "--recombination_rate=NUM", OptionParser::DecimalNumeric, "NUM") do |x|
         options.recombination_rate = x
       end
-
-      opts.on("-i", "--instance") do |x|
+      
+      opts.on("-i", "--instance=NUM", OptionParser::DecimalNumeric, "NUM") do |x|
         options.instance = x
       end
-
-      opts.on("-c", "--constraints") do |x|
+      
+      opts.on("-c", "--constraints=NUM", OptionParser::DecimalNumeric, "NUM") do |x|
         options.constraints = x
       end
-
-      # No argument, shows at tail.  This will print an options summary.
-      # Try it and see!
+      
       opts.on_tail("-h", "--help", "Show this message") do
         puts opts
         exit
       end
     end
-    opt_parser.parse!(args)
+    opt_parser.parse(args)
+#    binding.pry
     options
   end
 end
 
 options = OptparseExample.parse(ARGV)
-
-
 
 
 def system_log(cmd)
@@ -83,8 +78,11 @@ def full_matrix(rows)
   return (uniq.cols == m and uniq.rows == n)
 end
 
+#programs = [ "cppp", "cppp-sat" ] #, "cppp-new" ]
+programs = [ ] #, "cppp-new" ]
+timeout = 300 #in seconds
 n = options.num_species
-m = options.num_character_case * species / 4
+m = options.num_character_case * n / 4
 mutation_rate = options.mutation_rate
 recombination_rate = options.recombination_rate
 i = options.instance
@@ -104,7 +102,7 @@ programs.each do |prog|
   dir = "#{prog}/#{basename}"
   system_log("mkdir -p #{dir}") unless Dir.exists?(dir)
   outname = dir + '/' + dir.gsub("/", "-")
-              
+  
   unless File.exists?("#{outname}.out")
     system_log "touch #{outname}.out"
     time_cmd = "/usr/bin/time -f \"%e\" -o #{outname}.log timeout -s 9 #{timeout}s"
