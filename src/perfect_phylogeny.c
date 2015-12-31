@@ -226,6 +226,8 @@ copy_state(state_s* dst, const state_s* src) {
 }
 
 /**
+   We want to realize the character stored in \c src->realize.
+
    To realize a character, first we have to find the id \c c of the vertex of
    the red-black graph encoding the input character.
    Then we find the connected component \c A of the red-black graph to which \c

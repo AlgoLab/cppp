@@ -135,6 +135,8 @@ next_node(state_s *states, uint32_t level, strategy_fn get_characters_to_realize
         log_decisions(states, level);
 
         if (level_completed(current)) {
+                /* it is not possible to extend the solution. We have
+                   to backtrack */
                 log_debug("next_node: end. LEVEL. Backtrack to level: %d from %d", current->backtrack_level, level);
                 return (current->backtrack_level);
         }
@@ -146,23 +148,25 @@ next_node(state_s *states, uint32_t level, strategy_fn get_characters_to_realize
         bool status = realize_character(next, current);
         log_debug("next_node: result of realizing level=%d current->realize=%d outcome=%d", level, current->realize, status);
         if (status) {
-/* Check if we have resolved the whole instance */
+                /* The realization has been successful.
+                   First check if we have resolved the whole instance */
                 if (next->num_species == 0) {
                         log_debug("next_node: Solution found");
                         return(level + 1);
                 }
+
+                /* Since we had realized a character, we move to a
+                   deeper level of the decision tree. */
                 log_debug("next_node: LEVEL. Go to level: %d", level + 1);
                 init_node(next, get_characters_to_realize);
                 next-> backtrack_level = level;
                 if (level_completed(current)) {
                         log_debug("next_node: connected component completed");
-/* In this case we have resolved a connected component of the
-   red-black graph. Find the level of the decision tree where we have
-   started resolving such connected component.
+                        /* In this case we have resolved a connected component of the red-black graph. Find the level of the decision tree where we have started
+                           resolving such connected component.
 
-   It is equal to the topmost level whose current_component has
-   includes the original species and characters that are not current.
-*/
+                           It is equal to the topmost level whose current_component includes the original species and all characters that are not current.
+                        */
                         for (uint32_t blevel = 0; blevel < level; blevel++)
                                 if (component_borders(states, blevel, level + 1)) {
                                         next->backtrack_level = blevel - 1;
