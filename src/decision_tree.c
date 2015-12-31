@@ -159,7 +159,14 @@ next_node(state_s *states, uint32_t level, strategy_fn get_characters_to_realize
                    deeper level of the decision tree. */
                 log_debug("next_node: LEVEL. Go to level: %d", level + 1);
                 init_node(next, get_characters_to_realize);
-                next-> backtrack_level = level;
+
+                /* Since the realization of the negated characters are forced, we backtrack to the lowest level of the decision tree where the operation is the
+                   realization of an inactive character.
+
+                   In fact, this implies that we permute over all realization of inactive characters, instead of the naive permutation of all possible characters.
+                */
+                for (next->backtrack_level = level; (states + next->backtrack_level)->operation != 1; next->backtrack_level--) ;
+
                 if (level_completed(current)) {
                         log_debug("next_node: connected component completed");
                         /* In this case we have resolved a connected component of the red-black graph. Find the level of the decision tree where we have started
