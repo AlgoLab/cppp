@@ -176,7 +176,7 @@ next_node(state_s *states, uint32_t level, strategy_fn get_characters_to_realize
                         */
                         for (uint32_t blevel = 0; blevel < level; blevel++)
                                 if (component_borders(states, blevel, level + 1)) {
-                                        next->backtrack_level = blevel - 1;
+                                        next->backtrack_level = (blevel > 0) ? (states + blevel - 1)->backtrack_level : -1;
                                         log_decisions(states, level);
                                         log_debug("Preparing backtrack to level %d from %d (level=%d)", blevel - 1, level + 1, level);
                                         for (uint32_t l = blevel; l <= level; l++) {
