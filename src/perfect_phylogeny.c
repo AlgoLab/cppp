@@ -634,9 +634,10 @@ smallest_component(state_s* stp) {
 
    The first character in \c character_queue is the one with the
    largest degree in the red-black graph, since it is the most likely
-   to be realized first.
-   Moreover, when the instance has no conflict, we simulate the
+   to be realized first. In fact, if an inactive character c is universal, or an active character c can be freed, then c has maximum degree.
+   Moreover, a secondary effect of this strategy is that when the instance has no conflict, we simulate the
    standard algorithm to compute the perfect phylogeny.
+
 */
         uint32_t card[stp->red_black->num_vertices];
         memset(card, 0, stp->red_black->num_vertices * sizeof(card[0]));

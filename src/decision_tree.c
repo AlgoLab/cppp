@@ -28,7 +28,7 @@
 static void log_decisions(const state_s* arr_stp, const uint32_t max_depth) {
 #ifdef DEBUG
         log_debug("log_decisions");
-        fprintf(stderr, "=======================================\n");
+        fprintf(stderr, "=========BEGIN DECISIONS===============\n");
         for (uint32_t l = 0; l <= max_depth; l++)
                 fprintf(stderr, "level=%4d Character=%d\n", l, (arr_stp+l)->realize);
         fprintf(stderr, "=========END DECISIONS=================\n");
@@ -39,7 +39,7 @@ static void log_decisions(const state_s* arr_stp, const uint32_t max_depth) {
 
 /**
    \c no_sibling_p returns \c true iff there are no other characters
-   to  try at the current level
+   to try at the current level
 */
 static bool
 level_completed(const state_s * stp) {
