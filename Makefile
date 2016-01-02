@@ -80,11 +80,13 @@ REG_TESTS_OK   := $(wildcard $(REG_TESTS_DIR)/ok/*)
 REG_TESTS_DIFF := $(REG_TESTS_OK:$(REG_TESTS_DIR)/ok/%=$(REG_TESTS_DIR)/output/%.diff)
 
 thirdparty/cryptominisat/build/cryptominisat4_simple:
-	test -d thirdparty/cryptominisat/build || mkdir thirdparty/cryptominisat/build
-	cd thirdparty/cryptominisat/build && cmake .. && make -j4
+	cd thirdparty
+	test -d cryptominisat || git clone https://github.com/msoos/cryptominisat.git
+	test -d cryptominisat/build || mkdir -p cryptominisat/build
+	cd cryptominisat/build && cmake .. && make -j4
 
 tests: test 
-test: dist $(REG_TESTS_OK) thirdparty/cryptominisat/build/cryptominisat4_simple
+test: dist $(REG_TESTS_OK) 
 	tests/bin/run-tests.sh
 
 
