@@ -64,7 +64,6 @@ class OptparseExample
   end
 end
 
-puts "#{ARGV}"
 options = OptparseExample.parse(ARGV)
 
 
@@ -84,8 +83,7 @@ def full_matrix(rows)
   return (uniq.cols == m and uniq.rows == n)
 end
 
-#programs = [ "cppp", "cppp-sat" ] #, "cppp-new" ]
-programs = [ "polytime-ppp" ] #, "cppp-new" ]
+programs = [ "polytime-ppp", "cppp", "cppp-sat", "cppp-new" ]
 timeout = 300 #in seconds
 n = options.num_species
 m = options.num_character_case * n / 4
