@@ -85,7 +85,7 @@ def full_matrix(rows)
 end
 
 #programs = [ "cppp", "cppp-sat" ] #, "cppp-new" ]
-programs = [ ] #, "cppp-new" ]
+programs = [ "polytime-ppp" ] #, "cppp-new" ]
 timeout = 300 #in seconds
 n = options.num_species
 m = options.num_character_case * n / 4
@@ -115,6 +115,8 @@ programs.each do |prog|
     time_cmd = "/usr/bin/time -f \"%e\" -o #{outname}.log timeout -s 9 #{timeout}s"
     case prog
     when "cppp"
+      system_log "#{time_cmd} bin/#{prog} #{dataname} > #{outname}.out"
+    when "polytime-ppp"
       system_log "#{time_cmd} bin/#{prog} #{dataname} > #{outname}.out"
     when "cppp-new"
       system_log "#{time_cmd} bin/#{prog} #{dataname} -o #{outname}.out"
