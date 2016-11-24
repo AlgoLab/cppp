@@ -108,7 +108,7 @@ programs.each do |prog|
   system_log("mkdir -p #{dir}") unless Dir.exists?(dir)
   outname = dir + '/' + dir.gsub("/", "-")
   
-  unless File.exists?("#{outname}.out")
+  unless File.exists?("#{outname}.out") or File.exists?("#{outname}.out.xz")
     system_log "touch #{outname}.out"
     time_cmd = "/usr/bin/time -f \"%e\" -o #{outname}.log timeout -s 9 #{timeout}s"
     case prog
@@ -122,5 +122,6 @@ programs.each do |prog|
       system_log "#{time_cmd} bin/#{prog} -m #{dataname} -o #{outname}.out -c bin/cryptominisat4 -t bin/tree"
       system "rm -f #{outname}.out.sat.gz"
     end
+    system "xz -9 #{outname}.out"
   end
 end
