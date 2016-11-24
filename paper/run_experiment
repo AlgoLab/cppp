@@ -91,7 +91,6 @@ mutation_rate = options.mutation_rate
 recombination_rate = options.recombination_rate
 i = options.instance
 constr = options.constraints
-exit if n > 500 and recombination_rate > 0.2
 
 basename = "#{n}/#{m}/#{mutation_rate}/#{recombination_rate}/#{i}/#{constr}"
 dir = "data/#{basename}/"
