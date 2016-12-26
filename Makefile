@@ -38,7 +38,7 @@ profile: CFLAGS += -O3 -DNDEBUG
 
 profile: dist
 	rm -f callgrind.*
-	valgrind -q --tool=callgrind --dump-instr=yes $(P) -o /dev/null $(REG_TESTS_DIR)/input/no_8x4.00.txt
+	valgrind -q --tool=callgrind --dump-instr=yes $(P) -o /dev/null $(REG_TESTS_DIR)/input/test-counterexample-recomb-cg-2015.txt
 	# See the results with kcachegrind
 
 
