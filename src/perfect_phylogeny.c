@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2014 by Gianluca Della Vedova
+  Copyright (C) 2014-2017 by Gianluca Della Vedova
 
 
   You can redistribute this file and/or modify it
@@ -638,6 +638,8 @@ smallest_component(state_s* stp) {
    Moreover, a secondary effect of this strategy is that when the instance has no conflict, we simulate the
    standard algorithm to compute the perfect phylogeny.
 
+   We allow active characters only in the first position of the queue. In fact, if an active character can be freed, than it must be adjacent to all species in
+   the connected component, hence it has maximum degree.
 */
         uint32_t card[stp->red_black->num_vertices];
         memset(card, 0, stp->red_black->num_vertices * sizeof(card[0]));
@@ -646,7 +648,7 @@ smallest_component(state_s* stp) {
         uint32_t smallest_component = stp->red_black->num_vertices + 1;
         uint32_t smallest_size = stp->red_black->num_vertices + 1;
         for (uint32_t w = 0; w < stp->num_species_orig + stp->num_characters_orig; w++)
-                if (card[w] > 1 && card [w] < smallest_size) {
+                if (card[w] > 1 && card[w] < smallest_size) {
                         smallest_size = card[w];
                         smallest_component = w;
                 }
@@ -654,28 +656,43 @@ smallest_component(state_s* stp) {
         log_debug("smallest_component: %d smallest_size: %d", smallest_component, smallest_size);
         for (uint32_t w = 0; w < stp->red_black->num_vertices; w++)
                 stp->current_component[w] = (stp->connected_components[w] == smallest_component);
-        uint32_t p = 0;
-        uint32_t maximum_char = 0;
-        uint32_t max_degree = 0;
+
+        /* Reorder the characters in the current (i.e. smallest) connected components so that an active character that can be freed */
+        /*         is in the first position of \c stp->character_queue (if such an active character exists), and */
+        /*         all other active characters are at the end of the queue */
+
+        uint32_t maximum_active_char = 0;
+        uint32_t num_inactive_char = 0;
+        uint32_t max_degree_active = 0;
+
+        uint32_t num_species_in_component = 0;
+        for (uint32_t w = stp->num_species_orig; w < stp->num_species_orig; w++)
+                if (stp->connected_components[w] == smallest_component)
+                        num_species_in_component++;
+
         for (uint32_t w = stp->num_species_orig; w < stp->num_species_orig + stp->num_characters_orig; w++)
                 if (stp->connected_components[w] == smallest_component) {
-                        if (graph_degree(stp->red_black, w) > max_degree) {
-                                max_degree = graph_degree(stp->red_black, w);
-                                maximum_char = p;
-                        }
-                        stp->character_queue[p++] = w - stp->num_species_orig;
+                        uint32_t character = w - stp->num_species_orig;
+                        if (stp->colors[character] == BLACK) {
+                                stp->character_queue[num_inactive_char++] = w - stp->num_species_orig;
+                        } else
+                                if (graph_degree(stp->red_black, w) > max_degree_active) {
+                                        max_degree_active = graph_degree(stp->red_black, w);
+                                        maximum_active_char = character;
+                                }
                 }
-        stp->character_queue_size = p;
+        stp->character_queue_size = num_inactive_char;
         log_array_uint32_t("card: ", card, stp->red_black->num_vertices);
         log_debug("maximum_char: %d max_degree: %d", maximum_char, max_degree);
         log_array_uint32_t("character_queue", stp->character_queue, stp->character_queue_size);
+
 /* Put the character with maximum degree in front of
    stp->character_queue */
 
-        if (maximum_char > 0) {
-                uint32_t temp = stp->character_queue[0];
-                stp->character_queue[0] = stp->character_queue[maximum_char];
-                stp->character_queue[maximum_char] = temp;
+        if (num_species_in_component > 0 && num_species_in_component == max_degree_active) {
+                stp->character_queue_size++;
+                stp->character_queue[num_inactive_char] = stp->character_queue[0];
+                stp->character_queue[0] = maximum_active_char;
         }
         log_debug("character_queue_size: %d", stp->character_queue_size);
         log_array_uint32_t("character_queue", stp->character_queue, stp->character_queue_size);
