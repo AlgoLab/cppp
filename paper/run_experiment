@@ -118,7 +118,7 @@ programs.each do |prog|
     when "cppp-new"
       system_log "#{time_cmd} bin/#{prog} #{dataname} -o #{outname}.out"
     when "cppp-sat"
-      system_log "#{time_cmd} bin/#{prog} -m #{dataname} -o #{outname}.out -c bin/cryptominisat4 -t bin/tree"
+      #      system_log "#{time_cmd} bin/#{prog} -m #{dataname} -o #{outname}.out -c bin/cryptominisat4 -t bin/tree"
       system "rm -f #{outname}.out.sat.gz"
     end
     system "xz -9 #{outname}.out"
