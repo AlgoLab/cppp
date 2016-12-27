@@ -174,11 +174,9 @@ next_node(state_s *states, uint32_t level, strategy_fn get_characters_to_realize
 
                 if (level_completed(current)) {
                         log_debug("next_node: connected component completed");
-                        /* In this case we have resolved a connected component of the red-black graph. Find the level of the decision tree where we have started
-                           resolving such connected component.
-
-                           It is equal to the topmost level whose current_component includes the original species and all characters that are not current.
-                        */
+/* In this case we have resolved a connected component of the red-black graph. Find the level of the decision tree where
+ * we have started resolving such connected component.
+ * It is equal to the topmost level whose current_component includes the original species and all characters that are not current. */
                         for (uint32_t blevel = 0; blevel < level; blevel++)
                                 if (component_borders(states, blevel, level + 1)) {
                                         next->backtrack_level = (blevel > 0) ? (states + blevel - 1)->backtrack_level : -1;
@@ -208,12 +206,15 @@ next_node(state_s *states, uint32_t level, strategy_fn get_characters_to_realize
 
 bool
 exhaustive_search(state_s *states, strategy_fn strategy, uint32_t max_depth) {
+        log_debug("exhaustive_search: init");
         cleanup(states + 0);
         update_connected_components(states + 0);
+        log_debug("exhaustive_search: end init");
         init_node(states + 0, strategy);
         (states + 0)->backtrack_level = -1;
         for(uint32_t level = 0; level != -1; level = next_node(states, level, strategy)) {
                 log_debug("exhaustive_search: level %d", level);
+                log_decisions(states, level);
                 log_state(states + level);
                 assert(level <= max_depth);
                 if ((states + level)->num_species == 0) {

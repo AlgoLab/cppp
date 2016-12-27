@@ -640,8 +640,13 @@ smallest_component(state_s* stp) {
 */
         uint32_t card[stp->red_black->num_vertices];
         memset(card, 0, stp->red_black->num_vertices * sizeof(card[0]));
-        for (uint32_t w = 0; w < stp->red_black->num_vertices; w++)
+        uint32_t card_species[stp->red_black->num_vertices];
+        memset(card_species, 0, stp->red_black->num_vertices * sizeof(card[0]));
+        for (uint32_t w = 0; w < stp->red_black->num_vertices; w++) {
                 card[stp->connected_components[w]] += 1;
+                if (w < stp->num_species_orig)
+                        card_species[stp->connected_components[w]] += 1;
+        }
         uint32_t smallest_component = stp->red_black->num_vertices + 1;
         uint32_t smallest_size = stp->red_black->num_vertices + 1;
         for (uint32_t w = 0; w < stp->num_species_orig + stp->num_characters_orig; w++)
@@ -649,23 +654,20 @@ smallest_component(state_s* stp) {
                         smallest_size = card[w];
                         smallest_component = w;
                 }
+        uint32_t smallest_num_species = card_species[smallest_component];
 
-        log_debug("smallest_component: %d smallest_size: %d", smallest_component, smallest_size);
+        log_debug("smallest_component: %d smallest_size: %d smallest_num_species: %d",
+                  smallest_component, smallest_size, smallest_num_species);
         for (uint32_t w = 0; w < stp->red_black->num_vertices; w++)
                 stp->current_component[w] = (stp->connected_components[w] == smallest_component);
 
-        /* Reorder the characters in the current (i.e. smallest) connected components so that an active character that can be freed
-         *         is in the first position of \c stp->character_queue (if such an active character exists), and
-         *         all other active characters are at the end of the queue */
+        /* Reorder the characters in the current (i.e. smallest) connected components so that an active character that
+           can be freed is in the first position of \c stp->character_queue (if such an active character exists), and all
+           other active characters are at the end of the queue */
 
         uint32_t maximum_active_char = 0;
         uint32_t num_inactive_char = 0;
         uint32_t max_degree_active = 0;
-
-        uint32_t num_species_in_component = 0;
-        for (uint32_t w = stp->num_species_orig; w < stp->num_species_orig; w++)
-                if (stp->connected_components[w] == smallest_component)
-                        num_species_in_component++;
 
         for (uint32_t w = stp->num_species_orig; w < stp->num_species_orig + stp->num_characters_orig; w++)
                 if (stp->connected_components[w] == smallest_component) {
@@ -679,16 +681,17 @@ smallest_component(state_s* stp) {
                                 }
                 }
         stp->character_queue_size = num_inactive_char;
-        log_array_uint32_t("card: ", card, stp->red_black->num_vertices);
-        log_array_uint8_t("stp->colors: ", stp->colors, stp->num_characters_orig);
-        log_array_uint32_t("stp->connected_components: ", stp->connected_components, stp->num_species_orig + stp->num_characters_orig);
+        log_array_uint32_t("card", card, stp->red_black->num_vertices);
+        log_array_uint32_t("card_species", card_species, stp->red_black->num_vertices);
+        log_array_uint8_t("stp->colors", stp->colors, stp->num_characters_orig);
+        log_array_uint32_t("stp->connected_components", stp->connected_components, stp->num_species_orig + stp->num_characters_orig);
         log_debug("maximum_char: %d max_degree: %d", maximum_active_char, max_degree_active);
         log_array_uint32_t("character_queue", stp->character_queue, stp->character_queue_size);
 
 /* Put the character with maximum degree in front of
    stp->character_queue */
 
-        if (num_species_in_component > 0 && num_species_in_component == max_degree_active) {
+        if (smallest_num_species > 0 && smallest_num_species == max_degree_active) {
                 stp->character_queue_size++;
                 stp->character_queue[num_inactive_char] = stp->character_queue[0];
                 stp->character_queue[0] = maximum_active_char;
