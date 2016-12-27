@@ -126,6 +126,10 @@ component_borders(state_s* states, uint32_t root_level, uint32_t leaf_level) {
    character_queue (that is the characters left to try) to determine at which
    stage we are. More precisely, if \c tried_character is \c NULL, we are at the
    beginning, and if character_queue is \c NULL we are at the end.
+
+   \c character_queue contains only inactive characters, with the possible exception of the first character in the queue
+   which can be active if it can be freed (i.e. if it is adjacent to all species in its connected component.
+   The function \c smallest_component must take care of setting \c character_queue accordingly.
 */
 static uint32_t
 next_node(state_s *states, uint32_t level, strategy_fn get_characters_to_realize) {
@@ -160,10 +164,11 @@ next_node(state_s *states, uint32_t level, strategy_fn get_characters_to_realize
                 log_debug("next_node: LEVEL. Go to level: %d", level + 1);
                 init_node(next, get_characters_to_realize);
 
-                /* Since the realization of the negated characters are forced, we backtrack to the lowest level of the decision tree where the operation is the
-                   realization of an inactive character.
+                /* Since the realization of the negated characters are forced, we backtrack to the lowest level of the
+                   decision tree where the operation is the realization of an inactive character.
 
-                   In fact, this implies that we permute over all realization of inactive characters, instead of the naive permutation of all possible characters.
+                   In fact, this implies that we permute over all realization of inactive characters, instead of the
+                   naive permutation of all possible characters.
                 */
                 for (next->backtrack_level = level; (states + next->backtrack_level)->operation != 1; next->backtrack_level--) ;
 

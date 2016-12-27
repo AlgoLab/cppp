@@ -627,19 +627,16 @@ smallest_component(state_s* stp) {
         log_array_uint32_t("stp->connected_components", stp->connected_components, stp->red_black->num_vertices);
         stp->character_queue_size = stp->red_black->num_vertices + 1;
 /**
-   We need only the connected components that contain at least a
-   species and a character.
-   We only have to count the number of characters contained in the
-   component.
+   We need only the connected components that contain at least a species and a character. We only have to count the
+   number of characters contained in the component.
 
-   The first character in \c character_queue is the one with the
-   largest degree in the red-black graph, since it is the most likely
-   to be realized first. In fact, if an inactive character c is universal, or an active character c can be freed, then c has maximum degree.
-   Moreover, a secondary effect of this strategy is that when the instance has no conflict, we simulate the
-   standard algorithm to compute the perfect phylogeny.
+   The first character in \c character_queue is the one with the largest degree in the red-black graph, since it is the
+   most likely to be realized first. In fact, if an inactive character c is universal, or an active character c can be
+   freed, then c has maximum degree. Moreover, a secondary effect of this strategy is that when the instance has no
+   conflict, we simulate the standard algorithm to compute the perfect phylogeny.
 
-   We allow active characters only in the first position of the queue. In fact, if an active character can be freed, than it must be adjacent to all species in
-   the connected component, hence it has maximum degree.
+   Only the first character in \c character_queue can might be active: in that case the character must be adjacent to
+   all species in its connected components, hence it can be freed.
 */
         uint32_t card[stp->red_black->num_vertices];
         memset(card, 0, stp->red_black->num_vertices * sizeof(card[0]));
@@ -657,9 +654,9 @@ smallest_component(state_s* stp) {
         for (uint32_t w = 0; w < stp->red_black->num_vertices; w++)
                 stp->current_component[w] = (stp->connected_components[w] == smallest_component);
 
-        /* Reorder the characters in the current (i.e. smallest) connected components so that an active character that can be freed */
-        /*         is in the first position of \c stp->character_queue (if such an active character exists), and */
-        /*         all other active characters are at the end of the queue */
+        /* Reorder the characters in the current (i.e. smallest) connected components so that an active character that can be freed
+         *         is in the first position of \c stp->character_queue (if such an active character exists), and
+         *         all other active characters are at the end of the queue */
 
         uint32_t maximum_active_char = 0;
         uint32_t num_inactive_char = 0;
