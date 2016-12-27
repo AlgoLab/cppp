@@ -683,7 +683,9 @@ smallest_component(state_s* stp) {
                 }
         stp->character_queue_size = num_inactive_char;
         log_array_uint32_t("card: ", card, stp->red_black->num_vertices);
-        log_debug("maximum_char: %d max_degree: %d", maximum_char, max_degree);
+        log_array_uint8_t("stp->colors: ", stp->colors, stp->num_characters_orig);
+        log_array_uint32_t("stp->connected_components: ", stp->connected_components, stp->num_species_orig + stp->num_characters_orig);
+        log_debug("maximum_char: %d max_degree: %d", maximum_active_char, max_degree_active);
         log_array_uint32_t("character_queue", stp->character_queue, stp->character_queue_size);
 
 /* Put the character with maximum degree in front of

@@ -36,6 +36,7 @@ void start_logging(struct gengetopt_args_info args_info);
 
 void log_array_bool(const char* name, const bool* arr, const uint32_t size);
 void log_array_uint32_t(const char* name, const uint32_t* arr, const uint32_t size);
+void log_array_uint8_t(const char* name, const uint8_t* arr, const uint32_t size);
 void log_bitmap(const char* name, bitmap_word* arr, const uint32_t nbits);
 
 #ifdef DEBUG

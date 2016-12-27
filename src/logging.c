@@ -97,6 +97,18 @@ void log_array_uint32_t(const char* name, const uint32_t* arr, const uint32_t si
 #endif
 }
 
+void log_array_uint8_t(const char* name, const uint8_t* arr, const uint32_t size) {
+#ifdef DEBUG
+        fprintf(stderr, "  %s. Size %d  Address %p Values: ", name, size, arr);
+        if (arr != NULL)
+                for(uint8_t i = 0; i < size; i++)
+                        fprintf(stderr, "%d ", arr[i]);
+        else
+                fprintf(stderr, "NULL");
+        fprintf(stderr, "\n");
+#endif
+}
+
 void
 log_bitmap(const char* name, bitmap_word* arr, const uint32_t nbits) {
 #ifdef DEBUG
