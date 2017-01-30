@@ -107,9 +107,9 @@ matrix_set_value(state_s *stp, uint32_t s, uint32_t c, uint32_t value) {
         stp->matrix[c + stp->num_characters * s] = value;
 }
 
-#ifdef DEBUG
 static uint32_t
 state_cmp(const state_s *stp1, const state_s *stp2) {
+#ifdef DEBUG
         if (stp1->num_characters != stp2->num_characters)
                 return 1;
         if (stp1->num_species != stp2->num_species)
@@ -182,10 +182,9 @@ state_cmp(const state_s *stp1, const state_s *stp2) {
                 return 52;
         if (graph_cmp(stp1->conflict, stp2->conflict) != 0)
                 return 53;
-
+#endif
         return 0;
 }
-#endif
 
 void
 copy_state(state_s* dst, const state_s* src) {
